@@ -11,10 +11,13 @@
 
 ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
 {
-    socket=nullptr;
-    socketDescriptor=handle;
-    resetDataInfo();
-
+    {
+        socket=nullptr;
+        socketDescriptor=handle;
+        resetDataInfo();
+        msgs.clear();
+        filepaths.clear();
+    }
     socket=new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket,&QTcpSocket::readyRead,this,&ManageSocket::onreadyRead);
@@ -157,7 +160,7 @@ void ManageSocket::processReaded(QStringList list)
     processMsg(msgs);
     processFile(filepaths);
 }
-void ManageSocket::processMsg(const QStringList msgs)
+void ManageSocket::processMsg( QStringList &msgs)
 {
      for(auto msg:msgs)
      {
@@ -174,11 +177,12 @@ void ManageSocket::processMsg(const QStringList msgs)
         {
             auto p=makeMessageServer(LoadANO.cap(1).trimmed());
             auto port=p?p->port:"-1";
-            sendMsg(getMessageServerport(p->port+":MessageServerPort"));
+            sendMsg(port+":MessageServerPort");
         }
     }
+     msgs.clear();
 }
-void ManageSocket::processFile(const QStringList filePaths)
+void ManageSocket::processFile( QStringList &filePaths)
 {
     QStringList filenames;
     for(auto filepath:filePaths)
@@ -199,6 +203,7 @@ void ManageSocket::processFile(const QStringList filePaths)
     {
         QFile(filepath).remove();
     }
+    filePaths.clear();
 }
 
 

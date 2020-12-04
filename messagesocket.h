@@ -19,8 +19,11 @@ public slots:
     void onreadyRead();
     void sendMsg(QString msg);
     void sendfiles(MessageSocket* socket,QStringList filepath);
+    void sendmsgs(MessageSocket* socket,QStringList msglist);
 signals:
     void disconnected();
+    void pushMsg(QString ,bool);
+    void userlogin(QString);
 private:
     QTcpSocket *socket;
     qintptr socketDescriptor;
@@ -29,6 +32,8 @@ private:
     void resetDataInfo();
     void processMsg(const QString msg);
     void sendFiles(QStringList filePathList,QStringList fileNameList);
+
+
     //message processor
 };
 

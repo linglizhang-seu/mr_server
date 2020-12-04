@@ -34,9 +34,6 @@ QStringList writeArborAno(QString name,QString pos,QString swc,QString dir)
 
         return {dir+"/"+anoName,dir+"/"+apoName,dir+"/"+swcName};
 }
-
-
-
 QString cac_position(QString path)
 {
     QString result;
@@ -51,6 +48,10 @@ QString cac_position(QString path)
     return result;
 }
 
+int getid(QString name)
+{
+    return 0;
+}
 QMap<QStringList,QStringList> getANOFILE(QString neuronid,bool& f)
 {
     QSqlDatabase db=DB::getNewDbConnection();

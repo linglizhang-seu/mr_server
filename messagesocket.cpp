@@ -1,6 +1,7 @@
 #include "messagesocket.h"
 #include <QDataStream>
 #include <QFile>
+#include <QRegExp>
 MessageSocket::MessageSocket(qintptr handle,QObject *parent) : QObject(parent)
 {
     socket=nullptr;
@@ -122,7 +123,50 @@ void MessageSocket::sendfiles(MessageSocket* socket,QStringList filepaths)
         sendFiles(filepaths,filenames);
     }
 }
+
+void MessageSocket::sendmsgs(MessageSocket* socket,QStringList msgs)
+{
+    if(socket==this)
+    {
+        for(auto msg:msgs)
+        {
+            sendMsg(msg);
+        }
+    }
+}
 void MessageSocket::processMsg(const QString msg)
 {
+    QRegExp loginRex("^/login:(.*)$");
+
+    QRegExp drawlineRex("^/drawline:(.*)$");
+    QRegExp dellineRex("^/delline:(.*)");
+    QRegExp addmarkerRex("^/addmarker(.*)");
+    QRegExp delmarkerRex("^/delmakrer(.*)");
+
+    QRegExp retypelineRex("^/retypeline:(.*)");
+    QRegExp retypemarkerRex("^/retypemarker:(.*)");
+
+    if(drawlineRex.indexIn(msg)!=-1)
+    {
+        emit pushMsg(msg,0);
+    }else if(dellineRex.indexIn(msg)!=-1)
+    {
+        emit pushMsg(msg,0);
+    }else if(addmarkerRex.indexIn(msg)!=-1)
+    {
+        emit pushMsg(msg,1);
+    }else if(delmarkerRex.indexIn(msg)!=-1)
+    {
+        emit pushMsg(msg,0);
+    }else if(retypelineRex.indexIn(msg)!=-1)
+    {
+        emit pushMsg(msg,0);
+    }else if(retypemarkerRex.indexIn(msg)!=-1)
+    {
+        emit pushMsg(msg,0);
+    }else if(loginRex.indexIn(msg)!=-1)
+    {
+        emit userlogin(dellineRex.cap(1).trimmed());
+    }
 
 }

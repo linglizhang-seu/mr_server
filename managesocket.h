@@ -34,8 +34,8 @@ private:
     void sendMsg(QString msg);
     void sendFiles(QStringList filePathList,QStringList fileNameList);
     void processReaded(QStringList list);
-    void processMsg(const QStringList msglist);
-    void processFile(const QStringList filePaths);
+    void processMsg( QStringList &msglist);
+    void processFile( QStringList &filePaths);
 
 //    QMap<QStringList,QStringList> getANOFILE(QString neuronid,bool& f);
 
@@ -46,6 +46,8 @@ private:
     void processOTHER(QStringList filepaths,QStringList filenames);
 
     MessageServer* makeMessageServer(QString neuron);
+signals:
+    void disconnected();
 };
 
 #endif // MANAGESOCKET_H

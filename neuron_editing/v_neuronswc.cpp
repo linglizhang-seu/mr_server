@@ -193,7 +193,7 @@ V_NeuronSWC merge_V_NeuronSWC_list(V_NeuronSWC_list & in_swc_list)
 		//qDebug()<<min_ind;
 
 		// segment id & color type
-		int seg_id = k;
+        int seg_id = in_swc_list.seg.at(k).segid;
 		
 		//now merge
 		V3DLONG n0=n;
