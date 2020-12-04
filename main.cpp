@@ -11,3 +11,8 @@ int main(int argc, char *argv[])
     }
     return a.exec();
 }
+
+/*
+ *
+ * 1. 发送所有用户:users:ji;ji;ji
+ */

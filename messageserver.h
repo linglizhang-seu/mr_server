@@ -30,6 +30,7 @@ private:
     void delmarekr(QString);
     void retypeline(QString);
     void retypemarker(QString);
+    int getid(QString username);
 
 public:
     QString port;
@@ -54,7 +55,6 @@ private:
     QMap<QString,int> idmap;
 
     QStringList messagelist;
-
     QList <CellAPO> wholePoint;
     V3DLONG pointIndex;
     V_NeuronSWC_list segments;
