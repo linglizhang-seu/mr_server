@@ -65,7 +65,6 @@ MessageServer::MessageServer(QString neuron,QObject *parent) : QTcpServer(parent
     wholePoint.clear();
     segments.clear();
     clients.clear();
-    idmap.clear();
 
     savedMessageIndex=0;
     wholePoint=readAPO_file(map.keys().at(0).at(1));

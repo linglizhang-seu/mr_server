@@ -37,4 +37,27 @@ private:
     //message processor
 };
 
+/*
+ * messagesocket
+ * ----------------------
+ * slot
+ * + onstarted()
+ * + onreadyread()
+ * + sendMsg(QString)
+ * + sendfiles(MessageSocket*,QStringList )
+ * + sendmsgs(MessageSocket* ,QStringList )
+ * signal
+ * disconnected()
+ * pushMsg(QString,bool)
+ * userlogin(QString)
+ * -------------------
+ * - socket:QTcpsocket
+ * - socketdescriptor:qintptr
+ * - datainfo:DataInfo
+ * -----------------------------
+ * - resetdatainfo()
+ * - processMsg(QString)
+ * - sendFiles(QStringList,QStringList)
+ */
+
 #endif // MESSAGESOCKET_H

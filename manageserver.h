@@ -16,3 +16,10 @@ public slots:
 };
 
 #endif // MANAGESERVER_H
+
+/*
+ * Messagaer
+ * -------------------------
+ * + ManagerServer()
+ * - incommingConnection(qintptr)
+ */

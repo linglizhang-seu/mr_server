@@ -52,7 +52,6 @@ private:
     QMap<MessageSocket *,UserInfo> clients;//(socket ,(user , msgcntsend))
     //*****************
     quint32 savedMessageIndex=0;
-    QMap<QString,int> idmap;
 
     QStringList messagelist;
     QList <CellAPO> wholePoint;
@@ -61,7 +60,42 @@ private:
 
 
 };
-
+/*
+ *
+ * MessageServer
+ * -----------------------------
+ * + port:QString
+ * + neuronid:QString
+ * - timer:QTimer
+ * - clients:QMap<Messagesocket*,UserInfo> clients
+ * - savedMessageIndex:quint32
+ * - messagelist:QStringlist
+ * - wholePoint:QList<CellApo>
+ * - pointIndex:V3DLONG
+ * - segments:V_NeuronSWC_list
+ * ------------------------------------
+ * slot
+ * + processmessage()
+ * + autosave()
+ * + pushMessageList(QString,bool)
+ * + userLogin(QString);
+ * 静态函数 makeMessageServer(neurn_id)
+ * - incomingConnection(qintptr)
+ * - save(bool)
+ * - getuserlist()
+ * - drawline()
+ * - delline()
+ * - addmarker()
+ * - delmarekr()
+ * - retypeline()
+ * - retypemarker()
+ * - getid(QString)
+ * signal
+ * sendToAll(QString)
+ * sendfiles(Messagesocket*,filepath)
+ * sendmsgs(Messagesocket*,msgs)
+ * messagecome()
+*/
 namespace Map {
 
 };

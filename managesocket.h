@@ -39,7 +39,7 @@ private:
 
 //    QMap<QStringList,QStringList> getANOFILE(QString neuronid,bool& f);
 
-    QString getMessageServerport(QString neuronid);
+//    QString getMessageServerport(QString neuronid);
     //process file
     void processARBOR(QStringList filepaths,QStringList filenames);
     void processFULL(QStringList filepaths,QStringList filenames);
@@ -49,5 +49,23 @@ private:
 signals:
     void disconnected();
 };
-
 #endif // MANAGESOCKET_H
+
+/*
+ *ManageSocket
+ * ---------------------------
+ * - dataInfo:DataInfo
+ * - socket:QTcpsocket
+ * - socketdescriptor:qintptr
+ * - msgs:QStringList
+ * - filepaths:QStringList
+ * ---------------------------
+ * + onreadyread()
+ * - resetdatainfo()
+ * - sendmsg(msg)
+ * - sendfiles(filepathlist,filenamelist)
+ * - processReaded(msglist)
+ * - processmsg(msg)
+ * - processfils(filepaths);
+ * - makeMessageServer(neuronid)
+ */
