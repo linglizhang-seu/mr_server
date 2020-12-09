@@ -1,5 +1,5 @@
 #include "messageserver.h"
-#include "somefunction.h"
+#include "basicdatamanage.h"
 #include "ThreadPool.h"
 #include "basic_c_fun/basic_surf_objs.h"
 #include <QCoreApplication>
@@ -7,6 +7,35 @@ namespace Map {
     QMap<QString,MessageServer*> NeuronMapMessageServer;
     QMutex mutex;
 };
+const int colorsize=21;
+const int neuron_type_color[colorsize][3] = {
+        {255, 255, 255},  // white,   0-undefined
+        {20,  20,  20 },  // black,   1-soma
+        {200, 20,  0  },  // red,     2-axon
+        {0,   20,  200},  // blue,    3-dendrite
+        {200, 0,   200},  // purple,  4-apical dendrite
+        //the following is Hanchuan's extended color. 090331
+        {0,   200, 200},  // cyan,    5
+        {220, 200, 0  },  // yellow,  6
+        {0,   200, 20 },  // green,   7
+        {188, 94,  37 },  // coffee,  8
+        {180, 200, 120},  // asparagus,	9
+        {250, 100, 120},  // salmon,	10
+        {120, 200, 200},  // ice,		11
+        {100, 120, 200},  // orchid,	12
+    //the following is Hanchuan's further extended color. 111003
+    {255, 128, 168},  //	13
+    {128, 255, 168},  //	14
+    {128, 168, 255},  //	15
+    {168, 255, 128},  //	16
+    {255, 168, 128},  //	17
+    {168, 128, 255}, //	18
+    {0, 0, 0}, //19 //totally black. PHC, 2012-02-15
+    //the following (20-275) is used for matlab heat map. 120209 by WYN
+    {0,0,131}, //20
+        };
+
+const QStringList MessageServer::clienttypes={"Terafly","TeraVR","TeraAI"};
 
 MessageServer* MessageServer::makeMessageServer(QString neuron)
 {
@@ -31,8 +60,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
 
         MessageServer* p=0;
         try {
-            p = new MessageServer(neuron);
-            p->port=messageport;
+            p = new MessageServer(neuron,messageport);
             if(!(p->listen(QHostAddress::Any,p->port.toInt())))
                 throw "";
             else
@@ -46,33 +74,33 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
         return p;
 }
 
-
-MessageServer::MessageServer(QString neuron,QObject *parent) : QTcpServer(parent)
+MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcpServer(parent)
 {
-    this->neuron=neuron;
-    bool f=false;
-    auto map=getANOFILE(neuron,f);
-    if(!f)
-    {
-        qDebug()<<"cannot get file "<<neuron;
-        throw "";
-    }
-    timer=new QTimer();
-    connect(timer,&QTimer::timeout,this,&MessageServer::autosave);
-    timer->start(5*60*1000);
-
     messagelist.clear();
     wholePoint.clear();
     segments.clear();
-    clients.clear();
-
     savedMessageIndex=0;
-    wholePoint=readAPO_file(map.keys().at(0).at(1));
-    pointIndex=wholePoint.size();
-    auto NT=readSWC_file(map.values().at(0).at(2));
+    clients.clear();
+    timer=nullptr;
+    msgLog=nullptr;
+    msglogstream=nullptr;
+
+    this->neuron=neuron;
+    this->port=port;
+    QStringList filepaths=FE::getLoadFile(neuron);//ano,apo,eswc
+    if(filepaths.isEmpty()) throw  "";
+    wholePoint=readAPO_file(filepaths.at(1));
+    auto NT=readSWC_file(filepaths.at(2));
     segments=NeuronTree__2__V_NeuronSWC_list(NT);
+
     connect(this,SIGNAL(messagecome()),this,SLOT(processmessage()));
+    if(!this->listen(QHostAddress::Any,this->port.toInt()))
+    {
+        qDebug()<<"cannot listen messageserver in port "<<this->port;
+        throw "";
+    }
 }
+
 
 void MessageServer::incomingConnection(qintptr handle)
 {
@@ -83,10 +111,13 @@ void MessageServer::incomingConnection(qintptr handle)
         clients.remove(messagesocket);
         delete messagesocket;
         releaseThread(thread);
-        emit sendToAll("users:"+getUserList());
+        emit sendToAll("users:"+getUserList().join(";"));
         if(clients.size()==0) {
+            /**
+             * 协作结束，关闭该服务器，保存文件，释放招用端口号
+             */
             save();
-            Map::NeuronMapMessageServer.remove(Map::NeuronMapMessageServer.key(this));
+            Map::NeuronMapMessageServer.remove(this->neuron);
             this->deleteLater();
         }
     });
@@ -100,9 +131,42 @@ void MessageServer::incomingConnection(qintptr handle)
     thread->start();
 }
 
-void MessageServer::pushMessagelist(QString msg,bool isAddMarker)
+
+void MessageServer::userLogin(QString name)
 {
-    if(isAddMarker) msg+=";"+QString::number(pointIndex++);
+    auto t=autosave();
+    auto p=(MessageSocket*)(sender());
+    emit sendfiles(p,t.keys().at(0));
+    UserInfo info;
+    info.username=name;
+    info.userid=getid(name);
+    info.sendedsize=t.values().at(0);
+    clients.insert(p,info);
+    emit sendToAll("users:"+getUserList().join(";"));
+    if(timer==nullptr)
+    {
+        timer=new QTimer();
+        connect(timer,&QTimer::timeout,this,&MessageServer::autosave);
+        timer->start(5*60*1000);
+    }else{
+        timer->stop();
+        timer->start(5*60*1000);
+    }
+    if(!msgLog)
+    {
+        msgLog=new QFile(QCoreApplication::applicationDirPath()+"/msglog/"+neuron+"text");
+        if(!msgLog->open(QIODevice::Append|QIODevice::Text|QIODevice::WriteOnly))
+        {
+            qDebug()<<"failed to open msglog file for "<<this->neuron;
+            delete msgLog;
+            msgLog=nullptr;
+        }
+        msglogstream=new QTextStream(msgLog);
+    }
+}
+
+void MessageServer::pushMessagelist(QString msg)
+{
     messagelist.push_back(msg);
     emit messagecome();
     for(auto p:clients.keys())
@@ -115,6 +179,8 @@ void MessageServer::pushMessagelist(QString msg,bool isAddMarker)
         }
         sendmsgs(p,msgs);
     }
+
+    (*msglogstream)<<QDateTime::currentDateTimeUtc().toString("yyyy/MM/dd hh:mm:ss : ")<<msg<<endl;
 }
 
 void MessageServer::processmessage()
@@ -123,11 +189,13 @@ void MessageServer::processmessage()
     {
         QRegExp drawlineRex("^/drawline:(.*)$");
         QRegExp dellineRex("^/delline:(.*)");
+
         QRegExp addmarkerRex("^/addmarker(.*)");
         QRegExp delmarkerRex("^/delmakrer(.*)");
 
         QRegExp retypelineRex("^/retypeline:(.*)");
         QRegExp retypemarkerRex("^/retypemarker:(.*)");
+
         for(int maxProcess=0;maxProcess<5&&savedMessageIndex<messagelist.size();maxProcess++)
         {
             QString msg=messagelist[savedMessageIndex++];
@@ -154,7 +222,6 @@ void MessageServer::processmessage()
     }
 }
 
-
 QMap<QStringList,qint64> MessageServer::autosave()
 {
     return save(1);
@@ -179,10 +246,19 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
             wholePoint[i].n=i;
         }
     }
+
     if(!QDir(dirPath).exists())
     {
         QDir(QCoreApplication::applicationFilePath()).mkdir(dirPath.section('/',-1));
     }
+
+    if(!autosave)
+    {
+        while (savedMessageIndex!=messagelist.size()) {
+            processmessage();
+        }
+    }
+
     QFile anofile(dirPath+"/"+tempAno+".ano");
     if(anofile.open(QIODevice::WriteOnly))
     {
@@ -196,211 +272,243 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     return {  {{dirPath+"/"+tempAno+".ano",dirPath+"/"+tempAno+".ano.apo",dirPath+"/"+tempAno+".ano.eswc"},cnt}};
 }
 
-void MessageServer::userLogin(QString name)
-{
-    /*
-     * 先自动保存文件，获取savedMessageIndex
-     * 发送自动保存的文件
-     * 发送savedMessageIndex
-     */
-    auto t=autosave();
-    auto p=(MessageSocket*)(sender());
-    emit sendfiles(p,t.keys().at(0));
-    emit sendmsgs(p,{"InitMsgCnt:"+QString::number(t.values().at(0))});
-    UserInfo info;
-    info.username=name;
-    info.userid=getid(name);
-    info.sendedsize=t.values().at(0);
-    clients.insert(p,info);
-    emit sendToAll("users:"+getUserList());
-}
-
-QString MessageServer::getUserList()
+QStringList MessageServer::getUserList()
 {
     auto infos=clients.values();
     QStringList usernames;
     for(auto info:infos)
         usernames.push_back(info.username);
-    return usernames.join(';');
+    return usernames;
 }
 
 void MessageServer::drawline(QString msg)
 {
+    //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...
     QStringList listwithheader=msg.split(';',QString::SkipEmptyParts);
-    int cnt=listwithheader.size();
+    if(listwithheader.size()<=1)
+    {
+        qDebug()<<"msg only contains header:"<<msg;
+        return;
+    }
     int from=0;
     QString username;
-    if(cnt<=1) return;
-    //
-    {
-        auto tmp=listwithheader[0].split(' ',QString::SkipEmptyParts);
-        QString title=tmp[0].trimmed();
-        username=tmp[1].trimmed();
 
-        if(title=="Terafly") from=0;
-        else if(title=="TeraVR") from=1;
-        else if(title=="TeraAI") from=2;
+    {
+        auto headerlist=listwithheader[0].split(' ',QString::SkipEmptyParts);
+        QString clienttype=headerlist[1].trimmed();
+        for(int i=0;i<clienttypes.size();i++)
+        {
+            if(clienttypes[i]==clienttype)
+            {
+                from = i;
+                break;
+            }
+        }
+        username=headerlist[0].trimmed();
     }
 
-    NeuronTree newTempNT;
-    newTempNT.listNeuron.clear();
-    newTempNT.hashNeuron.clear();
-    for(int i=1;i<cnt;i++)
-    {
-        NeuronSWC S;
-        QStringList nodelist=listwithheader[i].split(' ',QString::SkipEmptyParts);
-        if(nodelist.size()<5) return;
-        S.n=i;
-        S.type=nodelist[1].toInt();
-        S.x=nodelist[2].toFloat();
-        S.y=nodelist[3].toFloat();
-        S.z=nodelist[4].toFloat();
-        S.r=getid(username)*10+from;
-        if(i==1) S.pn=-1;
-        else S.pn=i-1;
-
-        newTempNT.listNeuron.push_back(S);
-        newTempNT.hashNeuron.insert(S.n,newTempNT.listNeuron.size());
-    }
+    NeuronTree newTempNT=convertMsg2NT(listwithheader,username,from);
     segments.append(NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0]);
 }
 void MessageServer::delline(QString msg)
 {
+   //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...
     QStringList listwithheader=msg.split(';',QString::SkipEmptyParts);
-    int cnt=listwithheader.size();
-    int from=0;
-    QString username;
-    if(cnt<=1) return;
-    //
+    if(listwithheader.size()<=1)
     {
-        auto tmp=listwithheader[0].split(' ',QString::SkipEmptyParts);
-        QString title=tmp[0].trimmed();
-        username=tmp[1].trimmed();
-
-        if(title=="Terafly") from=0;
-        else if(title=="TeraVR") from=1;
-        else if(title=="TeraAI") from=2;
+        qDebug()<<"msg only contains header:"<<msg;
+        return;
     }
 
     NeuronTree newTempNT;
-    newTempNT.listNeuron.clear();
-    newTempNT.hashNeuron.clear();
-    for(int i=1;i<cnt;i++)
-    {
-        NeuronSWC S;
-        QStringList nodelist=listwithheader[i].split(' ',QString::SkipEmptyParts);
-        if(nodelist.size()<5) return;
-        S.n=i;
-        S.type=nodelist[1].toInt();
-        S.x=nodelist[2].toFloat();
-        S.y=nodelist[3].toFloat();
-        S.z=nodelist[4].toFloat();
-        S.r=getid(username)*10+from;
-        if(i==1) S.pn=-1;
-        else S.pn=i-1;
 
-        newTempNT.listNeuron.push_back(S);
-        newTempNT.hashNeuron.insert(S.n,newTempNT.listNeuron.size());
-    }
+    newTempNT=convertMsg2NT(listwithheader);
     auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
-    segments.seg.erase(find(segments.seg.begin(),segments.seg.end(),seg));
+    auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
+
+    if(it!=segments.seg.end())
+    {
+        segments.seg.erase(it);return;
+    }
+
+    qDebug()<<"not find delete line "<<msg;
 }
 void MessageServer::addmarker(QString msg)
 {
+    //marker msg format:username clienttype RESx RESy RESz;type x y z
     QStringList listwithheader=msg.split(';',QString::SkipEmptyParts);
-    int cnt=listwithheader.size();
-    int from=0;
-    QString username;
-    if(cnt<=1) return;
-    //
+    if(listwithheader.size()<=1)
     {
-        auto tmp=listwithheader[0].split(' ',QString::SkipEmptyParts);
-        QString title=tmp[0].trimmed();
-        username=tmp[1].trimmed();
-
-        if(title=="Terafly") from=0;
-        else if(title=="TeraVR") from=1;
-        else if(title=="TeraAI") from=2;
+        qDebug()<<"msg only contains header:"<<msg;
+        return;
     }
 
     CellAPO marker;
     {
         QStringList markerPara=listwithheader[1].split(' ',QString::SkipEmptyParts);
-        marker.n=listwithheader[2].toInt();
         marker.x=markerPara[0].toFloat();
         marker.y=markerPara[1].toFloat();
         marker.z=markerPara[2].toFloat();
-        marker.color.r=markerPara[3].toInt();
-        marker.color.g=markerPara[4].toInt();
-        marker.color.g=markerPara[5].toInt();
+        int type= markerPara[3].toInt();
+        marker.color.r=neuron_type_color[type][0];
+        marker.color.g=neuron_type_color[type][1];
+        marker.color.b=neuron_type_color[type][2];
     }
     wholePoint.push_back(marker);
 }
 void MessageServer::delmarekr(QString msg)
 {
+    //marker msg format:username clienttype RESx RESy RESz;type x y z
     QStringList listwithheader=msg.split(';',QString::SkipEmptyParts);
-    int cnt=listwithheader.size();
-    int from=0;
-    QString username;
-    if(cnt<=1) return;
-    //
+    if(listwithheader.size()<=1)
     {
-        auto tmp=listwithheader[0].split(' ',QString::SkipEmptyParts);
-        QString title=tmp[0].trimmed();
-        username=tmp[1].trimmed();
-
-        if(title=="Terafly") from=0;
-        else if(title=="TeraVR") from=1;
-        else if(title=="TeraAI") from=2;
+        qDebug()<<"msg only contains header:"<<msg;
+        return;
     }
 
     CellAPO marker;
     {
         QStringList markerPara=listwithheader[1].split(' ',QString::SkipEmptyParts);
-        marker.n=markerPara[6].toInt();
-        marker.x=markerPara[0].toFloat();
-        marker.y=markerPara[1].toFloat();
-        marker.z=markerPara[2].toFloat();
-        marker.color.r=markerPara[3].toInt();
-        marker.color.g=markerPara[4].toInt();
-        marker.color.g=markerPara[5].toInt();
+        marker.x=markerPara[1].toFloat();
+        marker.y=markerPara[2].toFloat();
+        marker.z=markerPara[3].toFloat();
     }
-    wholePoint.removeAt(wholePoint.indexOf(marker));
+    int index=-1;
+    double threshold=10e-0;
+    for(int i=0;i<wholePoint.size();i++)
+    {
+        float dist=distance(marker,wholePoint[i]);
+        if(dist<threshold)
+        {
+            index=i;
+        }
+    }
+    if(threshold<10e-0)
+    {
+        qDebug()<<"delete marker:"<<wholePoint[index].x<<" "<<wholePoint[index].y<<" "<<wholePoint[index].z
+               <<",msg = "<<msg;
+       wholePoint.removeAt(index);
+    }else
+    {
+        qDebug()<<"failed to find marker to delete ,msg = "<<msg;
+    }
+
 }
 void MessageServer::retypeline(QString msg)
 {
+    //line msg format:username clienttype  newtype RESx RESy RESz;type x y z;type x y z;...
     QStringList listwithheader=msg.split(';',QString::SkipEmptyParts);
-    int cnt=listwithheader.size();
-
-    if(cnt<=1) return;
-    //
-    int from=0;
-    QString username;
-    int type=0;
+    if(listwithheader.size()<=1)
     {
-        auto tmp=listwithheader[0].split(' ',QString::SkipEmptyParts);
-        QString title=tmp[0].trimmed();
-        username=tmp[1].trimmed();
-
-        if(title=="Terafly") from=0;
-        else if(title=="TeraVR") from=1;
-        else if(title=="TeraAI") from=2;
-        type=tmp[2].toInt();
+        qDebug()<<"msg only contains header:"<<msg;
+        return;
     }
 
+
+    int newtype=listwithheader[0].split(' ',QString::SkipEmptyParts)[2].trimmed().toUInt();
+    if(!(newtype<colorsize)) newtype=defaulttype;
+    NeuronTree newTempNT;
+
+    newTempNT=convertMsg2NT(listwithheader);
+    auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
+    auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
+
+    if(it!=segments.seg.end())
+    {
+        for(auto & unit:it->row)
+        {
+            unit.type=newtype;
+        }
+        return;
+    }
+    qDebug()<<"not find retype line "<<msg;
+
+}
+void MessageServer::retypemarker(QString msg)
+{
+    //marker msg format:username clienttype newtype RESx RESy RESz;type x y z
+    QStringList listwithheader=msg.split(';',QString::SkipEmptyParts);
+    if(listwithheader.size()<=1)
+    {
+        qDebug()<<"msg only contains header:"<<msg;
+        return;
+    }
+    int newtype=listwithheader[0].split(' ',QString::SkipEmptyParts)[2].trimmed().toUInt();
+    if(!(newtype<colorsize)) newtype=defaulttype;
+    CellAPO marker;
+    {
+        QStringList markerPara=listwithheader[1].split(' ',QString::SkipEmptyParts);
+        marker.x=markerPara[1].toFloat();
+        marker.y=markerPara[2].toFloat();
+        marker.z=markerPara[3].toFloat();
+    }
+
+    int index=-1;
+    double threshold=10e-0;
+    for(int i=0;i<wholePoint.size();i++)
+    {
+        float dist=distance(marker,wholePoint[i]);
+        if(dist<threshold)
+        {
+            index=i;
+        }
+    }
+
+    if(threshold<ths)
+    {
+        qDebug()<<"retype marker:"<<wholePoint[index].x<<" "<<wholePoint[index].y<<" "<<wholePoint[index].z
+               <<",msg = "<<msg;
+        wholePoint[index].color.r=neuron_type_color[newtype][0];
+        wholePoint[index].color.g=neuron_type_color[newtype][1];
+        wholePoint[index].color.b=neuron_type_color[newtype][2];
+    }else
+    {
+        qDebug()<<"failed to find marker to delete ,msg = "<<msg;
+    }
+}
+
+int MessageServer::getid(QString username)
+{
+    return DB::getid(username);
+}
+
+MessageServer::~MessageServer()
+{
+    delete timer;
+    if(clients.size()!=0){
+        qDebug()<<"error ,when deconstruct MessageServer there are "<<clients.size() <<" connections!";
+        for(auto p:clients.keys())
+        {
+            p->deleteLater();
+        }
+    }
+    msgLog->close();
+    delete msgLog;
+    delete msglogstream;
+}
+
+NeuronTree MessageServer::convertMsg2NT(QStringList &listwithheader,QString username,int from)
+{
     NeuronTree newTempNT;
     newTempNT.listNeuron.clear();
     newTempNT.hashNeuron.clear();
+    int cnt=listwithheader.size();
+    int type=-1;
+
     for(int i=1;i<cnt;i++)
     {
         NeuronSWC S;
         QStringList nodelist=listwithheader[i].split(' ',QString::SkipEmptyParts);
-        if(nodelist.size()<5) return;
+        if(nodelist.size()<4) return NeuronTree();
         S.n=i;
-        S.type=nodelist[1].toInt();
-        S.x=nodelist[2].toFloat();
-        S.y=nodelist[3].toFloat();
-        S.z=nodelist[4].toFloat();
+        type=nodelist[0].toUInt();
+        if(type<colorsize)
+            S.type=type;
+        else
+            S.type=defaulttype;
+        S.x=nodelist[1].toFloat();
+        S.y=nodelist[2].toFloat();
+        S.z=nodelist[3].toFloat();
         S.r=getid(username)*10+from;
         if(i==1) S.pn=-1;
         else S.pn=i-1;
@@ -408,63 +516,39 @@ void MessageServer::retypeline(QString msg)
         newTempNT.listNeuron.push_back(S);
         newTempNT.hashNeuron.insert(S.n,newTempNT.listNeuron.size());
     }
-    auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
-    auto it=find(segments.seg.begin(),segments.seg.end(),seg);
-    for(auto &node:it->row)
-    {
-        node.type=type;
-    }
+    return newTempNT;
 }
-void MessageServer::retypemarker(QString msg)
+
+vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterator begin,vector<V_NeuronSWC>::iterator end,const V_NeuronSWC seg)
 {
-    QStringList listwithheader=msg.split(';',QString::SkipEmptyParts);
-    int cnt=listwithheader.size();
-
-    if(cnt<=1) return;
-    int from=0;
-    QString username;
-    //
-    int r,g,b;
+    QList<XYZ> _seg;
+    QList<XYZ> _tempseg;
+    const int cnt=seg.row.size();
+    for(int i=0;i<cnt;i++)
     {
-        auto tmp=listwithheader[0].split(' ',QString::SkipEmptyParts);
-        QString title=tmp[0].trimmed();
-        username=tmp[1].trimmed();
-
-        if(title=="Terafly") from=0;
-        else if(title=="TeraVR") from=1;
-        else if(title=="TeraAI") from=2;
-        r=tmp[2].toInt();r=tmp[3].toInt();r=tmp[4].toInt();
+        _seg.push_back(seg.row.at(i));
     }
 
-    CellAPO marker;
+    while(begin!=end)
     {
-        QStringList markerPara=listwithheader[1].split(' ',QString::SkipEmptyParts);
-        marker.n=markerPara[6].toInt();
-        marker.x=markerPara[0].toFloat();
-        marker.y=markerPara[1].toFloat();
-        marker.z=markerPara[2].toFloat();
-        marker.color.r=markerPara[3].toInt();
-        marker.color.g=markerPara[4].toInt();
-        marker.color.g=markerPara[5].toInt();
+        _tempseg.clear();
+        if(begin->row.size()==cnt)
+        {
+            for(int i=0;i<cnt;i++)
+            {
+                _tempseg.push_back(begin->row.at(i));
+                if(_tempseg==_seg) return begin;
+                else{
+                    reverse(_tempseg.begin(),_tempseg.end());
+                    if(_tempseg==_seg) return begin;
+                }
+            }
+
+        }
+        begin++;
     }
-    wholePoint[wholePoint.indexOf(marker)].color.r=r;
-    wholePoint[wholePoint.indexOf(marker)].color.g=g;
-    wholePoint[wholePoint.indexOf(marker)].color.b=b;
+    return end;
 }
-
-int MessageServer::getid(QString username)
-{
-    auto infos=clients.values();
-    QStringList usernames;
-    for(auto info:infos)
-        if(info.username==username) return info.userid;
-//    return usernames.join(';');
-}
-
-
-
-
-
 
 
 

@@ -38,7 +38,7 @@ Peng, H, Ruan, Z., Atasoy, D., and Sternson, S. (2010) “Automatic reconstructi
 #define _V_NEURON_SWC_H_
 
 #include "../basic_c_fun/v3d_basicdatatype.h"
-
+#include "../basic_c_fun/basic_surf_objs.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -109,6 +109,8 @@ struct V_NeuronSWC_unit
 	void set(double x1, double y1, double z1, double r1) {x=x1; y=y1;z=z1;r=r1;}
 	void set(double x1, double y1, double z1) {x=x1; y=y1;z=z1;}
     void setType(double t) {type = t;}
+
+    operator XYZ()const  {return XYZ(x,y,z);}
 };
 
 inline double distL2square(const V_NeuronSWC_unit & a, const V_NeuronSWC_unit & b)

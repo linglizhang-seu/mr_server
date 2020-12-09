@@ -7,7 +7,11 @@ int main(int argc, char *argv[])
     ManageServer server;
     if(!server.listen(QHostAddress::Any,9999))
     {
+        qDebug()<<"Error:cannot start server in port 9999,please check!";
         exit(-1);
+    }else
+    {
+        qDebug()<<"server(2.0) for vr_farm started!";
     }
     return a.exec();
 }

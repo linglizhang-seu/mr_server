@@ -11,7 +11,7 @@ CONFIG -= app_bundle
 SOURCES += \
         basic_c_fun/basic_surf_objs.cpp \
         basic_c_fun/v3d_message.cpp \
-        dbfunction.cpp \
+        basicdatamanage.cpp \
         main.cpp \
         manageserver.cpp \
         managesocket.cpp \
@@ -35,7 +35,7 @@ HEADERS += \
     basic_c_fun/v3d_basicdatatype.h \
     basic_c_fun/v3d_message.h \
     basic_c_fun/v_neuronswc.h \
-    dbfunction.h \
+    basicdatamanage.h \
     manageserver.h \
     managesocket.h \
     messageserver.h \
@@ -45,5 +45,4 @@ HEADERS += \
     neuron_editing/neuron_format_converter.h \
     neuron_editing/neuron_sim_scores.h \
     neuron_editing/neuron_xforms.h \
-    neuron_editing/v_neuronswc.h \
-    somefunction.h
+    neuron_editing/v_neuronswc.h

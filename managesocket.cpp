@@ -5,8 +5,7 @@
 #include <QCoreApplication>
 #include <QRegExp>
 #include <QTime>
-#include "dbfunction.h"
-#include "somefunction.h"
+#include "basicdatamanage.h"
 #include "messageserver.h"
 
 ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
@@ -95,6 +94,12 @@ void ManageSocket::onreadyRead()
     }
 }
 
+void ManageSocket::resetDataInfo()
+{
+     dataInfo.dataSize=0;dataInfo.stringOrFilenameSize=0;
+     dataInfo.dataReadedSize=0;dataInfo.filedataSize=0;
+}
+
 void ManageSocket::sendMsg(QString msg)
 {
     qint32 stringSize=msg.toUtf8().size();
@@ -132,16 +137,10 @@ void ManageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     {
         if(filepath.contains("/tmp/"))
         {
-            QFile(filepath).remove();        }
+            QFile(filepath).remove();
+        }
     }
 }
-
-void ManageSocket::resetDataInfo()
-{
-     dataInfo.dataSize=0;dataInfo.stringOrFilenameSize=0;
-     dataInfo.dataReadedSize=0;dataInfo.filedataSize=0;
-}
-
 
 void ManageSocket::processReaded(QStringList list)
 {
@@ -164,77 +163,34 @@ void ManageSocket::processMsg( QStringList &msgs)
 {
      for(auto msg:msgs)
      {
-        QRegExp DownloadANO("(.*):DownloadANO");
-        QRegExp LoadANO("(.*):LoadANO");
+        QRegExp DownloadANO("(.*):DownloadANO");//;;;;:DownloadANO
+        QRegExp LoadANO("(.*):LoadANO");//17302_00001:LoadANO
+        QRegExp FileList("(.*):CurrentFiles");//data:CurrentFiles
 
         if(DownloadANO.indexIn(msg)!=-1)
         {
-            bool f=false;
-            auto res=getANOFILE(DownloadANO.cap(1).trimmed(),f);
-            if(f)
-                sendFiles(res.firstKey(),res.value(res.firstKey()));
+            auto pathMapName=FE::getFilesPathFormFileName(DownloadANO.cap(1).trimmed());
+            sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
+
         }else if(LoadANO.indexIn(msg)!=-1)
         {
             auto p=makeMessageServer(LoadANO.cap(1).trimmed());
             auto port=p?p->port:"-1";
             sendMsg(port+":MessageServerPort");
+        }else if(FileList.indexIn(msg)!=-1)
+        {
+            //返回当前所有文件的列表
+            QString dirname=FileList.cap(1).trimmed();
+            QStringList datafileNames=FE::getFileNames(dirname);
+            sendMsg(datafileNames.join(";")+":"+msg);
         }
     }
      msgs.clear();
 }
 void ManageSocket::processFile( QStringList &filePaths)
 {
-    QStringList filenames;
-    for(auto filepath:filePaths)
-        filenames.push_back(filepath.section('/',-1));
-
-    if(filenames.startsWith("ARBOR"))
-    {
-        processARBOR(filePaths,filenames);
-    }else if(filenames[0].startsWith("FULL"))
-    {
-        processFULL(filePaths,filenames);
-    }else
-    {
-        qDebug()<<"something wrong!we will put file "<<filepaths<<" to ./data/error dir";
-        processOTHER(filePaths,filenames);
-    }
-    for(auto filepath:filePaths)
-    {
-        QFile(filepath).remove();
-    }
+    FE::processFileFromClient(filePaths);
     filePaths.clear();
-}
-
-
-
-void processARBOR(QStringList filepaths,QStringList filenames)
-{
-//    try {
-//        if(filepaths.size()==1&&filepaths.size()==filenames.size())
-//        {
-//            addArborToDB(filepaths[0],filenames[0],cac_position(filepaths[0]));
-//        }else
-//        {
-//            addArborToDB(filepaths[2],filenames[2],cac_position(filepaths[1]));
-//        }
-//    }  catch (...) {
-//        qDebug()<<"error to add DB";
-//    }
-
-}
-void processFULL(QStringList filepaths,QStringList filenames)
-{
-//    try {
-//        addFullSwcToDB(filepaths,filenames);
-//    }  catch (...) {
-//        qDebug()<<"error to add DB";
-//    }
-
-}
-void processOTHER(QStringList filepaths,QStringList filenames)
-{
-
 }
 
 MessageServer* ManageSocket::makeMessageServer(QString neuron)
