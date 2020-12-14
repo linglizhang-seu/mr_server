@@ -120,7 +120,7 @@ namespace FE {
         if(dataDir.exists())
         {
             dataDir.setSorting(QDir::Name);
-            QStringList filenames=dataDir.entryList();
+            QStringList filenames=dataDir.entryList(QDir::Files);
             return filenames;
         }
         else{

@@ -58,15 +58,16 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
             }
         }
 
+
         MessageServer* p=0;
         try {
             p = new MessageServer(neuron,messageport);
-            if(!(p->listen(QHostAddress::Any,p->port.toInt())))
-                throw "";
-            else
-            {
+//            if(!(p->listen(QHostAddress::Any,p->port.toInt())))
+//                throw "";
+//            else
+//            {
                 Map::NeuronMapMessageServer.insert(neuron,p);
-            }
+//            }
         }  catch (...) {
             qDebug()<<"failed to create server";
         }
@@ -118,15 +119,16 @@ void MessageServer::incomingConnection(qintptr handle)
              */
             save();
             Map::NeuronMapMessageServer.remove(this->neuron);
+            qDebug()<<this->neuron<<" has been delete ";
             this->deleteLater();
         }
     });
 
-    connect(this,SIGNAL(sendToAll(QString)),messagesocket,SLOT(sendMsg(QString)));
+    connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(sendMsg(const QString &)));
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)));
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)));
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
-    connect(messagesocket,SIGNAL(pushMsg(QString,bool)),this,SLOT(pushMessagelist(QString,bool)));
+    connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
 
     thread->start();
 }

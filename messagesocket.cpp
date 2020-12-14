@@ -68,7 +68,7 @@ void MessageSocket::resetDataInfo()
      dataInfo.dataReadedSize=0;dataInfo.filedataSize=0;
 }
 
-void MessageSocket::sendMsg(QString msg)
+void MessageSocket::sendMsg(const QString & msg)
 {
     qint32 stringSize=msg.toUtf8().size();
     qint32 totalsize=3*sizeof (qint32)+stringSize;
@@ -109,8 +109,8 @@ void MessageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     for(int i=0;i<blocks.size();i++)
         block=block+blocks[i];
     qDebug()<<totalsize<<' '<<block.size();
-    this->write(block);
-    this->flush();
+    socket->write(block);
+    socket->flush();
 
     for(auto filepath:filePathList)
     {
@@ -161,22 +161,22 @@ void MessageSocket::processMsg(const QString msg)
 
     if(drawlineRex.indexIn(msg)!=-1)
     {
-        emit pushMsg(msg,0);
+        emit pushMsg(msg);
     }else if(dellineRex.indexIn(msg)!=-1)
     {
-        emit pushMsg(msg,0);
+        emit pushMsg(msg);
     }else if(addmarkerRex.indexIn(msg)!=-1)
     {
-        emit pushMsg(msg,1);
+        emit pushMsg(msg);
     }else if(delmarkerRex.indexIn(msg)!=-1)
     {
-        emit pushMsg(msg,0);
+        emit pushMsg(msg);
     }else if(retypelineRex.indexIn(msg)!=-1)
     {
-        emit pushMsg(msg,0);
+        emit pushMsg(msg);
     }else if(retypemarkerRex.indexIn(msg)!=-1)
     {
-        emit pushMsg(msg,0);
+        emit pushMsg(msg);
     }else if(loginRex.indexIn(msg)!=-1)
     {
         emit userlogin(dellineRex.cap(1).trimmed());

@@ -17,12 +17,12 @@ public:
 public slots:
     void onstarted();
     void onreadyRead();
-    void sendMsg(QString msg);
+    void sendMsg(const QString & msg);
     void sendfiles(MessageSocket* socket,QStringList filepath);
     void sendmsgs(MessageSocket* socket,QStringList msglist);
 signals:
     void disconnected();
-    void pushMsg(QString ,bool);
+    void pushMsg(QString );
     void userlogin(QString);
 private:
     QTcpSocket *socket;

@@ -20,7 +20,11 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
     socket=new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket,&QTcpSocket::readyRead,this,&ManageSocket::onreadyRead);
-    connect(socket,&QTcpSocket::disconnected,this,&ManageSocket::deleteLater);
+    connect(socket,&QTcpSocket::disconnected,[=]
+    {
+        this->deleteLater();
+        qDebug()<<this<<"delete";
+    });
 
 }
 
@@ -121,8 +125,8 @@ void ManageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     for(int i=0;i<blocks.size();i++)
         block=block+blocks[i];
     qDebug()<<totalsize<<' '<<block.size();
-    this->write(block);
-    this->flush();
+    socket->write(block);
+    socket->flush();
 
     for(auto filepath:filePathList)
     {
@@ -154,6 +158,7 @@ void ManageSocket::processMsg( QStringList &msgs)
 {
      for(auto msg:msgs)
      {
+         qDebug()<<"receive msg:"<<msg;
         QRegExp Download("(.*):Download");//;;;;:Download
         QRegExp LoadANO("(.*):LoadANO");//17302_00001:LoadANO
         QRegExp FileList("(.*):CurrentFiles");//data:CurrentFiles
