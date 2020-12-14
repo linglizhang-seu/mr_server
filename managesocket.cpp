@@ -94,25 +94,36 @@ void ManageSocket::sendMsg(QString msg)
 
 void ManageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
 {
-    qint32 totalsize=sizeof (qint32);
-    QByteArray block1;
-    QDataStream dts(&block1,QIODevice::WriteOnly);
+    int totalsize=sizeof(qint32);
+    QList<QByteArray> blocks;
     for(int i=0;i<filePathList.size();i++)
     {
-        auto fileName=fileNameList[i].toUtf8();
-        auto fileData=QFile(filePathList[i]).readAll();
-        totalsize += 2* sizeof (qint32);
-        totalsize += fileName.size();
-        totalsize += fileData.size();
+        QByteArray block;
+        block.clear();
+        QDataStream dts(&block,QIODevice::WriteOnly);
+        QFile f(filePathList[i]);
+        if(!f.open(QIODevice::ReadOnly))
+            qDebug()<<"cannot open file "<<fileNameList[i]<<" "<<f.errorString();
+        QByteArray fileName=fileNameList[i].toUtf8();
+        QByteArray fileData=f.readAll();
+        f.close();
         dts<<qint32(fileName.size())<<qint32(fileData.size());
-        block1 += fileName +=fileData;
+        block=block+fileName;
+        block=block+fileData;
+        blocks.push_back(block);
+        totalsize+=block.size();
     }
     QByteArray block;
-    QDataStream dts1(&block,QIODevice::WriteOnly);
+
+    block.clear();
+    QDataStream dts(&block,QIODevice::WriteOnly);
     dts<<qint32(totalsize);
-    block+=block1;
-    socket->write(block);
-    socket->waitForBytesWritten();
+    for(int i=0;i<blocks.size();i++)
+        block=block+blocks[i];
+    qDebug()<<totalsize<<' '<<block.size();
+    this->write(block);
+    this->flush();
+
     for(auto filepath:filePathList)
     {
         if(filepath.contains("/tmp/"))

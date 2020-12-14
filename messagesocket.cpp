@@ -1,4 +1,4 @@
-#include "messagesocket.h"
+﻿#include "messagesocket.h"
 #include <QDataStream>
 #include <QFile>
 #include <QRegExp>
@@ -82,33 +82,36 @@ void MessageSocket::sendMsg(QString msg)
 
 void MessageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
 {
-    qint32 totalsize=sizeof (qint32);
-    QByteArray block1;
+    int totalsize=sizeof(qint32);
+    QList<QByteArray> blocks;
+    for(int i=0;i<filePathList.size();i++)
     {
-        QDataStream dts(&block1,QIODevice::WriteOnly);
-        for(int i=0;i<filePathList.size();i++)
-        {
-            auto fileName=fileNameList[i].toUtf8();
-            QFile f(filePathList[i]);
-            f.open(QIODevice::ReadOnly);
-            auto fileData=f.readAll();
-            f.flush();
-            f.close();
-            totalsize += 2* sizeof (qint32);
-            totalsize += fileName.size();
-            totalsize += fileData.size();
-            dts<<qint32(fileName.size())<<qint32(fileData.size());
-            block1=block1+fileName;
-            block1=block1+fileData;
-        }
+        QByteArray block;
+        block.clear();
+        QDataStream dts(&block,QIODevice::WriteOnly);
+        QFile f(filePathList[i]);
+        if(!f.open(QIODevice::ReadOnly))
+            qDebug()<<"cannot open file "<<fileNameList[i]<<" "<<f.errorString();
+        QByteArray fileName=fileNameList[i].toUtf8();
+        QByteArray fileData=f.readAll();
+        f.close();
+        dts<<qint32(fileName.size())<<qint32(fileData.size());
+        block=block+fileName;
+        block=block+fileData;
+        blocks.push_back(block);
+        totalsize+=block.size();
     }
     QByteArray block;
-    QDataStream dts1(&block,QIODevice::WriteOnly);
-    dts1<<qint32(totalsize);
-    qDebug()<<totalsize;
-    block=block+block1;
-    socket->write(block);
-    socket->waitForBytesWritten();
+
+    block.clear();
+    QDataStream dts(&block,QIODevice::WriteOnly);
+    dts<<qint32(totalsize);
+    for(int i=0;i<blocks.size();i++)
+        block=block+blocks[i];
+    qDebug()<<totalsize<<' '<<block.size();
+    this->write(block);
+    this->flush();
+
     for(auto filepath:filePathList)
     {
         if(filepath.contains("/tmp/"))
