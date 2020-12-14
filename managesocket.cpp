@@ -1,4 +1,4 @@
-#include "managesocket.h"
+﻿#include "managesocket.h"
 #include <QDataStream>
 #include <QSqlQuery>
 #include <QFile>
