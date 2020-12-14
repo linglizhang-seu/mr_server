@@ -52,6 +52,10 @@ void ManageSocket::onreadyRead()
                 {
                     QByteArray block=socket->read(dataInfo.dataSize-dataInfo.dataReadedSize);
                     QString filePath=QCoreApplication::applicationDirPath()+"/tmp/"+messageOrFileName;
+                    if(!QDir(QCoreApplication::applicationDirPath()+"/tmp").exists())
+                    {
+                        QDir(QCoreApplication::applicationDirPath()).mkdir("tmp");
+                    }
                     QFile file(filePath);
                     file.open(QIODevice::WriteOnly);
                     file.write(block);file.flush();
@@ -80,6 +84,10 @@ void ManageSocket::onreadyRead()
                 {
                     QByteArray block=socket->read(dataInfo.dataSize-dataInfo.dataReadedSize);
                     QString filePath=QCoreApplication::applicationDirPath()+"/tmp/"+messageOrFileName;
+                    if(!QDir(QCoreApplication::applicationDirPath()+"/tmp").exists())
+                    {
+                        QDir(QCoreApplication::applicationDirPath()).mkdir("tmp");
+                    }
                     QFile file(filePath);
                     file.open(QIODevice::WriteOnly);
                     file.write(block);
@@ -163,26 +171,25 @@ void ManageSocket::processMsg( QStringList &msgs)
 {
      for(auto msg:msgs)
      {
-        QRegExp DownloadANO("(.*):DownloadANO");//;;;;:DownloadANO
+        QRegExp Download("(.*):Download");//;;;;:Download
         QRegExp LoadANO("(.*):LoadANO");//17302_00001:LoadANO
         QRegExp FileList("(.*):CurrentFiles");//data:CurrentFiles
 
-        if(DownloadANO.indexIn(msg)!=-1)
+        if(Download.indexIn(msg)!=-1)
         {
-            auto pathMapName=FE::getFilesPathFormFileName(DownloadANO.cap(1).trimmed());
+            auto pathMapName=FE::getFilesPathFormFileName(Download.cap(1).trimmed());
             sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
-
         }else if(LoadANO.indexIn(msg)!=-1)
         {
             auto p=makeMessageServer(LoadANO.cap(1).trimmed());
             auto port=p?p->port:"-1";
-            sendMsg(port+":MessageServerPort");
+            sendMsg(port+":Port");
         }else if(FileList.indexIn(msg)!=-1)
         {
             //返回当前所有文件的列表
-            QString dirname=FileList.cap(1).trimmed();
+            QString dirname=FileList.cap(1).trimmed().split(";").at(1).trimmed();
             QStringList datafileNames=FE::getFileNames(dirname);
-            sendMsg(datafileNames.join(";")+":"+msg);
+            sendMsg(datafileNames.join(";")+";"+msg);
         }
     }
      msgs.clear();

@@ -144,7 +144,8 @@ void MessageSocket::processMsg(const QString msg)
     QRegExp delmarkerRex("^/delmakrer(.*)");
 
     QRegExp retypelineRex("^/retypeline:(.*)");
-    QRegExp retypemarkerRex("^/retypemarker:(.*)");
+
+    QRegExp retypemarkerRex("^/retypemarker:(.*)");//unused
 
     if(drawlineRex.indexIn(msg)!=-1)
     {
