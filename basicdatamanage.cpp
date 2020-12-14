@@ -102,6 +102,10 @@ namespace FE {
     {
         QStringList filenames=msg.split(";",QString::SkipEmptyParts);
         QStringList filepaths;
+        if(!QDir(QCoreApplication::applicationDirPath()+"/data").exists())
+        {
+            QDir(QCoreApplication::applicationDirPath()).mkdir("data");
+        }
         for(auto filename:filenames)
         {
             filepaths.push_back(QCoreApplication::applicationDirPath()+"/data/"+filename);
@@ -128,7 +132,10 @@ namespace FE {
         QStringList filenames;
         for(auto filepath:filepaths)
             filenames.push_back(filepath.section('/',-1));
-
+        if(!QDir(QCoreApplication::applicationDirPath()+"/data").exists())
+        {
+            QDir(QCoreApplication::applicationDirPath()).mkdir("data");
+        }
         for(int i=0;i<filenames.size();i++)
         {
             if(QFile::rename(filepaths[i],QCoreApplication::applicationDirPath()+"/data/"+filenames[i]))
