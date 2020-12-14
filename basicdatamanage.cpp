@@ -139,9 +139,10 @@ namespace FE {
         }
         for(int i=0;i<filenames.size();i++)
         {
-            if(QFile::rename(filepaths[i],QCoreApplication::applicationDirPath()+"/data/"+filenames[i]))
+            QFile f(filepaths[i]);
+            if(!f.rename(filepaths[i],QCoreApplication::applicationDirPath()+"/data/"+filenames[i]))
             {
-                    qDebug()<<QString("Failed to move %1 to %2").arg(filepaths[i]).arg(QCoreApplication::applicationDirPath()+"/data/"+filenames[i]);
+                    qDebug()<<QString("Failed to move %1 to %2").arg(filepaths[i]).arg(QCoreApplication::applicationDirPath()+"/data/"+filenames[i])<<f.errorString();
                     return false;
             }
         }

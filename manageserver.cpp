@@ -9,6 +9,8 @@ ManageServer::ManageServer(QObject *parent):QTcpServer(parent)
 
 void ManageServer::incomingConnection(qintptr handle)
 {
+
     ManageSocket * manageSokcet = new ManageSocket(handle);
+    qDebug()<<"incoming "<<manageSokcet;
 }
 
