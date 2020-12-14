@@ -1,4 +1,4 @@
-#include "basicdatamanage.h"
+﻿#include "basicdatamanage.h"
 #include <QMutex>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -34,40 +34,41 @@ namespace DB {
     //wait to finish
     int getid(QString username)
     {
-        bool inserted=false;
-        QSqlDatabase db=getNewDbConnection();
-        if(!db.open()){
-            qFatal("cannot connect DB when processBrain");
-            throw "";
-        }
-        QSqlQuery query(db);
-        QString sql;
-    LABEL:
-        sql=QString("SELECT * INTO %1 where userName = ?").arg(TableForUser);
-        query.prepare(sql);
-        query.addBindValue(username);
-        if(!query.exec())
-        {
-            return -1;
-        }else{
-            if(query.next())
-            {
-                return query.value(0).toUInt();
-            }else if(!inserted)
-            {
-                sql=QString("INSERT INTO %1 userName = ?").arg(TableForUser);
-                query.addBindValue(username);
-                if(!query.exec())
-                {
-                    return -1;
-                }else
-                {
-                    inserted=true;
-                    goto LABEL;
-                }
-            }
-        }
-        return -1;
+        return username.toInt();
+//        bool inserted=false;
+//        QSqlDatabase db=getNewDbConnection();
+//        if(!db.open()){
+//            qFatal("cannot connect DB when processBrain");
+//            throw "";
+//        }
+//        QSqlQuery query(db);
+//        QString sql;
+//    LABEL:
+//        sql=QString("SELECT * INTO %1 where userName = ?").arg(TableForUser);
+//        query.prepare(sql);
+//        query.addBindValue(username);
+//        if(!query.exec())
+//        {
+//            return -1;
+//        }else{
+//            if(query.next())
+//            {
+//                return query.value(0).toUInt();
+//            }else if(!inserted)
+//            {
+//                sql=QString("INSERT INTO %1 userName = ?").arg(TableForUser);
+//                query.addBindValue(username);
+//                if(!query.exec())
+//                {
+//                    return -1;
+//                }else
+//                {
+//                    inserted=true;
+//                    goto LABEL;
+//                }
+//            }
+//        }
+//        return -1;
     }
 
 //    bool addArborToDB(QString swcpath,QString swcname,QString position)
@@ -134,8 +135,10 @@ namespace FE {
             if(QFile::rename(filepaths[i],QCoreApplication::applicationDirPath()+"/data/"+filenames[i]))
             {
                     qDebug()<<QString("Failed to move %1 to %2").arg(filepaths[i]).arg(QCoreApplication::applicationDirPath()+"/data/"+filenames[i]);
+                    return false;
             }
         }
+        return true;
     }
 
     QStringList getLoadFile(QString neuron)
