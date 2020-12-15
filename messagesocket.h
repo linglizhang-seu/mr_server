@@ -23,7 +23,7 @@ public slots:
 signals:
     void disconnected();
     void pushMsg(QString );
-    void userlogin(QString);
+    void userLogin(QString);
 private:
     QTcpSocket *socket;
     qintptr socketDescriptor;
@@ -32,7 +32,7 @@ private:
     void resetDataInfo();
     void processMsg(const QString msg);
     void sendFiles(QStringList filePathList,QStringList fileNameList);
-
+    void processReaded(QStringList list);
 
     //message processor
 };

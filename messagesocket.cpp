@@ -2,6 +2,7 @@
 #include <QDataStream>
 #include <QFile>
 #include <QRegExp>
+#include <QHostAddress>
 MessageSocket::MessageSocket(qintptr handle,QObject *parent) : QObject(parent)
 {
     socket=nullptr;
@@ -13,12 +14,14 @@ void MessageSocket::onstarted()
 {
     socket=new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
+    qDebug()<<socket->peerAddress().toString()<<socket->peerPort();
     connect(socket,&QTcpSocket::readyRead,this,&MessageSocket::onreadyRead);
     connect(socket,&QTcpSocket::disconnected,this,&MessageSocket::disconnected);
 }
 
 void MessageSocket::onreadyRead()
 {
+    qDebug()<<"onread";
     QDataStream in(socket);
     if(dataInfo.dataSize==0)
     {
@@ -43,7 +46,7 @@ void MessageSocket::onreadyRead()
     if(socket->bytesAvailable()>=dataInfo.stringOrFilenameSize+dataInfo.filedataSize)
     {
         QString messageOrFileName=QString::fromUtf8(socket->read(dataInfo.stringOrFilenameSize),dataInfo.stringOrFilenameSize);
-
+        qDebug()<<messageOrFileName;
         if(dataInfo.filedataSize)
         {
             qDebug()<<"error :filedatasize !=0";
@@ -57,10 +60,21 @@ void MessageSocket::onreadyRead()
         dataInfo.filedataSize=0;
         if(dataInfo.dataReadedSize==dataInfo.dataSize)
             resetDataInfo();
-        processMsg(list[0]);
+        processReaded(list);
     }else
         return;
     onreadyRead();
+}
+
+void MessageSocket::processReaded(QStringList list)
+{
+    for(auto msg:list)
+    {
+        if(msg.startsWith("00"))
+        {
+            processMsg(msg.remove(0,2));
+        }
+    }
 }
 void MessageSocket::resetDataInfo()
 {
@@ -77,7 +91,7 @@ void MessageSocket::sendMsg(const QString & msg)
     dts<<qint32(totalsize)<<qint32(stringSize)<<qint32(0);
     block+=msg.toUtf8();
     socket->write(block);
-    socket->waitForBytesWritten();
+    socket->flush();
 }
 
 void MessageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
@@ -91,7 +105,7 @@ void MessageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
         QDataStream dts(&block,QIODevice::WriteOnly);
         QFile f(filePathList[i]);
         if(!f.open(QIODevice::ReadOnly))
-            qDebug()<<"cannot open file "<<fileNameList[i]<<" "<<f.errorString();
+            qDebug()<<"cannot open file \n"<<filePathList[i]<<" "<<f.errorString();
         QByteArray fileName=fileNameList[i].toUtf8();
         QByteArray fileData=f.readAll();
         f.close();
@@ -112,13 +126,13 @@ void MessageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     socket->write(block);
     socket->flush();
 
-    for(auto filepath:filePathList)
-    {
-        if(filepath.contains("/tmp/"))
-        {
-            QFile(filepath).remove();
-        }
-    }
+//    for(auto filepath:filePathList)
+//    {
+//        if(filepath.contains("/tmp/"))
+//        {
+//            QFile(filepath).remove();
+//        }
+//    }
 
 }
 
@@ -153,12 +167,13 @@ void MessageSocket::processMsg(const QString msg)
     QRegExp drawlineRex("^/drawline:(.*)$");
     QRegExp dellineRex("^/delline:(.*)");
     QRegExp addmarkerRex("^/addmarker(.*)");
-    QRegExp delmarkerRex("^/delmakrer(.*)");
+    QRegExp delmarkerRex("^/delmarker(.*)");
 
     QRegExp retypelineRex("^/retypeline:(.*)");
 
     QRegExp retypemarkerRex("^/retypemarker:(.*)");//unused
 
+    qDebug()<<"message:receive "<<msg;
     if(drawlineRex.indexIn(msg)!=-1)
     {
         emit pushMsg(msg);
@@ -179,7 +194,7 @@ void MessageSocket::processMsg(const QString msg)
         emit pushMsg(msg);
     }else if(loginRex.indexIn(msg)!=-1)
     {
-        emit userlogin(dellineRex.cap(1).trimmed());
+        emit userLogin(msg);
     }
 
 }

@@ -35,7 +35,7 @@ const int neuron_type_color[colorsize][3] = {
     {0,0,131}, //20
         };
 
-const QStringList MessageServer::clienttypes={"Terafly","TeraVR","TeraAI"};
+const QStringList MessageServer::clienttypes={"TeraFly","TeraVR","TeraAI"};
 
 MessageServer* MessageServer::makeMessageServer(QString neuron)
 {
@@ -89,6 +89,7 @@ MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcp
     this->neuron=neuron;
     this->port=port;
     QStringList filepaths=FE::getLoadFile(neuron);//ano,apo,eswc
+    qDebug()<<filepaths;
     if(filepaths.isEmpty()) throw  "";
     wholePoint=readAPO_file(filepaths.at(1));
     auto NT=readSWC_file(filepaths.at(2));
@@ -99,6 +100,9 @@ MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcp
     {
         qDebug()<<"cannot listen messageserver in port "<<this->port;
         throw "";
+    }else
+    {
+        qDebug()<<"messageserver setup "<<this->neuron;
     }
 }
 
@@ -107,16 +111,18 @@ void MessageServer::incomingConnection(qintptr handle)
 {
     MessageSocket* messagesocket = new MessageSocket(handle);
     QThread * thread = getNewThread();
-    messagesocket->moveToThread(thread);
+
     QObject::connect(messagesocket,&MessageSocket::disconnected,[=]{
         clients.remove(messagesocket);
-        delete messagesocket;
+        thread->quit();
+        messagesocket->deleteLater();
         releaseThread(thread);
         emit sendToAll("users:"+getUserList().join(";"));
         if(clients.size()==0) {
             /**
              * 协作结束，关闭该服务器，保存文件，释放招用端口号
              */
+            qDebug()<<"client is 0,should close "<<neuron;
             save();
             Map::NeuronMapMessageServer.remove(this->neuron);
             qDebug()<<this->neuron<<" has been delete ";
@@ -129,13 +135,15 @@ void MessageServer::incomingConnection(qintptr handle)
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)));
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
     connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
-
+    connect(thread,SIGNAL(started()),messagesocket,SLOT(onstarted()));
+    messagesocket->moveToThread(thread);
     thread->start();
 }
 
 
 void MessageServer::userLogin(QString name)
 {
+    qDebug()<<"userlogin "<<name;
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
     emit sendfiles(p,t.keys().at(0));
@@ -179,9 +187,9 @@ void MessageServer::pushMessagelist(QString msg)
     {
         auto &info=clients[p];
         QStringList msgs;
-        for(int i=0;i<5&&info.sendedsize<messagelist.size();info.sendedsize++)
+        for(int i=0;i<5&&info.sendedsize<messagelist.size();info.sendedsize++,i++)
         {
-            msg.push_back(messagelist.at(info.sendedsize));
+            msgs.push_back(messagelist.at(info.sendedsize));
         }
         sendmsgs(p,msgs);
     }
@@ -196,8 +204,8 @@ void MessageServer::processmessage()
         QRegExp drawlineRex("^/drawline:(.*)$");
         QRegExp dellineRex("^/delline:(.*)");
 
-        QRegExp addmarkerRex("^/addmarker(.*)");
-        QRegExp delmarkerRex("^/delmakrer(.*)");
+        QRegExp addmarkerRex("^/addmarker:(.*)");
+        QRegExp delmarkerRex("^/delmarker:(.*)");
 
         QRegExp retypelineRex("^/retypeline:(.*)");
         QRegExp retypemarkerRex("^/retypemarker:(.*)");
@@ -210,20 +218,20 @@ void MessageServer::processmessage()
                 drawline(drawlineRex.cap(1).trimmed());
             }else if(dellineRex.indexIn(msg)!=-1)
             {
-                delline(drawlineRex.cap(1).trimmed());
+                delline(dellineRex.cap(1).trimmed());
             }else if(addmarkerRex.indexIn(msg)!=-1)
             {
-                addmarker(drawlineRex.cap(1).trimmed());
+                addmarker(addmarkerRex.cap(1).trimmed());
             }else if(delmarkerRex.indexIn(msg)!=-1)
             {
-                delmarekr(drawlineRex.cap(1).trimmed());
+                delmarekr(delmarkerRex.cap(1).trimmed());
             }else if(retypelineRex.indexIn(msg)!=-1)
             {
-                retypeline(drawlineRex.cap(1).trimmed());
-            }else if(retypemarkerRex.indexIn(msg)!=-1)
+                retypeline(retypelineRex.cap(1).trimmed());
+            }/*else if(retypemarkerRex.indexIn(msg)!=-1)
             {
-                retypemarker(drawlineRex.cap(1).trimmed());
-            }
+                retypemarker(retypemarkerRex.cap(1).trimmed());
+            }*/
         }
     }
 }
@@ -236,46 +244,40 @@ QMap<QStringList,qint64> MessageServer::autosave()
 QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
 {
     qint64 cnt=savedMessageIndex;
-    QString dirPath=QCoreApplication::applicationFilePath();
     auto nt=V_NeuronSWC_list__2__NeuronTree(segments);
     QString tempAno=neuron;
-    if(autosave)
+    QString dirpath=QCoreApplication::applicationDirPath()+"/data";
+    qDebug()<<dirpath;
+    if(!QDir(dirpath).exists())
     {
-        QString time=QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss");
-        tempAno=neuron+"_stamp_autosave_"+time;
-        dirPath+="/autosave";
-    }else
-    {
-        dirPath+="/data";
-        for(int i=0;i<wholePoint.size();i++)
-        {
-            wholePoint[i].n=i;
-        }
+       qDebug()<< QDir(QCoreApplication::applicationDirPath()).mkdir("data");
     }
-
-    if(!QDir(dirPath).exists())
-    {
-        QDir(QCoreApplication::applicationFilePath()).mkdir(dirPath.section('/',-1));
-    }
-
     if(!autosave)
     {
         while (savedMessageIndex!=messagelist.size()) {
             processmessage();
         }
-    }
+        for(int i=0;i<wholePoint.size();i++)
+        {
+            wholePoint[i].n=i;
+        }
 
-    QFile anofile(dirPath+"/"+tempAno+".ano");
+    }
+    QFile anofile(dirpath+"/"+tempAno+".ano");
+    qDebug()<<anofile;
     if(anofile.open(QIODevice::WriteOnly))
     {
         QTextStream out(&anofile);
-        out<<"ANOFILE="+tempAno+".ano.apo"<<endl<<"SWCFILE="+tempAno+".ano.eswc";
+        out<<"APOFILE="+tempAno+".ano.apo"<<endl<<"SWCFILE="+tempAno+".ano.eswc";
         anofile.close();
 
-        writeESWC_file(dirPath+"/"+tempAno+".ano.eswc",nt);
-        writeAPO_file(dirPath+"/"+tempAno+".ano.apo",wholePoint);
+        writeESWC_file(dirpath+"/"+tempAno+".ano.eswc",nt);
+        writeAPO_file(dirpath+"/"+tempAno+".ano.apo",wholePoint);
+    }else
+    {
+        qDebug()<<anofile.errorString();
     }
-    return {  {{dirPath+"/"+tempAno+".ano",dirPath+"/"+tempAno+".ano.apo",dirPath+"/"+tempAno+".ano.eswc"},cnt}};
+    return {  {{dirpath+"/"+tempAno+".ano",dirpath+"/"+tempAno+".ano.apo",dirpath+"/"+tempAno+".ano.eswc"},cnt}};
 }
 
 QStringList MessageServer::getUserList()
@@ -315,6 +317,7 @@ void MessageServer::drawline(QString msg)
 
     NeuronTree newTempNT=convertMsg2NT(listwithheader,username,from);
     segments.append(NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0]);
+    qDebug()<<"add in seg sucess "<<msg;
 }
 void MessageServer::delline(QString msg)
 {
@@ -330,14 +333,15 @@ void MessageServer::delline(QString msg)
 
     newTempNT=convertMsg2NT(listwithheader);
     auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
+    qDebug()<<segments.seg.size();
     auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
 
     if(it!=segments.seg.end())
     {
-        segments.seg.erase(it);return;
-    }
-
-    qDebug()<<"not find delete line "<<msg;
+        segments.seg.erase(it);
+        qDebug()<<"find delete line sucess"<<msg;
+    }else
+        qDebug()<<"not find delete line "<<msg;
 }
 void MessageServer::addmarker(QString msg)
 {
@@ -352,15 +356,16 @@ void MessageServer::addmarker(QString msg)
     CellAPO marker;
     {
         QStringList markerPara=listwithheader[1].split(' ',QString::SkipEmptyParts);
-        marker.x=markerPara[0].toFloat();
-        marker.y=markerPara[1].toFloat();
-        marker.z=markerPara[2].toFloat();
-        int type= markerPara[3].toInt();
+        marker.x=markerPara[1].toFloat();
+        marker.y=markerPara[2].toFloat();
+        marker.z=markerPara[3].toFloat();
+        int type= markerPara[0].toInt();
         marker.color.r=neuron_type_color[type][0];
         marker.color.g=neuron_type_color[type][1];
         marker.color.b=neuron_type_color[type][2];
     }
     wholePoint.push_back(marker);
+    qDebug()<<"add in seg marker "<<msg;
 }
 void MessageServer::delmarekr(QString msg)
 {
@@ -389,7 +394,7 @@ void MessageServer::delmarekr(QString msg)
             index=i;
         }
     }
-    if(threshold<10e-0)
+    if(index>=0)
     {
         qDebug()<<"delete marker:"<<wholePoint[index].x<<" "<<wholePoint[index].y<<" "<<wholePoint[index].z
                <<",msg = "<<msg;
@@ -425,6 +430,7 @@ void MessageServer::retypeline(QString msg)
         {
             unit.type=newtype;
         }
+        qDebug()<<"find retype line sucess "<<msg;
         return;
     }
     qDebug()<<"not find retype line "<<msg;
@@ -527,33 +533,48 @@ NeuronTree MessageServer::convertMsg2NT(QStringList &listwithheader,QString user
 
 vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterator begin,vector<V_NeuronSWC>::iterator end,const V_NeuronSWC seg)
 {
-    QList<XYZ> _seg;
-    QList<XYZ> _tempseg;
+//    qDebug()<<begin<" ,"<<end;
+    vector<V_NeuronSWC>::iterator result=end;
+    double mindist=1;
     const int cnt=seg.row.size();
-    for(int i=0;i<cnt;i++)
-    {
-        _seg.push_back(seg.row.at(i));
-    }
-
     while(begin!=end)
     {
-        _tempseg.clear();
         if(begin->row.size()==cnt)
         {
+            double dist=0;
             for(int i=0;i<cnt;i++)
             {
-                _tempseg.push_back(begin->row.at(i));
-                if(_tempseg==_seg) return begin;
-                else{
-                    reverse(_tempseg.begin(),_tempseg.end());
-                    if(_tempseg==_seg) return begin;
-                }
+                auto node=begin->row.at(i);
+                dist+=(sqrt(
+                           pow(node.x-seg.row[i].x,2)
+                          +pow(node.y-seg.row[i].y,2)
+                          +pow(node.z-seg.row[i].z,2)
+                           ));
             }
-
+            if(dist<mindist)
+            {
+                mindist=dist;
+                result=begin;
+            }
+            dist=0;
+            for(int i=0;i<cnt;i++)
+            {
+                auto node=begin->row.at(i);
+                dist+=(sqrt(
+                           pow(node.x-seg.row[cnt-i-1].x,2)
+                          +pow(node.y-seg.row[cnt-i-1].y,2)
+                          +pow(node.z-seg.row[cnt-i-1].z,2)
+                           ));
+            }
+            if(dist<mindist)
+            {
+                mindist=dist;
+                result=begin;
+            }
         }
         begin++;
     }
-    return end;
+    return result;
 }
 
 

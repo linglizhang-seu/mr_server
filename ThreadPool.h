@@ -8,7 +8,8 @@ inline QThread* getNewThread()
 
 inline bool releaseThread(QThread* thread)
 {
-    thread->deleteLater();
+//    emit thread->finished();
+    QObject::connect(thread,&QThread::finished,thread,&QThread::deleteLater);
     return true;
 }
 #endif // THREADPOOL_H

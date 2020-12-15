@@ -30,6 +30,7 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
 
 void ManageSocket::onreadyRead()
 {
+    qDebug()<<"Manage on read";
     QDataStream in(socket);
     if(dataInfo.dataSize==0)
     {
@@ -54,7 +55,7 @@ void ManageSocket::onreadyRead()
     if(socket->bytesAvailable()>=dataInfo.stringOrFilenameSize+dataInfo.filedataSize)
     {
         QString messageOrFileName=QString::fromUtf8(socket->read(dataInfo.stringOrFilenameSize),dataInfo.stringOrFilenameSize);
-
+        qDebug()<<messageOrFileName;
         if(dataInfo.filedataSize)
         {
             QString filePath=QCoreApplication::applicationDirPath()+"/tmp/"+messageOrFileName;
@@ -93,7 +94,7 @@ void ManageSocket::sendMsg(QString msg)
     dts<<qint32(totalsize)<<qint32(stringSize)<<qint32(0);
     block+=msg.toUtf8();
     socket->write(block);
-    socket->waitForBytesWritten();
+    socket->flush();
 }
 
 void ManageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
@@ -169,6 +170,7 @@ void ManageSocket::processMsg( QStringList &msgs)
             sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
         }else if(LoadANO.indexIn(msg)!=-1)
         {
+
             auto p=makeMessageServer(LoadANO.cap(1).trimmed());
             auto port=p?p->port:"-1";
             sendMsg(port+":Port");

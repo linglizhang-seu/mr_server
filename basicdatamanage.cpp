@@ -161,7 +161,9 @@ namespace FE {
             qDebug()<<"can not find "<<neuron+".ano.eswc";
         }else
         {
-            return {neuron+".ano",neuron+".ano.apo",neuron+".ano.eswc"};
+            return {QCoreApplication::applicationDirPath()+"/data/"+neuron+".ano",
+                       QCoreApplication::applicationDirPath()+"/data/"+ neuron+".ano.apo",
+                        QCoreApplication::applicationDirPath()+"/data/"+neuron+".ano.eswc"};
         }
         return {};
     }
