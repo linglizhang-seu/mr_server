@@ -58,6 +58,8 @@ void ManageSocket::onreadyRead()
         qDebug()<<messageOrFileName;
         if(dataInfo.filedataSize)
         {
+            if(!QDir(QCoreApplication::applicationDirPath()+"/tmp").exists())
+                QDir(QCoreApplication::applicationDirPath()).mkdir("tmp");
             QString filePath=QCoreApplication::applicationDirPath()+"/tmp/"+messageOrFileName;
             QFile file(filePath);
             file.open(QIODevice::WriteOnly);
