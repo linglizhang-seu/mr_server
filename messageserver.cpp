@@ -542,9 +542,10 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
     while(begin!=end)
     {
         qDebug()<<"-----------------------------------";
-        print(*begin);
+
         if(begin->row.size()==cnt)
         {
+                    print(*begin);
             double dist=0;
             for(int i=0;i<cnt;i++)
             {
