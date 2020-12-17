@@ -39,12 +39,14 @@ void MessageSocket::onreadyRead()
         {
             in>>dataInfo.stringOrFilenameSize>>dataInfo.filedataSize;
             dataInfo.dataReadedSize+=(2*sizeof (qint32));
+            if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100) socket->disconnectFromHost();
         }else
             return;
     }
     QStringList list;
     if(socket->bytesAvailable()>=dataInfo.stringOrFilenameSize+dataInfo.filedataSize)
     {
+        qDebug()<<socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
         QString messageOrFileName=QString::fromUtf8(socket->read(dataInfo.stringOrFilenameSize),dataInfo.stringOrFilenameSize);
         qDebug()<<messageOrFileName;
         if(dataInfo.filedataSize)

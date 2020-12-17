@@ -19,7 +19,7 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
     }
     socket=new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
-    qDebug()<<this<<" "<<socket->peerAddress().toIPv4Address()<<" "<<socket->peerPort();
+    qDebug()<<this<<" "<<socket->peerAddress().toString()<<" "<<socket->peerPort();
     connect(socket,&QTcpSocket::readyRead,this,&ManageSocket::onreadyRead);
     connect(socket,&QTcpSocket::disconnected,[=]
     {
@@ -31,7 +31,7 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
 
 void ManageSocket::onreadyRead()
 {
-    qDebug()<<"Manage on read";
+    qDebug()<<"Manage on read "<<socket->peerAddress().toString();
     QDataStream in(socket);
     if(dataInfo.dataSize==0)
     {
@@ -49,12 +49,14 @@ void ManageSocket::onreadyRead()
         {
             in>>dataInfo.stringOrFilenameSize>>dataInfo.filedataSize;
             dataInfo.dataReadedSize+=(2*sizeof (qint32));
+            if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100) socket->disconnectFromHost();
         }else
             return;
     }
     QStringList list;
     if(socket->bytesAvailable()>=dataInfo.stringOrFilenameSize+dataInfo.filedataSize)
     {
+        qDebug()<<socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
         QString messageOrFileName=QString::fromUtf8(socket->read(dataInfo.stringOrFilenameSize),dataInfo.stringOrFilenameSize);
         qDebug()<<messageOrFileName;
         if(dataInfo.filedataSize)

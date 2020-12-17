@@ -1,11 +1,12 @@
 #include <QCoreApplication>
+#include <stdlib.h>
 #include "manageserver.h"
 //传入的apo需要重新保存，使得n按顺序
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     ManageServer server;
-    if(!server.listen(QHostAddress::Any,9999))
+    if(!server.listen(QHostAddress::Any,26371))
     {
         qDebug()<<"Error:cannot start server in port 9999,please check!";
         exit(-1);
