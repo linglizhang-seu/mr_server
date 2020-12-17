@@ -1,4 +1,4 @@
-#include "messageserver.h"
+﻿#include "messageserver.h"
 #include "basicdatamanage.h"
 #include "ThreadPool.h"
 #include "basic_c_fun/basic_surf_objs.h"
@@ -536,16 +536,16 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
 {
 //    qDebug()<<begin<" ,"<<end;
     vector<V_NeuronSWC>::iterator result=end;
-    double mindist=1;
+    double mindist=0.2;
     const int cnt=seg.row.size();
-    print(seg);
+//    print(seg);
     while(begin!=end)
     {
         qDebug()<<"-----------------------------------";
 
         if(begin->row.size()==cnt)
         {
-                    print(*begin);
+//                    print(*begin);
             double dist=0;
             for(int i=0;i<cnt;i++)
             {
@@ -557,7 +557,7 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
                            );
             }
             qDebug()<<"dist1 = "<<dist;
-            if(dist<mindist)
+            if(dist/cnt<mindist)
             {
                 mindist=dist;
                 result=begin;
@@ -574,7 +574,7 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
                            );
             }
             qDebug()<<"dist2 = "<<dist;
-            if(dist<mindist)
+            if(dist/cnt<mindist)
             {
                 mindist=dist;
                 result=begin;
