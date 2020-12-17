@@ -2,6 +2,7 @@
 #include "managesocket.h"
 #include "ThreadPool.h"
 #include "ThreadPool.h"
+#include <QHostAddress>
 ManageServer::ManageServer(QObject *parent):QTcpServer(parent)
 {
 
