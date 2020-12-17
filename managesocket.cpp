@@ -19,6 +19,7 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
     }
     socket=new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
+    qDebug()<<this<<" "<<socket->peerAddress().toIPv4Address()<<" "<<socket->peerPort();
     connect(socket,&QTcpSocket::readyRead,this,&ManageSocket::onreadyRead);
     connect(socket,&QTcpSocket::disconnected,[=]
     {
