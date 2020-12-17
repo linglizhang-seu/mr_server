@@ -541,6 +541,7 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
     print(seg);
     while(begin!=end)
     {
+        qDebug()<<"-----------------------------------";
         print(*begin);
         if(begin->row.size()==cnt)
         {
@@ -554,11 +555,13 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
                           +pow(node.z-seg.row[i].z,2)
                            );
             }
+            qDebug()<<"dist1 = "<<dist;
             if(dist<mindist)
             {
                 mindist=dist;
                 result=begin;
             }
+
             dist=0;
             for(int i=0;i<cnt;i++)
             {
@@ -569,6 +572,7 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
                           +pow(node.z-seg.row[cnt-i-1].z,2)
                            );
             }
+            qDebug()<<"dist2 = "<<dist;
             if(dist<mindist)
             {
                 mindist=dist;
