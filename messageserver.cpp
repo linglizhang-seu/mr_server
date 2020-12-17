@@ -3,6 +3,8 @@
 #include "ThreadPool.h"
 #include "basic_c_fun/basic_surf_objs.h"
 #include <QCoreApplication>
+#include <cmath>
+#include <QtGlobal>
 namespace Map {
     QMap<QString,MessageServer*> NeuronMapMessageServer;
     QMutex mutex;
@@ -106,7 +108,6 @@ MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcp
     }
 }
 
-
 void MessageServer::incomingConnection(qintptr handle)
 {
     MessageSocket* messagesocket = new MessageSocket(handle);
@@ -139,7 +140,6 @@ void MessageServer::incomingConnection(qintptr handle)
     messagesocket->moveToThread(thread);
     thread->start();
 }
-
 
 void MessageServer::userLogin(QString name)
 {
@@ -422,6 +422,7 @@ void MessageServer::retypeline(QString msg)
 
     newTempNT=convertMsg2NT(listwithheader);
     auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
+    qDebug()<<segments.seg.size();
     auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
 
     if(it!=segments.seg.end())
@@ -537,19 +538,21 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
     vector<V_NeuronSWC>::iterator result=end;
     double mindist=1;
     const int cnt=seg.row.size();
+    print(seg);
     while(begin!=end)
     {
+        print(*begin);
         if(begin->row.size()==cnt)
         {
             double dist=0;
             for(int i=0;i<cnt;i++)
             {
                 auto node=begin->row.at(i);
-                dist+=(sqrt(
+                dist+=sqrt(
                            pow(node.x-seg.row[i].x,2)
                           +pow(node.y-seg.row[i].y,2)
                           +pow(node.z-seg.row[i].z,2)
-                           ));
+                           );
             }
             if(dist<mindist)
             {
@@ -560,11 +563,11 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
             for(int i=0;i<cnt;i++)
             {
                 auto node=begin->row.at(i);
-                dist+=(sqrt(
+                dist+=sqrt(
                            pow(node.x-seg.row[cnt-i-1].x,2)
                           +pow(node.y-seg.row[cnt-i-1].y,2)
                           +pow(node.z-seg.row[cnt-i-1].z,2)
-                           ));
+                           );
             }
             if(dist<mindist)
             {

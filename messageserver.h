@@ -153,4 +153,15 @@ private:
 namespace Map {
 
 };
+
+inline void print(V_NeuronSWC seg)
+{
+    qDebug()<<"----------------------------";
+    for(int i=0;i<seg.row.size();i++)
+    {
+        qDebug()<<i<<":"<<seg.row[i].x<<","<<seg.row[i].y<<" "<<seg.row[i].z;
+    }
+    qDebug()<<"-----------------------------";
+    return;
+}
 #endif // MESSAGESERVER_H
