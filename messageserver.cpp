@@ -388,7 +388,7 @@ void MessageServer::delmarekr(QString msg)
     double threshold=10e-0;
     for(int i=0;i<wholePoint.size();i++)
     {
-        float dist=distance(marker,wholePoint[i]);
+        double dist=distance(marker,wholePoint[i]);
         if(dist<threshold)
         {
             index=i;
