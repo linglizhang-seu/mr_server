@@ -12,6 +12,5 @@ void ManageServer::incomingConnection(qintptr handle)
 {
 
     ManageSocket * manageSokcet = new ManageSocket(handle);
-    qDebug()<<"incoming "<<manageSokcet;
 }
 

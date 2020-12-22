@@ -24,7 +24,7 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
     connect(socket,&QTcpSocket::disconnected,[=]
     {
         this->deleteLater();
-        qDebug()<<this<<"delete";
+        qDebug()<<"Manage:"+socket->peerAddress().toString()+"delete";
     });
 
 }
@@ -32,7 +32,7 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
 void ManageSocket::onreadyRead()
 {
     try {
-        qDebug()<<"Manage on read "<<socket->peerAddress().toString();
+        qDebug()<<"Manage:"<<socket->peerAddress().toString()+"on read";
         QDataStream in(socket);
         if(dataInfo.dataSize==0)
         {
@@ -50,16 +50,22 @@ void ManageSocket::onreadyRead()
             {
                 in>>dataInfo.stringOrFilenameSize>>dataInfo.filedataSize;
                 dataInfo.dataReadedSize+=(2*sizeof (qint32));
-                if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100) socket->disconnectFromHost();
+                qDebug()<<"Manage:"+socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
+                if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100)
+                {
+                    socket->disconnectFromHost();
+                    while(!socket->waitForDisconnected());
+                    this->deleteLater();
+                }
             }else
                 return;
         }
         QStringList list;
         if(socket->bytesAvailable()>=dataInfo.stringOrFilenameSize+dataInfo.filedataSize)
         {
-            qDebug()<<socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
+
             QString messageOrFileName=QString::fromUtf8(socket->read(dataInfo.stringOrFilenameSize),dataInfo.stringOrFilenameSize);
-            qDebug()<<messageOrFileName;
+            qDebug()<<"Manage: "+socket->peerAddress().toString()+messageOrFileName;
             if(dataInfo.filedataSize)
             {
                 if(!QDir(QCoreApplication::applicationDirPath()+"/tmp").exists())
@@ -84,7 +90,7 @@ void ManageSocket::onreadyRead()
             return;
         onreadyRead();
     }  catch (std::bad_alloc&) {
-        qDebug()<<"manage "<<socket->peerAddress().toString()<<" can not get available raw for read!";
+        qDebug()<<"Manage "<<socket->peerAddress().toString()<<" can not get available raw for read!";
     }
 
 }
@@ -118,7 +124,7 @@ void ManageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
         QDataStream dts(&block,QIODevice::WriteOnly);
         QFile f(filePathList[i]);
         if(!f.open(QIODevice::ReadOnly))
-            qDebug()<<"cannot open file "<<fileNameList[i]<<" "<<f.errorString();
+            qDebug()<<"Manage:cannot open file "<<fileNameList[i]<<" "<<f.errorString();
         QByteArray fileName=fileNameList[i].toUtf8();
         QByteArray fileData=f.readAll();
         f.close();

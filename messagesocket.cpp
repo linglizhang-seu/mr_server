@@ -22,7 +22,7 @@ void MessageSocket::onstarted()
 void MessageSocket::onreadyRead()
 {
     try {
-        qDebug()<<"onread";
+        qDebug()<<"Message:"+socket->peerAddress().toString()+"onread";
         QDataStream in(socket);
         if(dataInfo.dataSize==0)
         {
@@ -40,14 +40,20 @@ void MessageSocket::onreadyRead()
             {
                 in>>dataInfo.stringOrFilenameSize>>dataInfo.filedataSize;
                 dataInfo.dataReadedSize+=(2*sizeof (qint32));
-                if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100) socket->disconnectFromHost();
+                qDebug()<<"Message:"+socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
+                if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100)
+                {
+                    socket->disconnectFromHost();
+                    while(!socket->waitForDisconnected());
+                    this->deleteLater();
+                }
             }else
                 return;
         }
         QStringList list;
         if(socket->bytesAvailable()>=dataInfo.stringOrFilenameSize+dataInfo.filedataSize)
         {
-            qDebug()<<socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
+
             QString messageOrFileName=QString::fromUtf8(socket->read(dataInfo.stringOrFilenameSize),dataInfo.stringOrFilenameSize);
             qDebug()<<messageOrFileName;
             if(dataInfo.filedataSize)
@@ -68,7 +74,7 @@ void MessageSocket::onreadyRead()
             return;
         onreadyRead();
     }  catch (std::bad_alloc&) {
-        qDebug()<<"manage "<<socket->peerAddress().toString()<<" can not get available raw for read!";
+        qDebug()<<"Message "<<socket->peerAddress().toString()<<" can not get available raw for read!";
     }
 }
 
@@ -111,7 +117,7 @@ void MessageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
         QDataStream dts(&block,QIODevice::WriteOnly);
         QFile f(filePathList[i]);
         if(!f.open(QIODevice::ReadOnly))
-            qDebug()<<"cannot open file \n"<<filePathList[i]<<" "<<f.errorString();
+            qDebug()<<"cannot open file:"<<filePathList[i]<<" "<<f.errorString();
         QByteArray fileName=fileNameList[i].toUtf8();
         QByteArray fileData=f.readAll();
         f.close();

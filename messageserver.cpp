@@ -50,7 +50,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
     }
     label:
         qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-        QString messageport=QString::number(qrand()%1000+5000);
+        QString messageport=QString::number(qrand()%1000+4000);
         QStringList keys=Map::NeuronMapMessageServer.keys();
         for(QString neuron:keys)
         {
@@ -71,7 +71,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
                 Map::NeuronMapMessageServer.insert(neuron,p);
 //            }
         }  catch (...) {
-            qDebug()<<"failed to create server";
+            qDebug()<<"Message:failed to create server";
         }
         Map::mutex.unlock();
         return p;
