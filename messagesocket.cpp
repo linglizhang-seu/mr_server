@@ -174,38 +174,40 @@ void MessageSocket::sendmsgs(MessageSocket* socket,QStringList msgs)
 void MessageSocket::processMsg(const QString msg)
 {
     QRegExp loginRex("^/login:(.*)$");
+    QRegExp msgRex("^/(.*)_(.*):(.*)");
+//    QRegExp drawlineRex("^/drawline:(.*)$");
+//    QRegExp dellineRex("^/delline:(.*)");
+//    QRegExp addmarkerRex("^/addmarker(.*)");
+//    QRegExp delmarkerRex("^/delmarker(.*)");
 
-    QRegExp drawlineRex("^/drawline:(.*)$");
-    QRegExp dellineRex("^/delline:(.*)");
-    QRegExp addmarkerRex("^/addmarker(.*)");
-    QRegExp delmarkerRex("^/delmarker(.*)");
+//    QRegExp retypelineRex("^/retypeline:(.*)");
 
-    QRegExp retypelineRex("^/retypeline:(.*)");
-
-    QRegExp retypemarkerRex("^/retypemarker:(.*)");//unused
-
-//    qDebug()<<"message:receive "<<msg;
-    if(drawlineRex.indexIn(msg)!=-1)
-    {
-        emit pushMsg(msg);
-    }else if(dellineRex.indexIn(msg)!=-1)
-    {
-        emit pushMsg(msg);
-    }else if(addmarkerRex.indexIn(msg)!=-1)
-    {
-        emit pushMsg(msg);
-    }else if(delmarkerRex.indexIn(msg)!=-1)
-    {
-        emit pushMsg(msg);
-    }else if(retypelineRex.indexIn(msg)!=-1)
-    {
-        emit pushMsg(msg);
-    }else if(retypemarkerRex.indexIn(msg)!=-1)
-    {
-        emit pushMsg(msg);
-    }else if(loginRex.indexIn(msg)!=-1)
+//    QRegExp retypemarkerRex("^/retypemarker:(.*)");//unused
+    if(loginRex.indexIn(msg)!=-1)
     {
         emit userLogin(msg);
+    }else if(msgRex.indexIn(msg)!=-1)
+    {
+        emit pushMsg(msg);
     }
+//    else if(drawlineRex.indexIn(msg)!=-1)
+//    {
+//        emit pushMsg(msg);
+//    }else if(dellineRex.indexIn(msg)!=-1)
+//    {
+//        emit pushMsg(msg);
+//    }else if(addmarkerRex.indexIn(msg)!=-1)
+//    {
+//        emit pushMsg(msg);
+//    }else if(delmarkerRex.indexIn(msg)!=-1)
+//    {
+//        emit pushMsg(msg);
+//    }else if(retypelineRex.indexIn(msg)!=-1)
+//    {
+//        emit pushMsg(msg);
+//    }else if(retypemarkerRex.indexIn(msg)!=-1)
+//    {
+//        emit pushMsg(msg);
+//    }
 
 }

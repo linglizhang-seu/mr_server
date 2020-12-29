@@ -201,37 +201,70 @@ void MessageServer::processmessage()
 {
     if(savedMessageIndex!=messagelist.size())
     {
-        QRegExp drawlineRex("^/drawline:(.*)$");
-        QRegExp dellineRex("^/delline:(.*)");
+        QRegExp msgreg("/(.*)_(.*):(.*)");
 
-        QRegExp addmarkerRex("^/addmarker:(.*)");
-        QRegExp delmarkerRex("^/delmarker:(.*)");
+//        QRegExp drawlineRex("^/drawline:(.*)$");
+//        QRegExp dellineRex("^/delline:(.*)");
 
-        QRegExp retypelineRex("^/retypeline:(.*)");
-        QRegExp retypemarkerRex("^/retypemarker:(.*)");
+//        QRegExp addmarkerRex("^/addmarker:(.*)");
+//        QRegExp delmarkerRex("^/delmarker:(.*)");
+
+//        QRegExp retypelineRex("^/retypeline:(.*)");
+//        QRegExp retypemarkerRex("^/retypemarker:(.*)");
 
         for(int maxProcess=0;maxProcess<5&&savedMessageIndex<messagelist.size();maxProcess++)
         {
             QString msg=messagelist[savedMessageIndex++];
-            if(drawlineRex.indexIn(msg)!=-1)
+            if(msgreg.indexIn(msg)!=-1)
             {
-                drawline(drawlineRex.cap(1).trimmed());
-            }else if(dellineRex.indexIn(msg)!=-1)
-            {
-                delline(dellineRex.cap(1).trimmed());
-            }else if(addmarkerRex.indexIn(msg)!=-1)
-            {
-                addmarker(addmarkerRex.cap(1).trimmed());
-            }else if(delmarkerRex.indexIn(msg)!=-1)
-            {
-                delmarekr(delmarkerRex.cap(1).trimmed());
-            }else if(retypelineRex.indexIn(msg)!=-1)
-            {
-                retypeline(retypelineRex.cap(1).trimmed());
-            }/*else if(retypemarkerRex.indexIn(msg)!=-1)
-            {
-                retypemarker(retypemarkerRex.cap(1).trimmed());
-            }*/
+                QString operationtype=msgreg.cap(1).trimmed();
+//                bool isNorm=msgreg.cap(2).trimmed()=="norm";
+                QString operatorMsg=msgreg.cap(3).trimmed();
+                if(operationtype == "drawline" )
+                {
+                    drawline(operatorMsg);
+                }
+                else if(operationtype == "delline")
+                {
+                    delline(operatorMsg);
+                }
+                else if(operationtype == "addmarker")
+                {
+                    addmarker(operatorMsg);
+                }
+                else if(operationtype == "delmarker")
+                {
+                    delmarekr(operatorMsg);
+                }
+                else if(operationtype == "retypeline")
+                {
+                    retypeline(operatorMsg);
+                }
+
+            }
+
+
+
+//            if(drawlineRex.indexIn(msg)!=-1)
+//            {
+//                drawline(drawlineRex.cap(1).trimmed());
+//            }else if(dellineRex.indexIn(msg)!=-1)
+//            {
+//                delline(dellineRex.cap(1).trimmed());
+//            }else if(addmarkerRex.indexIn(msg)!=-1)
+//            {
+//                addmarker(addmarkerRex.cap(1).trimmed());
+//            }else if(delmarkerRex.indexIn(msg)!=-1)
+//            {
+//                delmarekr(delmarkerRex.cap(1).trimmed());
+//            }else if(retypelineRex.indexIn(msg)!=-1)
+//            {
+//                retypeline(retypelineRex.cap(1).trimmed());
+//            }
+//            else if(retypemarkerRex.indexIn(msg)!=-1)
+//            {
+//                retypemarker(retypemarkerRex.cap(1).trimmed());
+//            }
         }
     }
 }
