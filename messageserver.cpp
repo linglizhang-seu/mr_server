@@ -168,7 +168,7 @@ void MessageServer::userLogin(QString name)
         {
             QDir(QCoreApplication::applicationDirPath()).mkdir("msglog");
         }
-        msgLog=new QFile(QCoreApplication::applicationDirPath()+"/msglog/"+neuron+"txt");
+        msgLog=new QFile(QCoreApplication::applicationDirPath()+"/msglog/"+neuron+".txt");
         if(!msgLog->open(QIODevice::Append|QIODevice::Text|QIODevice::WriteOnly))
         {
             qDebug()<<"failed to open msglog file for "<<this->neuron;

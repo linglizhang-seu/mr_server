@@ -55,7 +55,6 @@ void MessageSocket::onreadyRead()
         {
 
             QString messageOrFileName=QString::fromUtf8(socket->read(dataInfo.stringOrFilenameSize),dataInfo.stringOrFilenameSize);
-            qDebug()<<messageOrFileName;
             if(dataInfo.filedataSize)
             {
                 qDebug()<<"error :filedatasize !=0";
@@ -185,7 +184,7 @@ void MessageSocket::processMsg(const QString msg)
 
     QRegExp retypemarkerRex("^/retypemarker:(.*)");//unused
 
-    qDebug()<<"message:receive "<<msg;
+//    qDebug()<<"message:receive "<<msg;
     if(drawlineRex.indexIn(msg)!=-1)
     {
         emit pushMsg(msg);
