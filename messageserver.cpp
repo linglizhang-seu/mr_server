@@ -152,7 +152,7 @@ void MessageServer::userLogin(QString name)
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
     clients.insert(p,info);
-    emit sendToAll("users:"+getUserList().join(";"));
+    emit sendToAll("/users:"+getUserList().join(";"));
     if(timer==nullptr)
     {
         timer=new QTimer();

@@ -187,7 +187,7 @@ void MessageSocket::processMsg(const QString msg)
 //    QRegExp retypemarkerRex("^/retypemarker:(.*)");//unused
     if(loginRex.indexIn(msg)!=-1)
     {
-        emit userLogin(msg);
+        emit userLogin(loginRex.cap(1));
     }else if(msgRex.indexIn(msg)!=-1)
     {
         emit pushMsg(msg);
