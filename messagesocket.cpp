@@ -83,8 +83,9 @@ void MessageSocket::processReaded(QStringList list)
     {
         if(msg.startsWith("00"))
         {
-            qDebug()<<this->socket->peerAddress().toString()<<":"<<msg.remove(0,2);
-            processMsg(msg.remove(0,2));
+            msg=msg.remove(0,2);
+            qDebug()<<this->socket->peerAddress().toString()<<":"<<msg;
+            processMsg(msg);
         }
     }
 }
