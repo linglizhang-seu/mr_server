@@ -152,6 +152,15 @@ void MessageServer::userLogin(QString name)
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
     clients.insert(p,info);
+    for(auto client:clients)
+    {
+        if(client.username==name)
+        {
+            auto key=clients.key(client);
+            key->disconnect();
+            clients.remove(key);
+        }
+    }
     emit sendToAll("/users:"+getUserList().join(";"));
     if(timer==nullptr)
     {
