@@ -118,7 +118,7 @@ void MessageServer::incomingConnection(qintptr handle)
         thread->quit();
         messagesocket->deleteLater();
         releaseThread(thread);
-        emit sendToAll("users:"+getUserList().join(";"));
+        emit sendToAll("/users:"+getUserList().join(";"));
         if(clients.size()==0) {
             /**
              * 协作结束，关闭该服务器，保存文件，释放招用端口号

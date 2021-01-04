@@ -54,7 +54,7 @@ void ManageSocket::onreadyRead()
                 if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100)
                 {
                     socket->disconnectFromHost();
-                    while(!socket->waitForDisconnected());
+//                    while(!socket->waitForDisconnected());
                     this->deleteLater();
                 }
             }else
