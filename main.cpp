@@ -20,7 +20,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss : ");
 //    QString strMessage = QString("%1 File:%2  Line:%3  Function:%4  DateTime:%5\n")
 //            .arg(localMsg.constData()).arg(context.file).arg(context.line).arg(context.function).arg(strDateTime);
-    QString strMessage=strDateTime+localMsg.constData();
+    QString strMessage=strDateTime+localMsg.constData()+"\n";
     // 输出信息至文件中（读写、追加形式）
     QFile file("log.txt");
     file.open(QIODevice::ReadWrite | QIODevice::Append);
