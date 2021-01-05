@@ -32,7 +32,7 @@ ManageSocket::ManageSocket(qintptr handle,QObject *parent):QObject(parent)
 void ManageSocket::onreadyRead()
 {
     try {
-        qDebug()<<"Manage:"<<socket->peerAddress().toString()+"on read";
+//        qDebug()<<"Manage:"<<socket->peerAddress().toString()+"on read";
         QDataStream in(socket);
         if(dataInfo.dataSize==0)
         {
@@ -124,7 +124,10 @@ void ManageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
         QDataStream dts(&block,QIODevice::WriteOnly);
         QFile f(filePathList[i]);
         if(!f.open(QIODevice::ReadOnly))
+        {
             qDebug()<<"Manage:cannot open file "<<fileNameList[i]<<" "<<f.errorString();
+            return ;
+        }
         QByteArray fileName=fileNameList[i].toUtf8();
         QByteArray fileData=f.readAll();
         f.close();

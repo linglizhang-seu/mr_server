@@ -22,7 +22,6 @@ void MessageSocket::onstarted()
 void MessageSocket::onreadyRead()
 {
     try {
-        qDebug()<<"Message:"+socket->peerAddress().toString()+"onread";
         QDataStream in(socket);
         if(dataInfo.dataSize==0)
         {
@@ -117,8 +116,13 @@ void MessageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
         block.clear();
         QDataStream dts(&block,QIODevice::WriteOnly);
         QFile f(filePathList[i]);
+
         if(!f.open(QIODevice::ReadOnly))
+        {
             qDebug()<<"cannot open file:"<<filePathList[i]<<" "<<f.errorString();
+            return;
+        }
+
         QByteArray fileName=fileNameList[i].toUtf8();
         QByteArray fileData=f.readAll();
         f.close();
@@ -177,14 +181,7 @@ void MessageSocket::processMsg(const QString msg)
 {
     QRegExp loginRex("^/login:(.*)$");
     QRegExp msgRex("^/(.*)_(.*):(.*)");
-//    QRegExp drawlineRex("^/drawline:(.*)$");
-//    QRegExp dellineRex("^/delline:(.*)");
-//    QRegExp addmarkerRex("^/addmarker(.*)");
-//    QRegExp delmarkerRex("^/delmarker(.*)");
 
-//    QRegExp retypelineRex("^/retypeline:(.*)");
-
-//    QRegExp retypemarkerRex("^/retypemarker:(.*)");//unused
     if(loginRex.indexIn(msg)!=-1)
     {
         emit userLogin(loginRex.cap(1));
@@ -192,24 +189,4 @@ void MessageSocket::processMsg(const QString msg)
     {
         emit pushMsg(msg);
     }
-//    else if(drawlineRex.indexIn(msg)!=-1)
-//    {
-//        emit pushMsg(msg);
-//    }else if(dellineRex.indexIn(msg)!=-1)
-//    {
-//        emit pushMsg(msg);
-//    }else if(addmarkerRex.indexIn(msg)!=-1)
-//    {
-//        emit pushMsg(msg);
-//    }else if(delmarkerRex.indexIn(msg)!=-1)
-//    {
-//        emit pushMsg(msg);
-//    }else if(retypelineRex.indexIn(msg)!=-1)
-//    {
-//        emit pushMsg(msg);
-//    }else if(retypemarkerRex.indexIn(msg)!=-1)
-//    {
-//        emit pushMsg(msg);
-//    }
-
 }

@@ -32,9 +32,6 @@ const int neuron_type_color[colorsize][3] = {
     {168, 255, 128},  //	16
     {255, 168, 128},  //	17
     {168, 128, 255}, //	18
-    {0, 0, 0}, //19 //totally black. PHC, 2012-02-15
-    //the following (20-275) is used for matlab heat map. 120209 by WYN
-    {0,0,131}, //20
         };
 
 const QStringList MessageServer::clienttypes={"TeraFly","TeraVR","TeraAI"};
@@ -576,18 +573,17 @@ NeuronTree MessageServer::convertMsg2NT(QStringList &listwithheader,QString user
 
 vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterator begin,vector<V_NeuronSWC>::iterator end,const V_NeuronSWC seg)
 {
-//    qDebug()<<begin<" ,"<<end;
+
     vector<V_NeuronSWC>::iterator result=end;
     double mindist=0.2;
     const int cnt=seg.row.size();
-//    print(seg);
+
     while(begin!=end)
     {
-        qDebug()<<"-----------------------------------";
+
 
         if(begin->row.size()==cnt)
         {
-//                    print(*begin);
             double dist=0;
             for(int i=0;i<cnt;i++)
             {
@@ -598,7 +594,6 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
                           +pow(node.z-seg.row[i].z,2)
                            );
             }
-            qDebug()<<"dist1 = "<<dist;
             if(dist/cnt<mindist)
             {
                 mindist=dist;
@@ -615,7 +610,6 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
                           +pow(node.z-seg.row[cnt-i-1].z,2)
                            );
             }
-            qDebug()<<"dist2 = "<<dist;
             if(dist/cnt<mindist)
             {
                 mindist=dist;
