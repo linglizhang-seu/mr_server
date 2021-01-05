@@ -61,12 +61,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
         MessageServer* p=0;
         try {
             p = new MessageServer(neuron,messageport);
-//            if(!(p->listen(QHostAddress::Any,p->port.toInt())))
-//                throw "";
-//            else
-//            {
-                Map::NeuronMapMessageServer.insert(neuron,p);
-//            }
+            Map::NeuronMapMessageServer.insert(neuron,p);
         }  catch (...) {
             qDebug()<<"Message:failed to create server";
         }
@@ -140,7 +135,18 @@ void MessageServer::incomingConnection(qintptr handle)
 
 void MessageServer::userLogin(QString name)
 {
-    qDebug()<<"userlogin "<<name;
+    qDebug()<<"start to remove some name user";
+    for(MessageSocket* key:clients.keys())
+    {
+        if(clients.value(key).username==name)
+        {
+            if(key->socket)
+                key->socket->disconnectFromHost();
+            key->deleteLater();
+            clients.remove(key);
+        }
+    }
+    qDebug()<<"remove some name user success";
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
     emit sendfiles(p,t.keys().at(0));
@@ -149,15 +155,6 @@ void MessageServer::userLogin(QString name)
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
     clients.insert(p,info);
-    for(auto client:clients)
-    {
-        if(client.username==name)
-        {
-            auto key=clients.key(client);
-            key->disconnect();
-            clients.remove(key);
-        }
-    }
     emit sendToAll("/users:"+getUserList().join(";"));
     if(timer==nullptr)
     {

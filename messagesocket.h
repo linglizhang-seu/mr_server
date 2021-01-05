@@ -14,6 +14,7 @@ class MessageSocket : public QObject
     };
 public:
     explicit MessageSocket(qintptr handle,QObject *parent = nullptr);
+    QTcpSocket *socket;
 public slots:
     void onstarted();
     void onreadyRead();
@@ -25,7 +26,7 @@ signals:
     void pushMsg(QString );
     void userLogin(QString);
 private:
-    QTcpSocket *socket;
+
     qintptr socketDescriptor;
     DataInfo dataInfo;
 private:
