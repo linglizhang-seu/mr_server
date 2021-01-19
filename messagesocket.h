@@ -5,12 +5,10 @@
 class MessageSocket : public QObject
 {
     Q_OBJECT
-    struct DataInfo
-    {
-        qint32 dataSize;
-        qint32 stringOrFilenameSize;
-        qint32 filedataSize;
-        qint32 dataReadedSize;
+    struct DataType{
+        bool isFile=false;//false msg,true file
+        qint64 filesize=0;
+        QString filename;
     };
 public:
     explicit MessageSocket(qintptr handle,QObject *parent = nullptr);
@@ -28,37 +26,14 @@ signals:
 private:
 
     qintptr socketDescriptor;
-    DataInfo dataInfo;
+    DataType datatype;
 private:
-    void resetDataInfo();
+    void resetDataType();
     void processMsg(const QString msg);
     void sendFiles(QStringList filePathList,QStringList fileNameList);
     void processReaded(QStringList list);
-
-    //message processor
 };
 
-/*
- * messagesocket
- * ----------------------
- * slot
- * + onstarted()
- * + onreadyread()
- * + sendMsg(QString)
- * + sendfiles(MessageSocket*,QStringList )
- * + sendmsgs(MessageSocket* ,QStringList )
- * signal
- * disconnected()
- * pushMsg(QString,bool)
- * userlogin(QString)
- * -------------------
- * - socket:QTcpsocket
- * - socketdescriptor:qintptr
- * - datainfo:DataInfo
- * -----------------------------
- * - resetdatainfo()
- * - processMsg(QString)
- * - sendFiles(QStringList,QStringList)
- */
+
 
 #endif // MESSAGESOCKET_H
