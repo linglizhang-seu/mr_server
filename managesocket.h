@@ -15,12 +15,17 @@ class ManageSocket:public QObject
      * @brief The DataInfo struct
      * 接收数据用的数据结构，控制判断该数据块是否已经读取完成，读取完成后重置该数据块
      */
-    struct DataInfo
-    {
-        qint32 dataSize;    /*!<该数据块的长度，初始值为0*/
-        qint32 stringOrFilenameSize;/*!<command的长度或者文件名的长度*/
-        qint32 filedataSize;/*!<文件的长度，当传输的不是文件是command时为0*/
-        qint32 dataReadedSize;/*!<已经读取的数据的长度，当数据块被完全读取是等于dataSize*/
+//    struct DataInfo
+//    {
+//        qint32 dataSize;    /*!<该数据块的长度，初始值为0*/
+//        qint32 stringOrFilenameSize;/*!<command的长度或者文件名的长度*/
+//        qint32 filedataSize;/*!<文件的长度，当传输的不是文件是command时为0*/
+//        qint32 dataReadedSize;/*!<已经读取的数据的长度，当数据块被完全读取是等于dataSize*/
+//    };
+    struct DataType{
+        bool isFile=false;//false msg,true file
+        qint64 filesize=0;
+        QString filename;
     };
 
     Q_OBJECT
@@ -47,7 +52,8 @@ public slots:
 private:
     QTcpSocket *socket; /*!<QTcpSocket指针*/
     qintptr socketDescriptor;/*!<socket描述符*/
-    DataInfo dataInfo;/*!<用于控制数据接受的数据结构*/
+//    DataInfo dataInfo;/*!<用于控制数据接受的数据结构*/
+    DataType datatype;
     QStringList msgs;/*!<command队列*/
     QStringList filepaths;/*!<文件路径队列*/
 
@@ -56,13 +62,13 @@ private:
      * @brief resetDataInfo
      * 重置控制数据接受的结构
      */
-    void resetDataInfo();
+    void resetDataType();
     /**
      * @brief sendMsg 发送消息
      * @param msg :QString待发生的消息
      *
      */
-    void sendMsg(QString msg);
+    void sendMsg(QString type,QString msg);
     /**
      * @brief sendFiles 发送多个(>=1)文件
      * @param filePathList 文件的路径列表
