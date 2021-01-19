@@ -6,20 +6,19 @@
 #include <QVariant>
 
 namespace DB {
-    int count =0;
+    uint count =0;
     QMutex locker;
     const QString databaseName="BrainTell";
     const QString dbHostName="localhost";
     const QString dbUserName="root";
     const QString dbPassword="1234";
 
-    const QString TableForImage="TableForImage";//图像数据表
-    const QString TableForPreReConstruct="TableForPreReConstruct";//预重建数据表
-    const QString TableForFullSwc="TableForFullSwc";//重建完成数据表
-    const QString TableForProof="TableForProof";//校验数据表
-    const QString TableForCheckResult="TableForCheckResult";//校验结果数据表
     const QString TableForUser="TableForUser";
-
+    //    const QString TableForImage="TableForImage";//图像数据表
+    //    const QString TableForPreReConstruct="TableForPreReConstruct";//预重建数据表
+    //    const QString TableForFullSwc="TableForFullSwc";//重建完成数据表
+    //    const QString TableForProof="TableForProof";//校验数据表
+    //    const QString TableForCheckResult="TableForCheckResult";//校验结果数据表
     QSqlDatabase getNewDbConnection()
     {
         locker.lock();
@@ -31,71 +30,124 @@ namespace DB {
         db.setPassword(dbPassword);
         return db;
     }
-    //wait to finish
-    int getid(QString username)
+
+    bool createTableForUser()
     {
-        return username.toInt();
-//        bool inserted=false;
-//        QSqlDatabase db=getNewDbConnection();
-//        if(!db.open()){
-//            qFatal("cannot connect DB when processBrain");
-//            throw "";
-//        }
-//        QSqlQuery query(db);
-//        QString sql;
-//    LABEL:
-//        sql=QString("SELECT * INTO %1 where userName = ?").arg(TableForUser);
-//        query.prepare(sql);
-//        query.addBindValue(username);
-//        if(!query.exec())
-//        {
-//            return -1;
-//        }else{
-//            if(query.next())
-//            {
-//                return query.value(0).toUInt();
-//            }else if(!inserted)
-//            {
-//                sql=QString("INSERT INTO %1 userName = ?").arg(TableForUser);
-//                query.addBindValue(username);
-//                if(!query.exec())
-//                {
-//                    return -1;
-//                }else
-//                {
-//                    inserted=true;
-//                    goto LABEL;
-//                }
-//            }
-//        }
-//        return -1;
+        auto db=getNewDbConnection();
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return false;
+        }
+
+        QSqlQuery query(db);
+        QString order="id INTEGER PRIMARY KEY AUTO_INCREMENT,"
+                "UserName VARCHAR(40) NOT NULL,"
+                "PassWord VARCHAR(20) NOT NULL"
+                ;
+        QString sql=QString("CREATE TABLE IF NOT EXISTS %1 (%2)").arg(TableForUser).arg(order);
+        if(!query.exec(sql)){
+            qDebug()<<query.lastError().text();
+            return false;
+        }
+        return true;
     }
 
-//    bool addArborToDB(QString swcpath,QString swcname,QString position)
-//    {
-//        QSqlDatabase db=getNewDbConnection();
-//        if(!db.open()){
-//            qFatal("cannot connect DB when processBrain");
-//            throw "";
-//        }
-//        QSqlQuery query(db);
-//        QString sql=QString("INSERT IGNORE INTO %1 (Name,Neuron_id,Brain_id,Arbor_Position,Tag,Swc) VALUES (?,?,?,?,?,?)"
-//                            ).arg(TableForProof);
-//        query.prepare(sql);
-//        query.addBindValue(swcname.left(swcname.size()-4));
-//        query.addBindValue(swcname.left(swcname.lastIndexOf('_')));
-//        query.addBindValue(swcname.left(swcname.indexOf('_')));
-//        query.addBindValue(position);
-//        query.addBindValue("0");
-//        query.addBindValue(swcpath);
-//        if(!query.exec()){
+    /**
+     * @brief userRegister
+     * @param userName
+     * @param passward
+     * @return 0:success;-1:db error;-2:same name
+     */
+    char userRegister(QString userName,QString passward)
+    {
+        auto db=getNewDbConnection();
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return -1;
+        }
+        QSqlQuery query(db);
+        QString order=QString("SELECT * FROM %1 WHERE Brainid = ?").arg(TableForUser);
+        query.prepare(order);
+        query.addBindValue(userName);
+        if(query.exec()){
+            if(query.next())
+            {
+                return -2;
+            }else
+            {
+                order=QString("INSERT INTO %1 (UserName,PassWord) VALUES (?,?)").arg(TableForUser);
+                query.prepare(order);
+                query.addBindValue(userName);
+                query.addBindValue(passward);
+                if(query.exec()) return 0;
+                else return -1;
+            }
+        }else
+        {
+            return -1;
+        }
+    }
 
-//            return false;
-//        }
+    /**
+     * @brief userLogin
+     * @param userName
+     * @param passward
+     * @return 0:success;-1:db error;-2:no name;-3 wrong password
+     */
+    char userLogin(QString userName,QString passward)
+    {
+        auto db=getNewDbConnection();
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return -1;
+        }
+        QSqlQuery query(db);
+        QString order=QString("SELECT * FROM %1 WHERE Brainid = ?").arg(TableForUser);
+        query.prepare(order);
+        query.addBindValue(userName);
+        if(query.exec()){
+            if(query.next())
+            {
+                return -2;
+            }else
+            {
+                if(query.value(2).toString()==passward) return 0;
+                else return -3;
+            }
+        }else
+        {
+            return -1;
+        }
+    }
 
-//        return true;
-//    }
-
+    int getid(QString userName)
+    {
+        auto db=getNewDbConnection();
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return -1;
+        }
+        QSqlQuery query(db);
+        QString order=QString("SELECT * FROM %1 WHERE Brainid = ?").arg(TableForUser);
+        query.prepare(order);
+        query.addBindValue(userName);
+        if(query.exec()){
+            if(query.next())
+            {
+                return -2;
+            }else
+            {
+                return query.value(0).toUInt();
+            }
+        }else
+        {
+            return -1;
+        }
+    }
 }
 
 namespace FE {
@@ -172,30 +224,30 @@ namespace FE {
     QStringList writeArborAno(QString name,QString pos,QString swc,QString dir)
     {
         //ano
-            QString anoName=name+".ano";
-            QString apoName=name+".ano.apo";
-            QString swcName=name+".ano.eswc";
+        QString anoName=name+".ano";
+        QString apoName=name+".ano.apo";
+        QString swcName=name+".ano.eswc";
 
-            auto NT=readSWC_file(swc);
-            QStringList posList=pos.split('_');
-            if(posList.size()!=3) return {};
-            QList<CellAPO> cells;
-            CellAPO cell;
-            cell.x=posList[0].toDouble();cell.y=posList[1].toDouble();cell.z=posList[2].toDouble();
-            cells.push_back(cell);
+        auto NT=readSWC_file(swc);
+        QStringList posList=pos.split('_');
+        if(posList.size()!=3) return {};
+        QList<CellAPO> cells;
+        CellAPO cell;
+        cell.x=posList[0].toDouble();cell.y=posList[1].toDouble();cell.z=posList[2].toDouble();
+        cells.push_back(cell);
 
-            QFile anofile(dir+"/"+anoName);
-            anofile.open(QIODevice::WriteOnly);
-            QString str1="APOFILE="+apoName;
-            QString str2="SWCFILE="+swcName;
-            QTextStream out(&anofile);
-            out<<str1<<endl<<str2;
-            anofile.close();
+        QFile anofile(dir+"/"+anoName);
+        anofile.open(QIODevice::WriteOnly);
+        QString str1="APOFILE="+apoName;
+        QString str2="SWCFILE="+swcName;
+        QTextStream out(&anofile);
+        out<<str1<<endl<<str2;
+        anofile.close();
 
-            writeESWC_file(dir+"/"+swcName,NT);
-            writeAPO_file(dir+"/"+apoName,cells);
+        writeESWC_file(dir+"/"+swcName,NT);
+        writeAPO_file(dir+"/"+apoName,cells);
 
-            return {dir+"/"+anoName,dir+"/"+apoName,dir+"/"+swcName};
+        return {dir+"/"+anoName,dir+"/"+apoName,dir+"/"+swcName};
     }
     QString cac_position(QString path)
     {
