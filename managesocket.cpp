@@ -96,7 +96,7 @@ void ManageSocket::resetDataType()
     datatype.filename.clear();
 }
 
-void ManageSocket::sendMsg(QString type,QString msg)
+void ManageSocket::sendMsg(const QString type,const QString msg)
 {
     QString data=type+":"+msg+"\n";
     int length=socket->write(data.toStdString().c_str(),data.size());
@@ -105,7 +105,7 @@ void ManageSocket::sendMsg(QString type,QString msg)
     socket->flush();
 }
 
-void ManageSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
+void ManageSocket::sendFiles(const QStringList filePathList,const QStringList fileNameList)
 {
     for(int i=0;i<filePathList.size();i++)
     {

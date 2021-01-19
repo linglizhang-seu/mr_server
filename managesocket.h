@@ -68,14 +68,14 @@ private:
      * @param msg :QString待发生的消息
      *
      */
-    void sendMsg(QString type,QString msg);
+    void sendMsg(const QString type,const QString msg);
     /**
      * @brief sendFiles 发送多个(>=1)文件
      * @param filePathList 文件的路径列表
      * @param fileNameList 文件名列表
      * 如果文件是tmp文件夹中的，发送后即将自动删除文件
      */
-    void sendFiles(QStringList filePathList,QStringList fileNameList);
+    void sendFiles(const QStringList filePathList,const QStringList fileNameList);
     /**
      * @brief processReaded 处理接受的数据包
      * @param list command和文件名队列
