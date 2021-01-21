@@ -44,7 +44,7 @@ void MessageSocket::onreadyRead()
                 {
                     socket->disconnectFromHost();
 //                    while(!socket->waitForDisconnected());
-                    this->deleteLater();
+//                    this->deleteLater();
                 }
             }else
                 return;

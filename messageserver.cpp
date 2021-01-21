@@ -105,8 +105,9 @@ void MessageServer::incomingConnection(qintptr handle)
     MessageSocket* messagesocket = new MessageSocket(handle);
     QThread * thread = getNewThread();
 
-    QObject::connect(messagesocket,&MessageSocket::disconnected,[=]{
-        clients.remove(messagesocket);
+    QObject::connect(messagesocket,&MessageSocket::disconnected,this,[=]{
+        if(clients.find(messagesocket)!=clients.end())
+            clients.remove(messagesocket);
         thread->quit();
         messagesocket->deleteLater();
         releaseThread(thread);
@@ -121,7 +122,7 @@ void MessageServer::incomingConnection(qintptr handle)
             qDebug()<<this->neuron<<" has been delete ";
             this->deleteLater();
         }
-    });
+    },Qt::DirectConnection);
 
     connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(sendMsg(const QString &)));
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)));
@@ -140,10 +141,12 @@ void MessageServer::userLogin(QString name)
     {
         if(clients.value(key).username==name)
         {
+            clients.remove(key);
             if(key->socket)
                 key->socket->disconnectFromHost();
-            key->deleteLater();
-            clients.remove(key);
+//            key->deleteLater();
+            while(key->socket->state()!=QTcpSocket::UnconnectedState)
+                key->socket->waitForDisconnected();
         }
     }
     qDebug()<<"remove some name user success";
@@ -526,9 +529,16 @@ MessageServer::~MessageServer()
     delete timer;
     if(clients.size()!=0){
         qDebug()<<"error ,when deconstruct MessageServer there are "<<clients.size() <<" connections!";
-        for(auto p:clients.keys())
+        auto plist=clients.keys();
+
+        for(auto p:plist)
         {
-            p->deleteLater();
+//            p->deleteLater();
+//            clients
+            clients.remove(p);
+            p->socket->disconnectFromHost();
+            while(p->socket->state()!=QTcpSocket::UnconnectedState)
+                p->socket->waitForDisconnected();
         }
     }
     msgLog->close();
@@ -577,8 +587,6 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
 
     while(begin!=end)
     {
-
-
         if(begin->row.size()==cnt)
         {
             double dist=0;
