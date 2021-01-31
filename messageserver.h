@@ -132,6 +132,7 @@ signals:
      */
     void messagecome();
 
+    void disconnectName(MessageSocket* socket);
 public:
     QString port;
 

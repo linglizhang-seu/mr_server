@@ -127,6 +127,7 @@ void MessageServer::incomingConnection(qintptr handle)
     connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(sendMsg(const QString &)));
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)));
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)));
+    connect(this,SIGNAL(disconnectName(MessageSocket*)),messagesocket,SLOT(MessageSocket*));
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
     connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
     connect(thread,SIGNAL(started()),messagesocket,SLOT(onstarted()));
@@ -142,23 +143,27 @@ void MessageServer::userLogin(QString name)
         if(clients.value(key).username==name)
         {
             clients.remove(key);
-            if(key->socket)
-                key->socket->disconnectFromHost();
-//            key->deleteLater();
-            while(key->socket->state()!=QTcpSocket::UnconnectedState)
-                key->socket->waitForDisconnected();
+            disconnectName(key);
+//            if(key->socket)
+//                key->socket->disconnectFromHost();
+////            key->deleteLater();
+//            while(key->socket->state()!=QTcpSocket::UnconnectedState)
+//                key->socket->waitForDisconnected();
         }
     }
     qDebug()<<"remove some name user success";
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
     emit sendfiles(p,t.keys().at(0));
+    qDebug()<<"strp 1";
     UserInfo info;
     info.username=name;
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
     clients.insert(p,info);
+    qDebug()<<"strp 2";
     emit sendToAll("/users:"+getUserList().join(";"));
+    qDebug()<<"strp 3";
     if(timer==nullptr)
     {
         timer=new QTimer();
@@ -183,6 +188,7 @@ void MessageServer::userLogin(QString name)
         }
         msglogstream=new QTextStream(msgLog);
     }
+    qDebug()<<"user login end";
 }
 
 void MessageServer::pushMessagelist(QString msg)

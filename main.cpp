@@ -40,13 +40,13 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     ManageServer server;
-    if(!server.listen(QHostAddress::Any,23763))
+    if(!server.listen(QHostAddress::Any,26371))
     {
         qDebug()<<"Error:cannot start server in port 9999,please check!";
         exit(-1);
     }else
     {
-        qDebug()<<"server(2.0) for vr_farm started!";
+        qDebug()<<"server(2.0.4.1) for vr_farm started!";
     }
     return a.exec();
 }

@@ -21,6 +21,15 @@ public slots:
     void sendMsg(const QString & msg);
     void sendfiles(MessageSocket* socket,QStringList filepath);
     void sendmsgs(MessageSocket* socket,QStringList msglist);
+    void disconnectName(MessageSocket * p)
+    {
+        if(this==p)
+        {
+            this->socket->disconnectFromHost();
+            while(this->socket->state()!=QTcpSocket::UnconnectedState)
+                this->socket->waitForDisconnected();
+        }
+    }
 signals:
     void disconnected();
     void pushMsg(QString );
