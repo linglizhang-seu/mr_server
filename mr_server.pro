@@ -22,7 +22,8 @@ SOURCES += \
         neuron_editing/neuron_format_converter.cpp \
         neuron_editing/neuron_sim_scores.cpp \
         neuron_editing/neuron_xforms.cpp \
-        neuron_editing/v_neuronswc.cpp
+        neuron_editing/v_neuronswc.cpp \
+        tcpsocket.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -45,4 +46,5 @@ HEADERS += \
     neuron_editing/neuron_format_converter.h \
     neuron_editing/neuron_sim_scores.h \
     neuron_editing/neuron_xforms.h \
-    neuron_editing/v_neuronswc.h
+    neuron_editing/v_neuronswc.h \
+    tcpsocket.h

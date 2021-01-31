@@ -1,24 +1,14 @@
 #ifndef MESSAGESOCKET_H
 #define MESSAGESOCKET_H
 
-#include <QTcpSocket>
-class MessageSocket : public QObject
+#include "tcpsocket.h"
+class MessageSocket : public TcpSocket
 {
     Q_OBJECT
-    struct DataInfo
-    {
-        qint32 dataSize;
-        qint32 stringOrFilenameSize;
-        qint32 filedataSize;
-        qint32 dataReadedSize;
-    };
 public:
-    explicit MessageSocket(qintptr handle,QObject *parent = nullptr);
-    QTcpSocket *socket;
+    explicit MessageSocket(qintptr handle,QObject *parent = nullptr)
+        :TcpSocket(handle,parent){}
 public slots:
-    void onstarted();
-    void onreadyRead();
-    void sendMsg(const QString & msg);
     void sendfiles(MessageSocket* socket,QStringList filepath);
     void sendmsgs(MessageSocket* socket,QStringList msglist);
     void disconnectName(MessageSocket * p)
@@ -30,44 +20,19 @@ public slots:
                 this->socket->waitForDisconnected();
         }
     }
+    void slotSendMsg(const QString & str)
+    {
+        sendMsg(str);
+    }
 signals:
-    void disconnected();
     void pushMsg(QString );
     void userLogin(QString);
 private:
-
-    qintptr socketDescriptor;
-    DataInfo dataInfo;
-private:
-    void resetDataInfo();
-    void processMsg(const QString msg);
+    bool processMsg(const QString msg);
+    bool processFile(const QString filepath);
     void sendFiles(QStringList filePathList,QStringList fileNameList);
-    void processReaded(QStringList list);
 
     //message processor
 };
-
-/*
- * messagesocket
- * ----------------------
- * slot
- * + onstarted()
- * + onreadyread()
- * + sendMsg(QString)
- * + sendfiles(MessageSocket*,QStringList )
- * + sendmsgs(MessageSocket* ,QStringList )
- * signal
- * disconnected()
- * pushMsg(QString,bool)
- * userlogin(QString)
- * -------------------
- * - socket:QTcpsocket
- * - socketdescriptor:qintptr
- * - datainfo:DataInfo
- * -----------------------------
- * - resetdatainfo()
- * - processMsg(QString)
- * - sendFiles(QStringList,QStringList)
- */
 
 #endif // MESSAGESOCKET_H

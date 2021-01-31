@@ -105,7 +105,7 @@ void MessageServer::incomingConnection(qintptr handle)
     MessageSocket* messagesocket = new MessageSocket(handle);
     QThread * thread = getNewThread();
 
-    QObject::connect(messagesocket,&MessageSocket::disconnected,this,[=]{
+    QObject::connect(messagesocket,&TcpSocket::disconnected,this,[=]{
         if(clients.find(messagesocket)!=clients.end())
             clients.remove(messagesocket);
         thread->quit();
@@ -124,7 +124,7 @@ void MessageServer::incomingConnection(qintptr handle)
         }
     },Qt::DirectConnection);
 
-    connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(sendMsg(const QString &)));
+    connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(slotSendMsg(const QString &)));
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)));
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)));
     connect(this,SIGNAL(disconnectName(MessageSocket*)),messagesocket,SLOT(MessageSocket*));
@@ -252,31 +252,7 @@ void MessageServer::processmessage()
                 {
                     retypeline(operatorMsg);
                 }
-
             }
-
-
-
-//            if(drawlineRex.indexIn(msg)!=-1)
-//            {
-//                drawline(drawlineRex.cap(1).trimmed());
-//            }else if(dellineRex.indexIn(msg)!=-1)
-//            {
-//                delline(dellineRex.cap(1).trimmed());
-//            }else if(addmarkerRex.indexIn(msg)!=-1)
-//            {
-//                addmarker(addmarkerRex.cap(1).trimmed());
-//            }else if(delmarkerRex.indexIn(msg)!=-1)
-//            {
-//                delmarekr(delmarkerRex.cap(1).trimmed());
-//            }else if(retypelineRex.indexIn(msg)!=-1)
-//            {
-//                retypeline(retypelineRex.cap(1).trimmed());
-//            }
-//            else if(retypemarkerRex.indexIn(msg)!=-1)
-//            {
-//                retypemarker(retypemarkerRex.cap(1).trimmed());
-//            }
         }
     }
 }

@@ -9,6 +9,7 @@ class MessageServer : public QTcpServer
 {
     struct UserInfo{
         QString username;
+        QString id;
         int userid;
         QString::size_type sendedsize;
     };

@@ -5,18 +5,12 @@
 #include <QHostAddress>
 MessageSocket::MessageSocket(qintptr handle,QObject *parent) : QObject(parent)
 {
-    socket=nullptr;
-    socketDescriptor=handle;
-    resetDataInfo();
+    connect(socket,&QTcpSocket::disconnected,this,&MessageSocket::disconnected);
 }
 
 void MessageSocket::onstarted()
 {
-    socket=new QTcpSocket;
-    socket->setSocketDescriptor(socketDescriptor);
-    qDebug()<<socket->peerAddress().toString()<<socket->peerPort();
-    connect(socket,&QTcpSocket::readyRead,this,&MessageSocket::onreadyRead);
-    connect(socket,&QTcpSocket::disconnected,this,&MessageSocket::disconnected);
+
 }
 
 void MessageSocket::onreadyRead()
