@@ -8,10 +8,41 @@
 #include "basicdatamanage.h"
 #include "messageserver.h"
 
-bool ManageSocket::processMsg( const QString msg)
+bool ManageSocket::processMsg( const QString rmsg)
 {
-    if(!msg.endsWith('\n')) return false;
-    qDebug()<<"receive msg:"<<msg;
+    if(!rmsg.endsWith('\n')) return false;
+    qDebug()<<"receive msg:"<<rmsg;
+    QString msg=rmsg.trimmed();
+    if(msg.startsWith("LOGIN:"))
+    {
+        QString data=msg.right(msg.size()-QString("LOGIN:").size());
+        QStringList loginInfo=data.split(' ');
+        //登陆验证
+    }else if(msg.startsWith("REGISTER:"))
+    {
+        QString data=msg.right(msg.size()-QString("REGISTER:").size());
+        QStringList registerInfo=data.split(' ');
+        //注册验证
+    }else if(msg.startsWith("FORGETPASSWORD:"))
+    {
+        QString data=msg.right(msg.size()-QString("FORGETPASSWORD:").size());
+        //密码找回验证
+    }else if(msg.startsWith("GETFILELIST:"))
+    {
+        QString conPath=msg.right(msg.size()-QString("GETFILELIST:").size());
+        //获取conpath文件夹下文件列表
+    }else if(msg.startsWith("LOADFILES:"))
+    {
+        QString conPath=msg.right(msg.size()-QString("GETFILELIST:").size());
+        //加载
+    }else if(msg.startsWith("GETALLACTIVECollABORATE"))
+    {
+        //获取当前所有的协作列表
+    }else{
+        return false;
+    }
+    return true;
+
     QRegExp Download("(.*):Download");//;;;;:Download
     QRegExp LoadANO("(.*):LoadANO");//17302_00001:LoadANO
     QRegExp FileList("(.*):CurrentFiles");//data:CurrentFiles
@@ -22,7 +53,6 @@ bool ManageSocket::processMsg( const QString msg)
         sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
     }else if(LoadANO.indexIn(msg)!=-1)
     {
-
         auto p=makeMessageServer(LoadANO.cap(1).trimmed());
         auto port=p?p->port:"-1";
         sendMsg(port+":Port");
