@@ -5,6 +5,7 @@
 #include <QMutex>
 #include "neuron_editing/neuron_format_converter.h"
 #include "messagesocket.h"
+
 class MessageServer : public QTcpServer
 {
     struct UserInfo{
@@ -153,7 +154,8 @@ private:
     static const QStringList clienttypes;
 };
 namespace Map {
-
+    QMap<QString,MessageServer*> NeuronMapMessageServer;
+    QMutex mutex;
 };
 
 //inline void print(V_NeuronSWC seg)

@@ -5,10 +5,7 @@
 #include <QCoreApplication>
 #include <cmath>
 #include <QtGlobal>
-namespace Map {
-    QMap<QString,MessageServer*> NeuronMapMessageServer;
-    QMutex mutex;
-};
+
 const int colorsize=21;
 const int neuron_type_color[colorsize][3] = {
         {255, 255, 255},  // white,   0-undefined

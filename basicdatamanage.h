@@ -18,6 +18,13 @@ namespace DB  {
      * 返回一个数据库的连接QSqlDatabase
      */
     QSqlDatabase getNewDbConnection();
+    bool createTableForUser();
+
+    char userLogin(QStringList loginInfo,QStringList & res);
+    char userRegister(QStringList registerInfo);
+    char findPassword(QString data,QStringList & res);
+    int getid(QString userName);
+
     int getid(QString username);
 }
 
@@ -32,6 +39,7 @@ namespace FE {
 
     QStringList getLoadFile(QString neuron);
 
+    QString getFileList(QString conPath);
 
     QStringList writeArborAno(QString name,QString pos,QString swc,QString dir);
     QString cac_position(QString path);

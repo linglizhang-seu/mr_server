@@ -42,8 +42,9 @@ namespace DB {
 
         QSqlQuery query(db);
         QString order="id INTEGER PRIMARY KEY AUTO_INCREMENT,"
-                "UserName VARCHAR(40) NOT NULL,"
-                "PassWord VARCHAR(20) NOT NULL"
+                "countId VARCHAR(100) NOT NULL,"
+                "PassWord VARCHAR(20) NOT NULL,"
+                "userName VARCHAR(50) NOT NULL"
                 ;
         QString sql=QString("CREATE TABLE IF NOT EXISTS %1 (%2)").arg(TableForUser).arg(order);
         if(!query.exec(sql)){
@@ -54,12 +55,12 @@ namespace DB {
     }
 
     /**
-     * @brief userRegister
+     * @brief userLogin
      * @param userName
      * @param passward
-     * @return 0:success;-1:db error;-2:same name
+     * @return 0:success;-1:db error;-2:no name;-3 wrong password
      */
-    char userRegister(QString userName,QString passward)
+    char userLogin(QStringList loginInfo,QStringList & res)
     {
         auto db=getNewDbConnection();
         if(!db.open())
@@ -68,19 +69,58 @@ namespace DB {
             return -1;
         }
         QSqlQuery query(db);
-        QString order=QString("SELECT * FROM %1 WHERE Brainid = ?").arg(TableForUser);
+        QString order=QString("SELECT * FROM %1 WHERE countId = ?").arg(TableForUser);
         query.prepare(order);
-        query.addBindValue(userName);
+        query.addBindValue(loginInfo[0]);
         if(query.exec()){
             if(query.next())
             {
                 return -2;
             }else
             {
-                order=QString("INSERT INTO %1 (UserName,PassWord) VALUES (?,?)").arg(TableForUser);
+                if(query.value(2).toString()==loginInfo[1])
+                {
+                    res=loginInfo;
+                    res.push_back(query.value(3).toString());
+                    return 0;
+                }
+                else return -3;
+            }
+        }else
+        {
+            return -1;
+        }
+    }
+
+    /**
+     * @brief userRegister
+     * @param userName
+     * @param passward
+     * @return 0:success;-1:db error;-2:same name
+     */
+    char userRegister(/*QString userName,QString passward*/const QStringList registerInfo)
+    {
+        auto db=getNewDbConnection();
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return -1;
+        }
+        QSqlQuery query(db);
+        QString order=QString("SELECT * FROM %1 WHERE countId = ?").arg(TableForUser);
+        query.prepare(order);
+        query.addBindValue(registerInfo[0]);
+        if(query.exec()){
+            if(query.next())
+            {
+                return -2;
+            }else
+            {
+                order=QString("INSERT INTO %1 (countId,PassWord,userName) VALUES (?,?)").arg(TableForUser);
                 query.prepare(order);
-                query.addBindValue(userName);
-                query.addBindValue(passward);
+                query.addBindValue(registerInfo[0]);
+                query.addBindValue(registerInfo[1]);
+                query.addBindValue(registerInfo[2]);
                 if(query.exec()) return 0;
                 else return -1;
             }
@@ -90,13 +130,7 @@ namespace DB {
         }
     }
 
-    /**
-     * @brief userLogin
-     * @param userName
-     * @param passward
-     * @return 0:success;-1:db error;-2:no name;-3 wrong password
-     */
-    char userLogin(QString userName,QString passward)
+    char findPassword(QString data,QStringList & res)
     {
         auto db=getNewDbConnection();
         if(!db.open())
@@ -105,17 +139,19 @@ namespace DB {
             return -1;
         }
         QSqlQuery query(db);
-        QString order=QString("SELECT * FROM %1 WHERE Brainid = ?").arg(TableForUser);
+        QString order=QString("SELECT * FROM %1 WHERE countId = ?").arg(TableForUser);
         query.prepare(order);
-        query.addBindValue(userName);
+        query.addBindValue(data);
         if(query.exec()){
             if(query.next())
             {
                 return -2;
             }else
             {
-                if(query.value(2).toString()==passward) return 0;
-                else return -3;
+                res.push_back(query.value(1).toString());
+                res.push_back(query.value(2).toString());
+//                res={query.value(1).toString(),query.value(2).toString()};
+                    return 0;
             }
         }else
         {
@@ -261,6 +297,19 @@ namespace FE {
             result="";
         }
         return result;
+    }
+
+    QString getFileList(QString conPath)
+    {
+        QString absPath=QCoreApplication::applicationFilePath()+"/data"+conPath;
+        QFileInfoList fileInfos=QDir(absPath).entryInfoList(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot,QDir::DirsFirst);
+        QStringList res;
+        for(auto info:fileInfos)
+        {
+            res.push_back(info.fileName()+" "+QString::number(info.isDir()?0:1));
+
+        }
+        return res.join(";;");
     }
 
 
