@@ -5,6 +5,7 @@
 #include <QMutex>
 #include "neuron_editing/neuron_format_converter.h"
 #include "messagesocket.h"
+#include <QThread>
 
 class MessageServer : public QTcpServer
 {
@@ -60,6 +61,8 @@ public slots:
      * @return 返回保存文件的路径名和保存时的savedMessageIndex
      */
     QMap<QStringList,qint64> autosave();//
+
+    void getBBSWC(QString paraStr);
 private:
     /**
      * @brief incomingConnection
@@ -154,8 +157,7 @@ private:
     static const QStringList clienttypes;
 };
 namespace Map {
-    QMap<QString,MessageServer*> NeuronMapMessageServer;
-    QMutex mutex;
+
 };
 
 //inline void print(V_NeuronSWC seg)

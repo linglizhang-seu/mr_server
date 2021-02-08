@@ -57,6 +57,7 @@ bool ManageSocket::processMsg( const QString rmsg)
         //conpath("/....")
     }else if(msg.startsWith("LOADFILES:"))
     {
+        //LOADFILES:0 ****.ano ****.ano
         QStringList infos=msg.right(msg.size()-QString("GETFILELIST:").size()).split(" ");
         int type=infos[0].toUInt();
         //加载
@@ -65,16 +66,19 @@ bool ManageSocket::processMsg( const QString rmsg)
          * @brief loadFiles
          * @param 2:0 从零开始，1 继承新开始， 2继承
          */
+
         QString conPath=infos[1];
         if(type==0)
         {
+            qDebug()<<"type =0";
             int ix=conPath.indexOf("_x");
             int iy=conPath.indexOf("_y");
             int iz=conPath.indexOf("_z");
             int idot=conPath.indexOf(".ano");
-            int x=conPath.left(iy).right(iy-ix-1).toUInt();
-            int y=conPath.left(iz).right(iz-iy-1).toUInt();
-            int z=conPath.left(idot).right(idot-iz-1).toUInt();
+            double x=conPath.left(iy).right(iy-ix-1).toDouble();
+            double y=conPath.left(iz).right(iz-iy-1).toDouble();
+            double z=conPath.left(idot).right(idot-iz-1).toDouble();
+            qDebug()<<x<<" "<<y<<" "<<z;
             {
                 QString anoName=infos[2];
                 QString apoName=infos[2]+".apo";
@@ -128,6 +132,11 @@ bool ManageSocket::processMsg( const QString rmsg)
             auto p=makeMessageServer(infos[1].section('/',-1,-1).section('.',0));
             auto port=p?p->port:"-1";
             sendMsg(port+":Port");
+        }else
+        {
+            auto p=makeMessageServer(infos[1].section('/',-1,-1).section('.',0));
+            auto port=p?p->port:"-1";
+            sendMsg(port+":Port");
         }
 
 
@@ -143,33 +152,37 @@ bool ManageSocket::processMsg( const QString rmsg)
 //        }
 
     }else{
+        if(msg=="Hello1")
+        sendFiles({QCoreApplication::applicationDirPath()+"/1.txt"},{"1.txt"});
+        else
+            sendMsg("12345");
         return false;
     }
     return true;
 
-    QRegExp Download("(.*):Download");//;;;;:Download
-    QRegExp LoadANO("(.*):LoadANO");//17302_00001:LoadANO
-    QRegExp FileList("(.*):CurrentFiles");//data:CurrentFiles
+//    QRegExp Download("(.*):Download");//;;;;:Download
+//    QRegExp LoadANO("(.*):LoadANO");//17302_00001:LoadANO
+//    QRegExp FileList("(.*):CurrentFiles");//data:CurrentFiles
 
-    if(Download.indexIn(msg)!=-1)
-    {
-        auto pathMapName=FE::getFilesPathFormFileName(Download.cap(1).trimmed());
-        sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
-    }else if(LoadANO.indexIn(msg)!=-1)
-    {
-        auto p=makeMessageServer(LoadANO.cap(1).trimmed());
-        auto port=p?p->port:"-1";
-        sendMsg(port+":Port");
-    }else if(FileList.indexIn(msg)!=-1)
-    {
-        //返回当前所有文件的列表
-        QString dirname=FileList.cap(1).trimmed().split(";").at(1).trimmed();
-        QStringList datafileNames=FE::getFileNames(dirname);
-        sendMsg(datafileNames.join(";")+";"+msg);
-    }else{
-        return false;
-    }
-    return true;
+//    if(Download.indexIn(msg)!=-1)
+//    {
+//        auto pathMapName=FE::getFilesPathFormFileName(Download.cap(1).trimmed());
+//        sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
+//    }else if(LoadANO.indexIn(msg)!=-1)
+//    {
+//        auto p=makeMessageServer(LoadANO.cap(1).trimmed());
+//        auto port=p?p->port:"-1";
+//        sendMsg(port+":Port");
+//    }else if(FileList.indexIn(msg)!=-1)
+//    {
+//        //返回当前所有文件的列表
+//        QString dirname=FileList.cap(1).trimmed().split(";").at(1).trimmed();
+//        QStringList datafileNames=FE::getFileNames(dirname);
+//        sendMsg(datafileNames.join(";")+";"+msg);
+//    }else{
+//        return false;
+//    }
+//    return true;
 }
 
 bool ManageSocket::processFile( const QString filePath)

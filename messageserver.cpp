@@ -5,7 +5,10 @@
 #include <QCoreApplication>
 #include <cmath>
 #include <QtGlobal>
-
+namespace Map {
+QMap<QString,MessageServer*> NeuronMapMessageServer;
+QMutex mutex;
+}
 const int colorsize=21;
 const int neuron_type_color[colorsize][3] = {
         {255, 255, 255},  // white,   0-undefined
@@ -59,6 +62,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
         try {
             p = new MessageServer(neuron,messageport);
             Map::NeuronMapMessageServer.insert(neuron,p);
+            qDebug()<<"create server for "<<neuron<<" success "<<p->port;
         }  catch (...) {
             qDebug()<<"Message:failed to create server";
         }
@@ -66,7 +70,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
         return p;
 }
 
-MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcpServer(parent)
+MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcpServer(parent),QThread(parent)
 {
     messagelist.clear();
     wholePoint.clear();
@@ -127,6 +131,7 @@ void MessageServer::incomingConnection(qintptr handle)
     connect(this,SIGNAL(disconnectName(MessageSocket*)),messagesocket,SLOT(MessageSocket*));
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
     connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
+    connect(messagesocket,SIGNAL(getBBSWC(QString)),this,SLOT(getBBSWC(QString)));
     connect(thread,SIGNAL(started()),messagesocket,SLOT(onstarted()));
     messagesocket->moveToThread(thread);
     thread->start();
@@ -151,7 +156,7 @@ void MessageServer::userLogin(QString name)
     qDebug()<<"remove some name user success";
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
-    emit sendfiles(p,t.keys().at(0));
+//    emit sendfiles(p,t.keys().at(0));
     qDebug()<<"strp 1";
     UserInfo info;
     info.username=name;
@@ -605,7 +610,12 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
     return result;
 }
 
-
+void MessageServer::getBBSWC(QString paraStr)
+{
+    auto t=autosave();
+    auto p=(MessageSocket*)(sender());
+    emit sendfiles(p,t.keys().at(0));
+}
 
 
 

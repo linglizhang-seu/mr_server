@@ -42,7 +42,7 @@ namespace DB {
 
         QSqlQuery query(db);
         QString order="id INTEGER PRIMARY KEY AUTO_INCREMENT,"
-                "countId VARCHAR(100) NOT NULL,"
+                "userId VARCHAR(100) NOT NULL,"
                 "PassWord VARCHAR(20) NOT NULL,"
                 "userName VARCHAR(50) NOT NULL"
                 ;
@@ -69,7 +69,7 @@ namespace DB {
             return -1;
         }
         QSqlQuery query(db);
-        QString order=QString("SELECT * FROM %1 WHERE countId = ?").arg(TableForUser);
+        QString order=QString("SELECT * FROM %1 WHERE userId = ?").arg(TableForUser);
         query.prepare(order);
         query.addBindValue(loginInfo[0]);
         if(query.exec()){
@@ -107,7 +107,7 @@ namespace DB {
             return -1;
         }
         QSqlQuery query(db);
-        QString order=QString("SELECT * FROM %1 WHERE countId = ?").arg(TableForUser);
+        QString order=QString("SELECT * FROM %1 WHERE userId = ?").arg(TableForUser);
         query.prepare(order);
         query.addBindValue(registerInfo[0]);
         if(query.exec()){
@@ -116,7 +116,7 @@ namespace DB {
                 return -2;
             }else
             {
-                order=QString("INSERT INTO %1 (countId,PassWord,userName) VALUES (?,?)").arg(TableForUser);
+                order=QString("INSERT INTO %1 (userId,PassWord,userName) VALUES (?,?)").arg(TableForUser);
                 query.prepare(order);
                 query.addBindValue(registerInfo[0]);
                 query.addBindValue(registerInfo[1]);
@@ -139,7 +139,7 @@ namespace DB {
             return -1;
         }
         QSqlQuery query(db);
-        QString order=QString("SELECT * FROM %1 WHERE countId = ?").arg(TableForUser);
+        QString order=QString("SELECT * FROM %1 WHERE userId = ?").arg(TableForUser);
         query.prepare(order);
         query.addBindValue(data);
         if(query.exec()){

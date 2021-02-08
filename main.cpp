@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include "manageserver.h"
+#include "basicdatamanage.h"
+
 //传入的apo需要重新保存，使得n按顺序
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -41,7 +43,14 @@ int main(int argc, char *argv[])
         exit(-1);
     }else
     {
-        qDebug()<<"server(2.0.4.1) for vr_farm started!";
+//        if(!DB::createTableForUser())
+//        {
+//            qDebug()<<"mysql error";
+//            exit(-1);
+//        }else
+//        {
+            qDebug()<<"server(2.0.4.1) for vr_farm started!";
+//        }
     }
     return a.exec();
 }

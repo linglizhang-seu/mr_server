@@ -22,9 +22,7 @@ public:
      */
     ManageSocket(qintptr handle,QObject * parent=nullptr):TcpSocket(handle,parent)
     {
-        connect(this,&TcpSocket::disconnected,this,[=]{
-            deleteLater();
-        });
+
     }
 private:
     /**

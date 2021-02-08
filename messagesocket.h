@@ -27,10 +27,11 @@ public slots:
 signals:
     void pushMsg(QString );
     void userLogin(QString);
+    void getBBSWC(QString);
 private:
     bool processMsg(const QString msg);
     bool processFile(const QString filepath);
-    void sendFiles(QStringList filePathList,QStringList fileNameList);
+//    void sendFiles(QStringList filePathList,QStringList fileNameList);
 
     //message processor
 };

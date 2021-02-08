@@ -17,7 +17,7 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
         socket=nullptr;
         resetDataType();
         emit disconnected();
-    });
+    },Qt::QueuedConnection);
 }
 
 bool TcpSocket::sendMsg(QString str)
@@ -27,8 +27,8 @@ bool TcpSocket::sendMsg(QString str)
         const QString data=str+"\n";
         int datalength=data.size();
         QString header=QString("DataTypeWithSize:%1 %2\n").arg(0).arg(datalength);
-        socket->write(header.toStdString().c_str(),header.size());
-        socket->write(data.toStdString().c_str(),data.size());
+        qDebug()<<socket->write(header.toStdString().c_str(),header.size())<<header;
+        qDebug()<<socket->write(data.toStdString().c_str(),data.size())<<data;
         socket->flush();
         return true;
     }
@@ -41,19 +41,21 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     {
         for(auto filepath:filePathList)
         {
-            QString filename=filepath.section('/',-1);
             QFile f(filepath);
+            QString filename=filepath.section('/',-1);
+
             if(!f.open(QIODevice::ReadOnly))
             {
                 std::cout<<"can not read file "<<filename.toStdString().c_str()<<","<<f.errorString().toStdString().c_str()<<std::endl;
                 continue;
             }
             QByteArray fileData=f.readAll();
-            f.close();
+            f.flush();
             QString header=QString("DataTypeWithSize:%1 %2 %3\n").arg(1).arg(filename).arg(fileData.size());
             this->socket->write(header.toStdString().c_str(),header.size());
-            this->socket->write(fileData,fileData.size());
+            this->socket->write(fileData);
             this->socket->flush();
+            f.close();
         }
         return true;
     }
@@ -62,6 +64,8 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
 
 void TcpSocket::onreadyRead()
 {
+
+
     if(!datatype.isFile)
     {
         if(datatype.datasize==0)
@@ -70,19 +74,29 @@ void TcpSocket::onreadyRead()
             {
                 //read head
                 QString msg=socket->readLine(1024);
-                if(processHeader(msg))
-                    onreadyRead();
+                int ret=processHeader(msg);
+                if(!ret) onreadyRead();
+                else
+                {
+                    resetDataType();
+                    errorprocess(ret,msg);
+                }
             }
         }else
         {
             //read msg
-            if(socket->bytesAvailable()>=datatype.datasize)
+            int cnt=socket->bytesAvailable();
+            if(cnt>=datatype.datasize)
             {
-                QString msg=socket->readLine(datatype.datasize);
-                if(processMsg(msg))
-                {
-                    onreadyRead();
-                }
+                int ret=0;
+                QString msg=socket->readLine(datatype.datasize+1);
+                resetDataType();
+                ret=processMsg(msg)?0:7;
+                if(!ret) onreadyRead();
+                else errorprocess(ret,msg);
+            }else
+            {
+                qDebug()<<"bytesAvailable= "<<cnt;
             }
         }
     }else if(socket->bytesAvailable())
@@ -100,19 +114,20 @@ void TcpSocket::onreadyRead()
                 datatype.f=nullptr;
                 resetDataType();
                 processFile(filename);
-                onreadyRead();
+                ret=0;
             }else if(datatype.datasize<0)
             {
+                resetDataType();
                 ret = 6;
             }
         }else{
+            resetDataType();
             ret = 5;
         }
-        if(ret!=0)
-        {
-            errorprocess(ret,datatype.f->fileName());
-        }
+        if(!ret) onreadyRead();
+        else errorprocess(ret);
     }
+
 }
 
 void TcpSocket::resetDataType()
@@ -127,7 +142,7 @@ void TcpSocket::resetDataType()
     }
 }
 
-bool TcpSocket::processHeader(const QString rmsg)
+char TcpSocket::processHeader(const QString rmsg)
 {
     int ret = 0;
     if(rmsg.endsWith('\n'))
@@ -163,8 +178,7 @@ bool TcpSocket::processHeader(const QString rmsg)
     {
         ret = 1;
     }
-    if(!ret) return true;
-    errorprocess(ret,rmsg.trimmed()); return false;
+    return ret;
 }
 
 void TcpSocket::errorprocess(int errcode,QString msg)
@@ -176,6 +190,7 @@ void TcpSocket::errorprocess(int errcode,QString msg)
     //4:cannot open file
     //5:read socket != write file
     //6:next read size < 0
+    std::cerr<<"errorcode = "<<errcode<<",";
     if(errcode==1)
     {
         std::cerr<<"ERROR:msg not end with '\n',";
@@ -191,7 +206,13 @@ void TcpSocket::errorprocess(int errcode,QString msg)
         std::cerr<<QString("ERROR:%1 read socket != write file").arg(msg).toStdString().c_str();
     }else if(errcode==6){
         std::cerr<<QString("ERROR:%1 next read size < 0").arg(msg).toStdString().c_str();
+    }else if(errcode==7)
+    {
+        std::cerr<<"";
     }
-    std::cerr<<",We will disconnect the socket\n";
-    this->socket->disconnectFromHost();
+//    this->socket->disconnectFromHost();
+//    std::cerr<<"We have disconnected socket.\n";
+//    while (this->socket->state()!=QAbstractSocket::UnconnectedState) {
+//        this->socket->waitForDisconnected();
+//    }
 }
