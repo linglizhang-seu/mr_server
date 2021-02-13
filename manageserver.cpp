@@ -11,9 +11,14 @@ ManageServer::ManageServer(QObject *parent):QTcpServer(parent)
 void ManageServer::incomingConnection(qintptr handle)
 {
     ManageSocket * manageSokcet = new ManageSocket(handle);
-    qDebug()<<manageSokcet->socket->peerAddress()<<" connected ";
-     QObject::connect(manageSokcet,&TcpSocket::disconnected,this,[=]{
-        delete manageSokcet;
-    },Qt::QueuedConnection);
+    qDebug()<<manageSokcet->socket->peerAddress()<<" connected "<<manageSokcet;
+    QObject::connect(manageSokcet,&TcpSocket::disconnected,this,[=]{
+
+         qDebug()<<"delete "<<manageSokcet;
+
+//        delete manageSokcet;
+         manageSokcet->deleteLater();
+         qDebug()<<"delete success";
+    },Qt::DirectConnection);
 }
 

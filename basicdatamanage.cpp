@@ -239,19 +239,20 @@ namespace FE {
 
     QStringList getLoadFile(QString neuron)
     {
-        QDir dataDir=QDir(QCoreApplication::applicationDirPath()+"/data");
-        if(!dataDir.exists(neuron+".ano"))
+        if(!QFile(QCoreApplication::applicationDirPath()+"/data/"+neuron).exists())
         {
             qDebug()<<"can not find "<<neuron+".ano";
-        }else if(!dataDir.exists(neuron+".ano.apo")){
+        }else if(!QFile(QCoreApplication::applicationDirPath()+"/data/"+neuron+".apo").exists())
+        {
             qDebug()<<"can not find "<<neuron+".ano.apo";
-        }else if(!dataDir.exists(neuron+".ano.eswc")){
+        }if(!QFile(QCoreApplication::applicationDirPath()+"/data/"+neuron+".eswc").exists())
+        {
             qDebug()<<"can not find "<<neuron+".ano.eswc";
         }else
         {
-            return {QCoreApplication::applicationDirPath()+"/data/"+neuron+".ano",
-                       QCoreApplication::applicationDirPath()+"/data/"+ neuron+".ano.apo",
-                        QCoreApplication::applicationDirPath()+"/data/"+neuron+".ano.eswc"};
+            return {QCoreApplication::applicationDirPath()+"/data"+neuron,
+                       QCoreApplication::applicationDirPath()+"/data"+ neuron+".apo",
+                        QCoreApplication::applicationDirPath()+"/data"+neuron+".eswc"};
         }
         return {};
     }

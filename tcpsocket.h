@@ -16,7 +16,9 @@ class TcpSocket : public QObject
     };
 public:
     explicit TcpSocket(qintptr handle,QObject *parent = nullptr);
-    virtual ~TcpSocket() {resetDataType();}
+    virtual ~TcpSocket() {
+        resetDataType();
+    }
     virtual bool processMsg(const QString)=0;
     virtual bool processFile(const QString)=0;
     bool sendMsg(QString str);

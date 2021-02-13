@@ -27,14 +27,16 @@ void MessageSocket::sendmsgs(MessageSocket* socket,QStringList msgs)
         }
     }
 }
-bool MessageSocket::processMsg(const QString msg)
+bool MessageSocket::processMsg(const QString rmsg)
 {
-    if(!msg.endsWith('\n')) return true;
+    if(!rmsg.endsWith('\n')) return true;
     QRegExp loginRex("^/login:(.*)$");
     QRegExp ImgBlockRex("^/Imgblock:(.*)");
     QRegExp GetBBSWCRex("^/GetBBSwc:(.*)");
     QRegExp msgRex("^/(.*)_(.*):(.*)");
 
+    QString msg=rmsg.trimmed();
+    qDebug()<<this<<"message:"<<msg;
     if(loginRex.indexIn(msg)!=-1)
     {
         emit userLogin(loginRex.cap(1));
@@ -48,6 +50,10 @@ bool MessageSocket::processMsg(const QString msg)
     {
         emit pushMsg(msg);
     }
+    else {
+        return false;
+    }
+    return true;
 }
 
 bool MessageSocket::processFile(const QString filepath)

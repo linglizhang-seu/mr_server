@@ -33,7 +33,7 @@ public:
      * @param port 端口号
      * @param parent
      */
-    explicit MessageServer(QString neuron,QString port,QObject *parent = nullptr);
+    explicit MessageServer(QString neuron,QString port,QThread *p,QObject *parent = nullptr);
     ~MessageServer();
 
 public slots:
@@ -63,6 +63,10 @@ public slots:
     QMap<QStringList,qint64> autosave();//
 
     void getBBSWC(QString paraStr);
+    void onstarted()
+    {
+
+    }
 private:
     /**
      * @brief incomingConnection
@@ -140,6 +144,7 @@ signals:
     void disconnectName(MessageSocket* socket);
 public:
     QString port;
+    QThread *p_thread=nullptr;
 
 private:
     QString neuron;
@@ -149,12 +154,13 @@ private:
     QList <CellAPO> wholePoint;
     V_NeuronSWC_list segments;
     quint32 savedMessageIndex;
-    QFile *msgLog;
-    QTextStream *msglogstream;
+    QFile msgLog;
+    QTextStream msglogstream;
     const int defaulttype=3;
     const float ths=1;
 //    enum ClientType {}
     static const QStringList clienttypes;
+
 };
 namespace Map {
 

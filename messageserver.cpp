@@ -56,12 +56,15 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
                 goto label;
             }
         }
-
-
         MessageServer* p=0;
         try {
-            p = new MessageServer(neuron,messageport);
+            QThread * p_thread = getNewThread();
+            p = new MessageServer(neuron,messageport,p_thread);
             Map::NeuronMapMessageServer.insert(neuron,p);
+            connect(p,SIGNAL(messagecome()),p,SLOT(processmessage()));
+            connect(p_thread,SIGNAL(started()),p,SLOT(onstarted()));
+            p->moveToThread(p_thread);
+            p_thread->start();
             qDebug()<<"create server for "<<neuron<<" success "<<p->port;
         }  catch (...) {
             qDebug()<<"Message:failed to create server";
@@ -70,7 +73,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
         return p;
 }
 
-MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcpServer(parent),QThread(parent)
+MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObject *parent) : QTcpServer(parent)
 {
     messagelist.clear();
     wholePoint.clear();
@@ -78,11 +81,9 @@ MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcp
     savedMessageIndex=0;
     clients.clear();
     timer=nullptr;
-    msgLog=nullptr;
-    msglogstream=nullptr;
-
     this->neuron=neuron;
     this->port=port;
+    this->p_thread=pthread;
     QStringList filepaths=FE::getLoadFile(neuron);//ano,apo,eswc
     qDebug()<<filepaths;
     if(filepaths.isEmpty()) throw  "";
@@ -90,82 +91,96 @@ MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcp
     auto NT=readSWC_file(filepaths.at(2));
     segments=NeuronTree__2__V_NeuronSWC_list(NT);
 
-    connect(this,SIGNAL(messagecome()),this,SLOT(processmessage()));
     if(!this->listen(QHostAddress::Any,this->port.toInt()))
     {
         qDebug()<<"cannot listen messageserver in port "<<this->port;
         throw "";
     }else
     {
-        qDebug()<<"messageserver setup "<<this->neuron;
+        qDebug()<<"messageserver setup "<<this->neuron<<" "<<this->port;
     }
+
+        if(!QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)+"/msglog").exists())
+        {
+            QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)).mkdir("msglog");
+        }
+        msgLog.setFileName(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)+"/msglog/"+neuron.section('/',-1,-1)+".txt");
+        if(!msgLog.open(QIODevice::Append|QIODevice::Text|QIODevice::WriteOnly))
+        {
+            qDebug()<<"failed to open msglog file for "<<this->neuron<<msgLog.errorString();
+        }else
+            msglogstream.setDevice(&msgLog);
+
 }
 
 void MessageServer::incomingConnection(qintptr handle)
 {
     MessageSocket* messagesocket = new MessageSocket(handle);
-    QThread * thread = getNewThread();
-
+    qDebug()<<"this....."<<messagesocket;
     QObject::connect(messagesocket,&TcpSocket::disconnected,this,[=]{
         if(clients.find(messagesocket)!=clients.end())
+        {
             clients.remove(messagesocket);
-        thread->quit();
-        messagesocket->deleteLater();
-        releaseThread(thread);
-        emit sendToAll("/users:"+getUserList().join(";"));
+            messagesocket->disconnect();
+            messagesocket->deleteLater();
+        }
+
         if(clients.size()==0) {
             /**
              * 协作结束，关闭该服务器，保存文件，释放招用端口号
-             */
+             */  
             qDebug()<<"client is 0,should close "<<neuron;
             save();
             Map::NeuronMapMessageServer.remove(this->neuron);
             qDebug()<<this->neuron<<" has been delete ";
+            releaseThread(p_thread);
+            qDebug()<<"2";
+            p_thread=nullptr;
             this->deleteLater();
-        }
-    },Qt::DirectConnection);
+            qDebug()<<"3";
+        }else
+        {
+            emit sendToAll("/users:"+getUserList().join(";"));
 
-    connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(slotSendMsg(const QString &)));
-    connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)));
-    connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)));
-    connect(this,SIGNAL(disconnectName(MessageSocket*)),messagesocket,SLOT(MessageSocket*));
+        }
+        qDebug()<<"dasdsadas";
+    },Qt::DirectConnection);
+    connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(slotSendMsg(const QString &)),Qt::DirectConnection);
+    connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)),Qt::DirectConnection);
+    connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)),Qt::DirectConnection);
+    connect(this,SIGNAL(disconnectName(MessageSocket*)),messagesocket,SLOT(disconnectName(MessageSocket*)),Qt::DirectConnection);
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
     connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
     connect(messagesocket,SIGNAL(getBBSWC(QString)),this,SLOT(getBBSWC(QString)));
-    connect(thread,SIGNAL(started()),messagesocket,SLOT(onstarted()));
-    messagesocket->moveToThread(thread);
-    thread->start();
 }
 
 void MessageServer::userLogin(QString name)
 {
-    qDebug()<<"start to remove some name user";
-    for(MessageSocket* key:clients.keys())
+    MessageSocket *kp=nullptr;
     {
-        if(clients.value(key).username==name)
+
+        for(MessageSocket* key:clients.keys())
         {
-            clients.remove(key);
-            disconnectName(key);
-//            if(key->socket)
-//                key->socket->disconnectFromHost();
-////            key->deleteLater();
-//            while(key->socket->state()!=QTcpSocket::UnconnectedState)
-//                key->socket->waitForDisconnected();
+            if(clients.value(key).username==name)
+            {
+                kp=key;
+                break;
+            }
         }
     }
-    qDebug()<<"remove some name user success";
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
-//    emit sendfiles(p,t.keys().at(0));
-    qDebug()<<"strp 1";
     UserInfo info;
     info.username=name;
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
     clients.insert(p,info);
-    qDebug()<<"strp 2";
+    if(kp)
+    {
+        clients.remove(kp);
+        disconnectName(kp);
+    }
     emit sendToAll("/users:"+getUserList().join(";"));
-    qDebug()<<"strp 3";
     if(timer==nullptr)
     {
         timer=new QTimer();
@@ -175,21 +190,7 @@ void MessageServer::userLogin(QString name)
         timer->stop();
         timer->start(5*60*1000);
     }
-    if(!msgLog)
-    {
-        if(!QDir(QCoreApplication::applicationDirPath()+"/msglog").exists())
-        {
-            QDir(QCoreApplication::applicationDirPath()).mkdir("msglog");
-        }
-        msgLog=new QFile(QCoreApplication::applicationDirPath()+"/msglog/"+neuron+".txt");
-        if(!msgLog->open(QIODevice::Append|QIODevice::Text|QIODevice::WriteOnly))
-        {
-            qDebug()<<"failed to open msglog file for "<<this->neuron;
-            delete msgLog;
-            msgLog=nullptr;
-        }
-        msglogstream=new QTextStream(msgLog);
-    }
+
     qDebug()<<"user login end";
 }
 
@@ -208,7 +209,8 @@ void MessageServer::pushMessagelist(QString msg)
         sendmsgs(p,msgs);
     }
 
-    (*msglogstream)<<QDateTime::currentDateTimeUtc().toString("yyyy/MM/dd hh:mm:ss : ")<<msg<<endl;
+    (msglogstream)<<QDateTime::currentDateTimeUtc().toString("yyyy/MM/dd hh:mm:ss : ")<<msg<<endl;
+    msglogstream.flush();
 }
 
 void MessageServer::processmessage()
@@ -216,15 +218,6 @@ void MessageServer::processmessage()
     if(savedMessageIndex!=messagelist.size())
     {
         QRegExp msgreg("/(.*)_(.*):(.*)");
-
-//        QRegExp drawlineRex("^/drawline:(.*)$");
-//        QRegExp dellineRex("^/delline:(.*)");
-
-//        QRegExp addmarkerRex("^/addmarker:(.*)");
-//        QRegExp delmarkerRex("^/delmarker:(.*)");
-
-//        QRegExp retypelineRex("^/retypeline:(.*)");
-//        QRegExp retypemarkerRex("^/retypemarker:(.*)");
 
         for(int maxProcess=0;maxProcess<5&&savedMessageIndex<messagelist.size();maxProcess++)
         {
@@ -284,23 +277,22 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
         {
             wholePoint[i].n=i;
         }
-
     }
-    QFile anofile(dirpath+"/"+tempAno+".ano");
+    QFile anofile(dirpath+tempAno);
     qDebug()<<anofile;
     if(anofile.open(QIODevice::WriteOnly))
     {
         QTextStream out(&anofile);
-        out<<"APOFILE="+tempAno+".ano.apo"<<endl<<"SWCFILE="+tempAno+".ano.eswc";
+        out<<"APOFILE="+tempAno+".apo"<<endl<<"SWCFILE="+tempAno+".eswc";
         anofile.close();
 
-        writeESWC_file(dirpath+"/"+tempAno+".ano.eswc",nt);
-        writeAPO_file(dirpath+"/"+tempAno+".ano.apo",wholePoint);
+        writeESWC_file(dirpath+tempAno+".eswc",nt);
+        writeAPO_file(dirpath+tempAno+".apo",wholePoint);
     }else
     {
         qDebug()<<anofile.errorString();
     }
-    return {  {{dirpath+"/"+tempAno+".ano",dirpath+"/"+tempAno+".ano.apo",dirpath+"/"+tempAno+".ano.eswc"},cnt}};
+    return {  {{dirpath+"/"+tempAno,dirpath+"/"+tempAno+".apo",dirpath+"/"+tempAno+".eswc"},cnt}};
 }
 
 QStringList MessageServer::getUserList()
@@ -505,12 +497,16 @@ void MessageServer::retypemarker(QString msg)
 
 int MessageServer::getid(QString username)
 {
+    return username.toUInt();
     return DB::getid(username);
 }
 
 MessageServer::~MessageServer()
 {
+    qDebug()<<"2234";
     delete timer;
+    timer=0;
+    qDebug()<<"2235";
     if(clients.size()!=0){
         qDebug()<<"error ,when deconstruct MessageServer there are "<<clients.size() <<" connections!";
         auto plist=clients.keys();
@@ -525,9 +521,7 @@ MessageServer::~MessageServer()
                 p->socket->waitForDisconnected();
         }
     }
-    msgLog->close();
-    delete msgLog;
-    delete msglogstream;
+    qDebug()<<"2236";
 }
 
 NeuronTree MessageServer::convertMsg2NT(QStringList &listwithheader,QString username,int from)

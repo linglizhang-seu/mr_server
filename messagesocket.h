@@ -8,6 +8,9 @@ class MessageSocket : public TcpSocket
 public:
     explicit MessageSocket(qintptr handle,QObject *parent = nullptr)
         :TcpSocket(handle,parent){}
+    ~MessageSocket() {
+        qDebug()<<this<<"delete";
+    }
 public slots:
     void sendfiles(MessageSocket* socket,QStringList filepath);
     void sendmsgs(MessageSocket* socket,QStringList msglist);

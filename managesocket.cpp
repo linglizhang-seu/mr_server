@@ -11,7 +11,7 @@
 bool ManageSocket::processMsg( const QString rmsg)
 {
     if(!rmsg.endsWith('\n')) return false;
-    qDebug()<<"receive msg:"<<rmsg;
+    qDebug()<<this<<"receive msg:"<<rmsg;
     QString msg=rmsg.trimmed();
     if(msg.startsWith("LOGIN:"))
     {
@@ -58,7 +58,7 @@ bool ManageSocket::processMsg( const QString rmsg)
     }else if(msg.startsWith("LOADFILES:"))
     {
         //LOADFILES:0 ****.ano ****.ano
-        QStringList infos=msg.right(msg.size()-QString("GETFILELIST:").size()).split(" ");
+        QStringList infos=msg.right(msg.size()-QString("LOADFILES:").size()).split(" ");
         int type=infos[0].toUInt();
         //加载
         //conpath type
@@ -70,14 +70,13 @@ bool ManageSocket::processMsg( const QString rmsg)
         QString conPath=infos[1];
         if(type==0)
         {
-            qDebug()<<"type =0";
             int ix=conPath.indexOf("_x");
             int iy=conPath.indexOf("_y");
             int iz=conPath.indexOf("_z");
             int idot=conPath.indexOf(".ano");
-            double x=conPath.left(iy).right(iy-ix-1).toDouble();
-            double y=conPath.left(iz).right(iz-iy-1).toDouble();
-            double z=conPath.left(idot).right(idot-iz-1).toDouble();
+            double x=conPath.left(iy).right(iy-ix-2).toDouble();
+            double y=conPath.left(iz).right(iz-iy-2).toDouble();
+            double z=conPath.left(idot).right(idot-iz-2).toDouble();
             qDebug()<<x<<" "<<y<<" "<<z;
             {
                 QString anoName=infos[2];
@@ -97,12 +96,13 @@ bool ManageSocket::processMsg( const QString rmsg)
                 out<<str1<<endl<<str2;
                 anofile.close();
 
-                writeESWC_file(swcName,nt);
-                writeAPO_file(apoName,cells);
+                writeESWC_file(QCoreApplication::applicationDirPath()+"/data"+swcName,nt);
+                writeAPO_file(QCoreApplication::applicationDirPath()+"/data"+apoName,cells);
             }
-            auto p=makeMessageServer(infos[2].section('/',-1,-1).section('.',0));
+            auto p=makeMessageServer(infos[2]);
             auto port=p?p->port:"-1";
             sendMsg(port+":Port");
+            qDebug()<<"endlllll";
         }else if(type==1)
         {
             {
@@ -124,19 +124,20 @@ bool ManageSocket::processMsg( const QString rmsg)
                 writeESWC_file(swcName,nt);
                 writeAPO_file(apoName,cells);
             }
-            auto p=makeMessageServer(infos[2].section('/',-1,-1).section('.',0));
+            auto p=makeMessageServer(infos[2]);
             auto port=p?p->port:"-1";
             sendMsg(port+":Port");
         }else if(type==2)
         {
-            auto p=makeMessageServer(infos[1].section('/',-1,-1).section('.',0));
+            qDebug()<<infos[1];
+            auto p=makeMessageServer(infos[1]);
             auto port=p?p->port:"-1";
             sendMsg(port+":Port");
         }else
         {
-            auto p=makeMessageServer(infos[1].section('/',-1,-1).section('.',0));
-            auto port=p?p->port:"-1";
-            sendMsg(port+":Port");
+//            auto p=makeMessageServer(infos[1].section('/',-1,-1).section('.',0));
+//            auto port=p?p->port:"-1";
+//            sendMsg(port+":Port");
         }
 
 
@@ -160,29 +161,6 @@ bool ManageSocket::processMsg( const QString rmsg)
     }
     return true;
 
-//    QRegExp Download("(.*):Download");//;;;;:Download
-//    QRegExp LoadANO("(.*):LoadANO");//17302_00001:LoadANO
-//    QRegExp FileList("(.*):CurrentFiles");//data:CurrentFiles
-
-//    if(Download.indexIn(msg)!=-1)
-//    {
-//        auto pathMapName=FE::getFilesPathFormFileName(Download.cap(1).trimmed());
-//        sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
-//    }else if(LoadANO.indexIn(msg)!=-1)
-//    {
-//        auto p=makeMessageServer(LoadANO.cap(1).trimmed());
-//        auto port=p?p->port:"-1";
-//        sendMsg(port+":Port");
-//    }else if(FileList.indexIn(msg)!=-1)
-//    {
-//        //返回当前所有文件的列表
-//        QString dirname=FileList.cap(1).trimmed().split(";").at(1).trimmed();
-//        QStringList datafileNames=FE::getFileNames(dirname);
-//        sendMsg(datafileNames.join(";")+";"+msg);
-//    }else{
-//        return false;
-//    }
-//    return true;
 }
 
 bool ManageSocket::processFile( const QString filePath)
