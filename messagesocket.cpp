@@ -4,6 +4,7 @@
 #include <QRegExp>
 #include <QHostAddress>
 #include <QCoreApplication>
+#include "basicdatamanage.h"
 void MessageSocket::sendfiles(MessageSocket* socket,QStringList filepaths)
 {
     if(socket==this)
@@ -33,6 +34,7 @@ bool MessageSocket::processMsg(const QString rmsg)
     QRegExp loginRex("^/login:(.*)$");
     QRegExp ImgBlockRex("^/Imgblock:(.*)");
     QRegExp GetBBSWCRex("^/GetBBSwc:(.*)");
+    QRegExp ImageResRex("^/ImageRes:(.*)");
     QRegExp msgRex("^/(.*)_(.*):(.*)");
 
     QString msg=rmsg.trimmed();
@@ -42,11 +44,17 @@ bool MessageSocket::processMsg(const QString rmsg)
         emit userLogin(loginRex.cap(1));
     }else if(ImgBlockRex.indexIn(msg)!=-1)
     {
-        sendFiles({QCoreApplication::applicationDirPath()+"/tmp/test_128_128_128.v3draw"},{"test_128_128_128.v3draw"});
+        auto name_path=IP::getImageBlock(ImgBlockRex.cap(1).trimmed()+QString::number(this->socket->socketDescriptor()));
+        sendFiles({name_path.at(1)},{name_path.at(0)});
     }else if(GetBBSWCRex.indexIn(msg)!=-1)
     {
-        emit getBBSWC(GetBBSWCRex.cap(1));
-    }else if(msgRex.indexIn(msg)!=-1)
+        emit getBBSWC(GetBBSWCRex.cap(1).trimmed()+QString::number(this->socket->socketDescriptor()));
+    }else if(ImageResRex.indexIn(msg)!=-1)
+    {
+        QString id=ImageResRex.cap(1).trimmed();
+        sendMsg("ImgRes:"+id+";"+QString::number(IP::getImageRes(id)));
+    }
+    else if(msgRex.indexIn(msg)!=-1)
     {
         emit pushMsg(msg);
     }

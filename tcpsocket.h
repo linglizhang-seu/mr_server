@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTcpSocket>
 #include <QFile>
+#include <QTimer>
 
 class TcpSocket : public QObject
 {
@@ -18,6 +19,8 @@ public:
     explicit TcpSocket(qintptr handle,QObject *parent = nullptr);
     virtual ~TcpSocket() {
         resetDataType();
+        delete socket;
+        socket=nullptr;
     }
     virtual bool processMsg(const QString)=0;
     virtual bool processFile(const QString)=0;
@@ -30,6 +33,7 @@ public:
 private:
     qintptr socketDescriptor;
     DataType datatype;
+    QTimer timer;
 
 private:
     void resetDataType();
@@ -37,7 +41,7 @@ private:
     void errorprocess(int,QString msg="");
 
 signals:
-    void disconnected();
+    void tcpdisconnected();
 
 };
 

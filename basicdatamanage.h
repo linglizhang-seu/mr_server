@@ -7,6 +7,7 @@
 #include <QList>
 #include "basic_c_fun/basic_surf_objs.h"
 #include <QSqlQuery>
+#include <neuron_editing/neuron_format_converter.h>
 /**
  *@brief 数据库相关函数
  * 2020-12-07:只有获取数据库连接的代码
@@ -45,6 +46,13 @@ namespace FE {
     QString cac_position(QString path);
 
 
+}
+
+namespace IP {
+    int getImageRes(QString imageId);
+    QStringList getImageBlock(QString msg);
+    QStringList getSwcInBlock(const QString msg,const V_NeuronSWC_list& testVNL);
+    QStringList getApoInBlock(const QString msg,const QList <CellAPO>& wholePoint);
 }
 
 

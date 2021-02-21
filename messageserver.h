@@ -6,7 +6,7 @@
 #include "neuron_editing/neuron_format_converter.h"
 #include "messagesocket.h"
 #include <QThread>
-
+#include "basicdatamanage.h"
 class MessageServer : public QTcpServer
 {
     struct UserInfo{
@@ -62,7 +62,13 @@ public slots:
      */
     QMap<QStringList,qint64> autosave();//
 
-    void getBBSWC(QString paraStr);
+    void getBBSWC(QString paraStr)
+    {
+        auto swc_name_path=IP::getSwcInBlock(paraStr,segments);
+        auto apo_name_path=IP::getApoInBlock(paraStr,wholePoint);
+        sendfiles((MessageSocket*)(sender()),{swc_name_path.at(1),apo_name_path.at(1)});
+        clients[(MessageSocket*)(sender())].sendedsize=savedMessageIndex;
+    }
     void onstarted()
     {
 

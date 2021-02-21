@@ -34,10 +34,11 @@ const int neuron_type_color[colorsize][3] = {
     {168, 128, 255}, //	18
         };
 
-const QStringList MessageServer::clienttypes={"TeraFly","TeraVR","TeraAI"};
+const QStringList MessageServer::clienttypes={"TeraFly","TeraVR","TeraAI","HI5"};
 
 MessageServer* MessageServer::makeMessageServer(QString neuron)
 {
+    //neuron:/17301/17301_00019/*****.ano
     Map::mutex.lock();
     auto iter=Map::NeuronMapMessageServer.find(neuron);
     if(iter!=Map::NeuronMapMessageServer.end())
@@ -61,6 +62,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
             QThread * p_thread = getNewThread();
             p = new MessageServer(neuron,messageport,p_thread);
             Map::NeuronMapMessageServer.insert(neuron,p);
+            connect(p_thread,&QThread::finished,p,&MessageServer::deleteLater);
             connect(p,SIGNAL(messagecome()),p,SLOT(processmessage()));
             connect(p_thread,SIGNAL(started()),p,SLOT(onstarted()));
             p->moveToThread(p_thread);
@@ -100,6 +102,7 @@ MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObjec
         qDebug()<<"messageserver setup "<<this->neuron<<" "<<this->port;
     }
 
+    {
         if(!QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)+"/msglog").exists())
         {
             QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)).mkdir("msglog");
@@ -109,7 +112,8 @@ MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObjec
         {
             qDebug()<<"failed to open msglog file for "<<this->neuron<<msgLog.errorString();
         }else
-            msglogstream.setDevice(&msgLog);
+        msglogstream.setDevice(&msgLog);
+    }
 
 }
 
@@ -117,34 +121,28 @@ void MessageServer::incomingConnection(qintptr handle)
 {
     MessageSocket* messagesocket = new MessageSocket(handle);
     qDebug()<<"this....."<<messagesocket;
-    QObject::connect(messagesocket,&TcpSocket::disconnected,this,[=]{
-        if(clients.find(messagesocket)!=clients.end())
-        {
-            clients.remove(messagesocket);
-            messagesocket->disconnect();
-            messagesocket->deleteLater();
-        }
-
+    QObject::connect(messagesocket,&TcpSocket::tcpdisconnected,this,[=]{
+        if(!clients.remove(messagesocket))
+            qDebug()<<"error:messagesocket not in clients";
+        delete messagesocket;
+        qDebug()<<"remove socket";
         if(clients.size()==0) {
             /**
              * 协作结束，关闭该服务器，保存文件，释放招用端口号
              */  
+            this->close();
             qDebug()<<"client is 0,should close "<<neuron;
             save();
             Map::NeuronMapMessageServer.remove(this->neuron);
             qDebug()<<this->neuron<<" has been delete ";
-            releaseThread(p_thread);
-            qDebug()<<"2";
-            p_thread=nullptr;
-            this->deleteLater();
-            qDebug()<<"3";
+            p_thread->quit();
         }else
         {
             emit sendToAll("/users:"+getUserList().join(";"));
-
         }
-        qDebug()<<"dasdsadas";
     },Qt::DirectConnection);
+
+    connect(messagesocket,SIGNAL(getBBSWC(QString)),this,SLOT(getBBSWC(QString)),Qt::DirectConnection);
     connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(slotSendMsg(const QString &)),Qt::DirectConnection);
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)),Qt::DirectConnection);
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)),Qt::DirectConnection);
@@ -156,9 +154,9 @@ void MessageServer::incomingConnection(qintptr handle)
 
 void MessageServer::userLogin(QString name)
 {
+
     MessageSocket *kp=nullptr;
     {
-
         for(MessageSocket* key:clients.keys())
         {
             if(clients.value(key).username==name)
@@ -177,6 +175,7 @@ void MessageServer::userLogin(QString name)
     clients.insert(p,info);
     if(kp)
     {
+        qDebug()<<"find same name ,first"<<kp<<",second "<<p;
         clients.remove(kp);
         disconnectName(kp);
     }
@@ -254,6 +253,20 @@ void MessageServer::processmessage()
 
 QMap<QStringList,qint64> MessageServer::autosave()
 {
+//    if(clients.size()==0) {
+//        /**
+//         * 协作结束，关闭该服务器，保存文件，释放招用端口号
+//         */
+//        this->close();
+//        qDebug()<<"autosave client is 0,should close "<<neuron;
+//        save();
+//        Map::NeuronMapMessageServer.remove(this->neuron);
+//        qDebug()<<this->neuron<<" has been delete ";
+//        p_thread->quit();
+//    }else
+//    {
+//        emit sendToAll("/users:"+getUserList().join(";"));
+//    }
     return save(1);
 }
 
@@ -497,7 +510,7 @@ void MessageServer::retypemarker(QString msg)
 
 int MessageServer::getid(QString username)
 {
-    return username.toUInt();
+//    return username.toUInt();
     return DB::getid(username);
 }
 
@@ -604,12 +617,12 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
     return result;
 }
 
-void MessageServer::getBBSWC(QString paraStr)
-{
-    auto t=autosave();
-    auto p=(MessageSocket*)(sender());
-    emit sendfiles(p,t.keys().at(0));
-}
+//void MessageServer::getBBSWC(QString paraStr)
+//{
+//    auto t=autosave();
+//    auto p=(MessageSocket*)(sender());
+//    emit sendfiles(p,t.keys().at(0));
+//}
 
 
 

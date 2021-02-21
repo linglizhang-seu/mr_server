@@ -12,13 +12,9 @@ void ManageServer::incomingConnection(qintptr handle)
 {
     ManageSocket * manageSokcet = new ManageSocket(handle);
     qDebug()<<manageSokcet->socket->peerAddress()<<" connected "<<manageSokcet;
-    QObject::connect(manageSokcet,&TcpSocket::disconnected,this,[=]{
-
+    QObject::connect(manageSokcet,&TcpSocket::tcpdisconnected,this,[=]{
          qDebug()<<"delete "<<manageSokcet;
-
-//        delete manageSokcet;
          manageSokcet->deleteLater();
-         qDebug()<<"delete success";
     },Qt::DirectConnection);
 }
 

@@ -9,15 +9,20 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
     socketDescriptor=handle;
     resetDataType();
 
-    socket=new QTcpSocket(this);
+    socket=new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket,&QTcpSocket::readyRead,this,&TcpSocket::onreadyRead);
     connect(socket,&QTcpSocket::disconnected,this,[=]{
         socket->deleteLater();
         socket=nullptr;
         resetDataType();
-        emit disconnected();
+        qDebug()<<this<<" disocnnect";
+        emit tcpdisconnected();
     },Qt::DirectConnection);
+    connect(&timer,&QTimer::timeout,this,[=]{
+        sendMsg("TestSocketConnection");
+    },Qt::DirectConnection);
+    timer.start(60*1000);
 }
 
 bool TcpSocket::sendMsg(QString str)
@@ -30,7 +35,6 @@ bool TcpSocket::sendMsg(QString str)
         qDebug()<<socket->write(header.toStdString().c_str(),header.size())<<header;
         qDebug()<<socket->write(data.toStdString().c_str(),data.size())<<data;
         socket->flush();
-        qDebug()<<"end1111";
         return true;
     }
     return false;
@@ -42,7 +46,7 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     {
         for(auto filepath:filePathList)
         {
-                qDebug()<<"fileP:"<<filepath;
+            qDebug()<<"filePath:"<<filepath;
             QFile f(filepath);
             QString filename=filepath.section('/',-1);
 
@@ -66,20 +70,14 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
 
 void TcpSocket::onreadyRead()
 {
-    qDebug()<<"emm read:"<<this;
     if(!datatype.isFile)
     {
-        qDebug()<<"1111"<<this;
         if(datatype.datasize==0)
         {
-            qDebug()<<"1112"<<this;
             if(socket->bytesAvailable()>=1024||socket->canReadLine())
             {
-                //read head
-                qDebug()<<"1117"<<this;
                 QString msg=socket->readLine(1024);
                 int ret=processHeader(msg);
-                qDebug()<<"1112"<<this<<ret<<msg;
                 if(!ret) onreadyRead();
                 else
                 {
@@ -89,8 +87,6 @@ void TcpSocket::onreadyRead()
             }
         }else
         {
-            qDebug()<<"1113"<<this;
-            //read msg
             int cnt=socket->bytesAvailable();
             if(cnt>=datatype.datasize)
             {
@@ -100,14 +96,10 @@ void TcpSocket::onreadyRead()
                 ret=processMsg(msg)?0:7;
                 if(!ret) onreadyRead();
                 else errorprocess(ret,msg);
-            }/*else
-            {
-                qDebug()<<"bytesAvailable= "<<cnt;
-            }*/
+            }
         }
     }else if(socket->bytesAvailable())
     {
-        qDebug()<<"1114"<<this;
         int ret = 0;
         auto bytes=socket->read(datatype.datasize);
         if(datatype.f->write(bytes)==bytes.size())
@@ -117,8 +109,6 @@ void TcpSocket::onreadyRead()
             {
                 QString filename=datatype.f->fileName();
                 datatype.f->close();
-                delete datatype.f;
-                datatype.f=nullptr;
                 resetDataType();
                 processFile(filename);
                 ret=0;
@@ -134,7 +124,6 @@ void TcpSocket::onreadyRead()
         if(!ret) onreadyRead();
         else errorprocess(ret);
     }
-qDebug()<<"1151"<<this;
 }
 
 void TcpSocket::resetDataType()

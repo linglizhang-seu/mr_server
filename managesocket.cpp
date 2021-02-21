@@ -1,4 +1,4 @@
-﻿#include "managesocket.h"
+#include "managesocket.h"
 #include <QDataStream>
 #include <QSqlQuery>
 #include <QFile>
@@ -41,8 +41,7 @@ bool ManageSocket::processMsg( const QString rmsg)
     }else if(msg.startsWith("GETFILELIST:"))
     {
         QString conPath=msg.right(msg.size()-QString("GETFILELIST:").size());
-        //获取conpath文件夹下文件列表
-        //conpath("/....")
+        sendMsg("GETFILELIST:"+FE::getFileList(conPath));
     }else if(msg.startsWith("DOWNLOAD:"))
     {
         QStringList conPaths=msg.right(msg.size()-QString("DOWNLOAD:").size()).split(";;");
@@ -101,7 +100,7 @@ bool ManageSocket::processMsg( const QString rmsg)
             }
             auto p=makeMessageServer(infos[2]);
             auto port=p?p->port:"-1";
-            sendMsg(port+":Port");
+            sendMsg("Port:"+port);
             qDebug()<<"endlllll";
         }else if(type==1)
         {
@@ -126,21 +125,19 @@ bool ManageSocket::processMsg( const QString rmsg)
             }
             auto p=makeMessageServer(infos[2]);
             auto port=p?p->port:"-1";
-            sendMsg(port+":Port");
+            sendMsg("Port:"+port);
         }else if(type==2)
         {
             qDebug()<<infos[1];
             auto p=makeMessageServer(infos[1]);
             auto port=p?p->port:"-1";
-            sendMsg(port+":Port");
+            sendMsg("Port:"+port);
         }else
         {
 //            auto p=makeMessageServer(infos[1].section('/',-1,-1).section('.',0));
 //            auto port=p?p->port:"-1";
 //            sendMsg(port+":Port");
         }
-
-
     }else if(msg.startsWith("GETALLACTIVECollABORATE"))
     {
         //获取当前所有的协作列表
@@ -153,11 +150,7 @@ bool ManageSocket::processMsg( const QString rmsg)
 //        }
 
     }else{
-        if(msg=="Hello1")
-        sendFiles({QCoreApplication::applicationDirPath()+"/1.txt"},{"1.txt"});
-        else
-            sendMsg("12345");
-        return false;
+
     }
     return true;
 
