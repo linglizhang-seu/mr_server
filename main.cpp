@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 {
     qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-
+    vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
     QStringList list18454={
         "RES(26298x35000x11041)",
         "RES(13149x17500x5520)",

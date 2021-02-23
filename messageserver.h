@@ -66,7 +66,7 @@ public slots:
     {
         auto swc_name_path=IP::getSwcInBlock(paraStr,segments);
         auto apo_name_path=IP::getApoInBlock(paraStr,wholePoint);
-        sendfiles((MessageSocket*)(sender()),{swc_name_path.at(1),apo_name_path.at(1)});
+        emit sendfiles((MessageSocket*)(sender()),{swc_name_path.at(1),apo_name_path.at(1)});
         clients[(MessageSocket*)(sender())].sendedsize=savedMessageIndex;
     }
     void onstarted()

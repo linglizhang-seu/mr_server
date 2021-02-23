@@ -30,6 +30,7 @@ public slots:
     void onreadyRead();
 public:
     QTcpSocket *socket=nullptr;
+    QString username;
 private:
     qintptr socketDescriptor;
     DataType datatype;

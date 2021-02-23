@@ -142,7 +142,6 @@ void MessageServer::incomingConnection(qintptr handle)
         }
     },Qt::DirectConnection);
 
-    connect(messagesocket,SIGNAL(getBBSWC(QString)),this,SLOT(getBBSWC(QString)),Qt::DirectConnection);
     connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(slotSendMsg(const QString &)),Qt::DirectConnection);
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)),Qt::DirectConnection);
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)),Qt::DirectConnection);
@@ -189,7 +188,7 @@ void MessageServer::userLogin(QString name)
         timer->stop();
         timer->start(5*60*1000);
     }
-
+    p->username=name;
     qDebug()<<"user login end";
 }
 
@@ -511,7 +510,10 @@ void MessageServer::retypemarker(QString msg)
 int MessageServer::getid(QString username)
 {
 //    return username.toUInt();
-    return DB::getid(username);
+    static QMap<QString,int> name_id;
+    if(!name_id.contains(username))
+        name_id[username]=DB::getid(username);
+    return name_id[username];
 }
 
 MessageServer::~MessageServer()

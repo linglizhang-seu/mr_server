@@ -23,6 +23,10 @@ bool ManageSocket::processMsg( const QString rmsg)
         int ret=DB::userLogin(loginInfo,res);
         res.push_front(QString::number(ret));
         sendMsg("LOGIN:"+res.join(";;"));
+        if(ret==0)
+            username=res.at(1);
+        else
+            socket->disconnectFromHost();
     }else if(msg.startsWith("REGISTER:"))
     {
         QString data=msg.right(msg.size()-QString("REGISTER:").size());
@@ -86,6 +90,7 @@ bool ManageSocket::processMsg( const QString rmsg)
                 QList<CellAPO> cells;
                 CellAPO cell;
                 cell.x=x;cell.y=y;cell.z=z;
+                qDebug()<<x<<" "<<y<<" "<<z;
                 cells.push_back(cell);
                 QFile anofile(QCoreApplication::applicationDirPath()+"/data"+anoName);
                 anofile.open(QIODevice::WriteOnly);
@@ -138,7 +143,21 @@ bool ManageSocket::processMsg( const QString rmsg)
 //            auto port=p?p->port:"-1";
 //            sendMsg(port+":Port");
         }
-    }else if(msg.startsWith("GETALLACTIVECollABORATE"))
+    }else if("MUSICLIST")
+    {
+        sendMsg("MUSICLIST:"+QDir(QCoreApplication::applicationDirPath()+"/resource/music").entryList().join(" "));
+    }
+    else if(msg.startsWith("GETMUSIC:"))
+    {
+        QStringList infos=msg.right(msg.size()-QString("LOADFILES:").size()).split(" ");
+        QStringList paths;
+        for(auto info:infos)
+        {
+            paths.push_back(QCoreApplication::applicationDirPath()+"/resource/music/"+info);
+        }
+        sendFiles(paths,infos);
+    }
+    else if(msg.startsWith("GETALLACTIVECollABORATE"))
     {
         //获取当前所有的协作列表
 //        Map::mutex.lock();

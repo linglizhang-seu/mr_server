@@ -22,7 +22,12 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
     connect(&timer,&QTimer::timeout,this,[=]{
         sendMsg("TestSocketConnection");
     },Qt::DirectConnection);
-    timer.start(60*1000);
+    timer.start(2*60*1000);
+
+    QTimer::singleShot(60*1000,this,[=]{
+        if(username.isEmpty())
+            socket->disconnectFromHost();
+    });
 }
 
 bool TcpSocket::sendMsg(QString str)
@@ -32,8 +37,8 @@ bool TcpSocket::sendMsg(QString str)
         const QString data=str+"\n";
         int datalength=data.size();
         QString header=QString("DataTypeWithSize:%1 %2\n").arg(0).arg(datalength);
-        qDebug()<<socket->write(header.toStdString().c_str(),header.size())<<header;
-        qDebug()<<socket->write(data.toStdString().c_str(),data.size())<<data;
+        qDebug()<<username<<endl<<socket->write(header.toStdString().c_str(),header.size())<<header;
+        qDebug()<<username<<endl<<socket->write(data.toStdString().c_str(),data.size())<<data;
         socket->flush();
         return true;
     }
@@ -46,7 +51,7 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     {
         for(auto filepath:filePathList)
         {
-            qDebug()<<"filePath:"<<filepath;
+            qDebug()<<username<<"filePath:"<<filepath;
             QFile f(filepath);
             QString filename=filepath.section('/',-1);
 
@@ -61,7 +66,9 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
             this->socket->write(header.toStdString().c_str(),header.size());
             this->socket->write(fileData);
             this->socket->flush();
+
             f.close();
+            if(filepath.contains("/tmp/")) f.remove();
         }
         return true;
     }
@@ -140,7 +147,7 @@ void TcpSocket::resetDataType()
 
 char TcpSocket::processHeader(const QString rmsg)
 {
-    qDebug()<<"processHeader:"<<rmsg;
+    qDebug()<<username<<"processHeader:"<<rmsg;
     int ret = 0;
     if(rmsg.endsWith('\n'))
     {

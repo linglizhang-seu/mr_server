@@ -449,14 +449,14 @@ namespace IP {
             int x2=xpos+blocksize;
             int y1=ypos-blocksize;
             int y2=ypos+blocksize;
-            int z1=xpos-blocksize;
+            int z1=zpos-blocksize;
             int z2=zpos+blocksize;
             int cnt=pow(2,res-1);
 
             dirCheck("tmp");
             QString BBSWCNAME=QCoreApplication::applicationDirPath()+"/tmp/blockGet__"+name+QString("__%1__%2__%3__%4__%5__%6__%7.ano.eswc")
                     .arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2).arg(cnt);
-            x1*=cnt;x1*=cnt;y1*=cnt;y2*=cnt;z1*=cnt;z2*=cnt;
+            x1*=cnt;x2*=cnt;y1*=cnt;y2*=cnt;z1*=cnt;z2*=cnt;
             V_NeuronSWC_list tosave;
             for(int i=0;i<testVNL.seg.size();i++)
             {
@@ -476,7 +476,7 @@ namespace IP {
             }
             qDebug()<<"get nt size:"<<tosave.seg.size();
             auto nt=V_NeuronSWC_list__2__NeuronTree(tosave);
-            writeSWC_file(BBSWCNAME,nt);
+            writeESWC_file(BBSWCNAME,nt);
             return {BBSWCNAME.right(BBSWCNAME.size()-BBSWCNAME.lastIndexOf('/')),BBSWCNAME};
         }
     }
@@ -506,24 +506,27 @@ namespace IP {
             int x2=xpos+blocksize;
             int y1=ypos-blocksize;
             int y2=ypos+blocksize;
-            int z1=xpos-blocksize;
+            int z1=zpos-blocksize;
             int z2=zpos+blocksize;
             int cnt=pow(2,res-1);
+
 
             dirCheck("tmp");
             QString BBAPONAME=QCoreApplication::applicationDirPath()+"/tmp/blockGet__"+name+QString("__%1__%2__%3__%4__%5__%6__%7.ano.apo")
                     .arg(x1).arg(x2).arg(y1).arg(y2).arg(z1).arg(z2).arg(cnt);
-            x1*=cnt;x1*=cnt;y1*=cnt;y2*=cnt;z1*=cnt;z2*=cnt;
+            x1*=cnt;x2*=cnt;y1*=cnt;y2*=cnt;z1*=cnt;z2*=cnt;
+            qDebug()<<"x1,x2,y1,y2,z1,z2"<<x1<<x2<<y1<<y2<<z1<<z2;
             QList <CellAPO> to_save;
             for(auto marker:wholePoint)
             {
                 if(marker.x>=x1&&marker.x<=x2
                   &&marker.y>=y1&&marker.y<=y2
-                  &&marker.z>=z2&&marker.z<=z2)
+                  &&marker.z>=z1&&marker.z<=z2)
                 {
                     to_save.append(marker);
                 }
             }
+            qDebug()<<"to_save.size()="<<to_save.size();
             writeAPO_file(BBAPONAME,to_save);
             return {BBAPONAME.right(BBAPONAME.size()-BBAPONAME.lastIndexOf('/')),BBAPONAME};
         }
