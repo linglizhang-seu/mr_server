@@ -64,10 +64,20 @@ public slots:
 
     void getBBSWC(QString paraStr)
     {
-        auto swc_name_path=IP::getSwcInBlock(paraStr,segments);
-        auto apo_name_path=IP::getApoInBlock(paraStr,wholePoint);
-        emit sendfiles((MessageSocket*)(sender()),{swc_name_path.at(1),apo_name_path.at(1)});
-        clients[(MessageSocket*)(sender())].sendedsize=savedMessageIndex;
+        if(paraStr.isEmpty())
+        {
+            auto t=autosave();
+            auto p=(MessageSocket*)(sender());
+            emit sendfiles(p,t.keys().at(0));
+            clients[p].sendedsize=savedMessageIndex;
+        }
+        else
+        {
+            auto swc_name_path=IP::getSwcInBlock(paraStr,segments);
+            auto apo_name_path=IP::getApoInBlock(paraStr,wholePoint);
+            emit sendfiles((MessageSocket*)(sender()),{swc_name_path.at(1),apo_name_path.at(1)});
+            clients[(MessageSocket*)(sender())].sendedsize=savedMessageIndex;
+        }
     }
     void onstarted()
     {

@@ -48,7 +48,9 @@ bool MessageSocket::processMsg(const QString rmsg)
         sendFiles({name_path.at(1)},{name_path.at(0)});
     }else if(GetBBSWCRex.indexIn(msg)!=-1)
     {
-        emit getBBSWC(GetBBSWCRex.cap(1).trimmed()+QString::number(this->socket->socketDescriptor()));
+        if(msg=="/GetBBSwc:")
+            emit getBBSWC("");
+        else emit getBBSWC(GetBBSWCRex.cap(1).trimmed()+QString::number(this->socket->socketDescriptor()));
     }else if(ImageResRex.indexIn(msg)!=-1)
     {
         QString id=ImageResRex.cap(1).trimmed();
