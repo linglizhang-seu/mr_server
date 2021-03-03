@@ -7,7 +7,12 @@
 #include <cstdio>
 #include "manageserver.h"
 //传入的apo需要重新保存，使得n按顺序
+#include "basicdatamanage.h"
 
+//传入的apo需要重新保存，使得n按顺序
+QString vaa3dPath;
+QMap<QString,QStringList> m_MapImageIdWithRes;
+QMap<QString,QString> m_MapImageIdWithDir;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -38,7 +43,16 @@ int main(int argc, char *argv[])
 {
     qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-
+    vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
+    QStringList list18454={
+        "RES(26298x35000x11041)",
+        "RES(13149x17500x5520)",
+        "RES(6574x8750x2760)",
+        "RES(3287x4375x1380)",
+        "RES(1643x2187x690)",
+        "RES(821x1093x345)"};
+    m_MapImageIdWithRes.insert("18454",list18454);
+    m_MapImageIdWithDir.insert("18454","18454");
     ManageServer server;
     if(!server.listen(QHostAddress::Any,23763))
     {
@@ -46,7 +60,14 @@ int main(int argc, char *argv[])
         exit(-1);
     }else
     {
-        qDebug()<<"server(2.0.4.1) for vr_farm started!";
+        if(!DB::createTableForUser())
+        {
+            qDebug()<<"mysql error";
+            exit(-1);
+        }else
+        {
+            qDebug()<<"server(2.0.5.0) for vr_farm started!";
+        }
     }
     return a.exec();
 }

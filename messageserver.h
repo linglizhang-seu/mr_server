@@ -14,6 +14,7 @@ class MessageServer : public QTcpServer
         QString id;
         int userid;
         QString::size_type sendedsize;
+        int score;
     };
 
     Q_OBJECT

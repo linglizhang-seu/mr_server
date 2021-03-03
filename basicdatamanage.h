@@ -26,7 +26,8 @@ namespace DB  {
     char findPassword(QString data,QStringList & res);
     int getid(QString userName);
 
-    int getid(QString username);
+    int getScore(QString id);
+    bool setScore(QStringList userNames,std::vector<int> scores);
 }
 
 

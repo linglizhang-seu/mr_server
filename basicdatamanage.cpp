@@ -19,6 +19,7 @@ namespace DB {
     const QString dbPassword="1234";
 
     const QString TableForUser="TableForUser";
+    const QString TableForUserScore="TableForUserScore";
     //    const QString TableForImage="TableForImage";//图像数据表
     //    const QString TableForPreReConstruct="TableForPreReConstruct";//预重建数据表
     //    const QString TableForFullSwc="TableForFullSwc";//重建完成数据表
@@ -46,19 +47,35 @@ namespace DB {
         }
 
         QSqlQuery query(db);
-        QString order="id INTEGER PRIMARY KEY AUTO_INCREMENT,"
+        {
+            QString order="id INTEGER PRIMARY KEY AUTO_INCREMENT,"
                 "userName VARCHAR(100) NOT NULL,"
                 "passWord VARCHAR(20) NOT NULL,"
                 "email VARCHAR(100) NOT NULL,"
                 "nickName VARCHAR(50) NOT NULL"
                 ;
-        QString sql=QString("CREATE TABLE IF NOT EXISTS %1 (%2)").arg(TableForUser).arg(order);
-//        qDebug()<<sql;
-        if(!query.exec(sql)){
+            QString sql=QString("CREATE TABLE IF NOT EXISTS %1 (%2)").arg(TableForUser).arg(order);
+            //        qDebug()<<sql;
+            if(!query.exec(sql)){
 
-            qDebug()<<query.lastError().text();
-            return false;
+                qDebug()<<query.lastError().text();
+                return false;
+            }
         }
+
+        {
+            QString order="userName VARCHAR(100) PRIMARY KEY NOT NULL,"
+                "score int NOT NULL"
+                ;
+            QString sql=QString("CREATE TABLE IF NOT EXISTS %1 (%2)").arg(TableForUserScore).arg(order);
+            if(!query.exec(sql)){
+
+                qDebug()<<query.lastError().text();
+                return false;
+            }
+        }
+
+
         return true;
     }
 
@@ -70,6 +87,7 @@ namespace DB {
      */
     char userLogin(QStringList loginInfo,QStringList & res)
     {
+        //
         auto db=getNewDbConnection();
         if(!db.open())
         {
@@ -109,6 +127,7 @@ namespace DB {
      */
     char userRegister(/*QString userName,QString passward*/const QStringList registerInfo)
     {
+        //username,email,nickname,password,invite
         auto db=getNewDbConnection();
         if(!db.open())
         {
@@ -116,28 +135,41 @@ namespace DB {
             return -1;
         }
         QSqlQuery query(db);
-        QString order=QString("SELECT * FROM %1 WHERE userName = ?").arg(TableForUser);
-        query.prepare(order);
-        query.addBindValue(registerInfo[0]);
-        if(query.exec()){
-            if(query.next())
-            {
-                return -2;
+        {
+            QString order=QString("SELECT * FROM %1 WHERE userName = ?").arg(TableForUser);
+            query.prepare(order);
+            query.addBindValue(registerInfo[0]);
+            if(query.exec()){
+                if(query.next())
+                {
+                    return -2;
+                }else
+                {
+                    order=QString("INSERT INTO %1 (userName,passWord,email,nickName) VALUES (?,?,?,?)").arg(TableForUser);
+                    query.prepare(order);
+                    query.addBindValue(registerInfo[0]);
+                    query.addBindValue(registerInfo[3]);
+                    query.addBindValue(registerInfo[1]);
+                    query.addBindValue(registerInfo[2]);
+                    if(query.exec())
+                    {
+                        order=QString("INSERT INTO %1 (userName,score) VALUES(?,?)").arg(TableForUserScore);
+                        query.prepare(order);
+                        query.addBindValue(registerInfo[0]);
+                        query.addBindValue(0);
+                        if(query.exec())
+                        {
+                            return 0;
+                        }
+                    }
+                    else return -1;
+                }
             }else
             {
-                order=QString("INSERT INTO %1 (userName,passWord,email,nickName) VALUES (?,?,?,?)").arg(TableForUser);
-                query.prepare(order);
-                query.addBindValue(registerInfo[0]);
-                query.addBindValue(registerInfo[3]);
-                query.addBindValue(registerInfo[1]);
-                query.addBindValue(registerInfo[2]);
-                if(query.exec()) return 0;
-                else return -1;
+                return -1;
             }
-        }else
-        {
-            return -1;
         }
+
     }
 
     char findPassword(QString data,QStringList & res)
@@ -193,6 +225,59 @@ namespace DB {
         {
             return -1;
         }
+    }
+
+    int getScore(QString userName)
+    {
+        auto db=getNewDbConnection();
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return -1;
+        }
+        QSqlQuery query(db);
+        QString order=QString("SELECT score FROM %1 WHERE userName = ?").arg(TableForUserScore);
+        query.prepare(order);
+        query.addBindValue(userName);
+        if(query.exec()&&query.next())
+        {
+           return query.value(0).toUInt();
+        }
+        return 0;
+    }
+
+    bool setScore(QStringList userNames,std::vector<int> scores)
+    {
+        auto db=getNewDbConnection();
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return -1;
+        }
+
+//        UPDATE mytable SET
+//            myfield = CASE id
+//                WHEN 1 THEN 'value'
+//                WHEN 2 THEN 'value'
+//                WHEN 3 THEN 'value'
+//            END
+//        WHERE id IN (1,2,3)
+
+
+        QSqlQuery query(db);
+        QString caseStr;
+        for(int i=0;i<scores.size();i++)
+        {
+            caseStr+=QString("WHEN %1 THEN %2\n").arg(userNames[i]).arg(scores[i]);
+        }
+
+        QString order=QString("update %1 score = CASE userName \n%2END WHERE userName = IN (%3)").arg(TableForUserScore).arg(caseStr).arg(userNames.join(','));
+        query.prepare(order);
+        if(query.exec())
+        {
+           return true;
+        }
+        return false;
     }
 }
 

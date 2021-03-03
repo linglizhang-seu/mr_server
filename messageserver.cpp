@@ -174,6 +174,7 @@ void MessageServer::userLogin(QString name)
     info.username=name;
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
+    info.score=DB::getScore(name);
     clients.insert(p,info);
     if(kp)
     {
@@ -197,6 +198,10 @@ void MessageServer::userLogin(QString name)
 
 void MessageServer::pushMessagelist(QString msg)
 {
+    //score
+        auto p=(MessageSocket*)sender();
+        clients[p].score+=1;
+    //
     messagelist.push_back(msg);
     emit messagecome();
     for(auto p:clients.keys())
@@ -213,7 +218,6 @@ void MessageServer::pushMessagelist(QString msg)
     (msglogstream)<<QDateTime::currentDateTimeUtc().toString("yyyy/MM/dd hh:mm:ss : ")<<msg<<endl;
     msglogstream.flush();
 }
-
 void MessageServer::processmessage()
 {
     if(savedMessageIndex!=messagelist.size())
@@ -252,7 +256,6 @@ void MessageServer::processmessage()
         }
     }
 }
-
 QMap<QStringList,qint64> MessageServer::autosave()
 {
 //    if(clients.size()==0) {
@@ -271,10 +274,19 @@ QMap<QStringList,qint64> MessageServer::autosave()
 //    }
     return save(1);
 }
-
 QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
 {
     qint64 cnt=savedMessageIndex;
+    {
+        QStringList names;
+        std::vector<int> scores;
+        for(auto v:clients.values())
+        {
+            names.push_back(v.username);
+            scores.push_back(v.score);
+        }
+        DB::setScore(names,scores);
+    }
     auto nt=V_NeuronSWC_list__2__NeuronTree(segments);
     QString tempAno=neuron;
     QString dirpath=QCoreApplication::applicationDirPath()+"/data";
@@ -309,7 +321,6 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     }
     return {  {{dirpath+"/"+tempAno,dirpath+"/"+tempAno+".apo",dirpath+"/"+tempAno+".eswc"},cnt}};
 }
-
 QStringList MessageServer::getUserList()
 {
     auto infos=clients.values();
@@ -318,7 +329,6 @@ QStringList MessageServer::getUserList()
         usernames.push_back(info.username);
     return usernames;
 }
-
 void MessageServer::drawline(QString msg)
 {
     //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...

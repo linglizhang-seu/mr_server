@@ -8,6 +8,10 @@
 #include "basicdatamanage.h"
 #include "messageserver.h"
 
+void processInvite(int id)
+{
+
+}
 bool ManageSocket::processMsg( const QString rmsg)
 {
     if(!rmsg.endsWith('\n')) return false;
@@ -24,7 +28,13 @@ bool ManageSocket::processMsg( const QString rmsg)
         res.push_front(QString::number(ret));
         sendMsg("LOGIN:"+res.join(";;"));
         if(ret==0)
+        {
             username=res.at(1);
+            if(loginInfo.at(4)!="0")
+            {
+                processInvite(loginInfo.at(4).toUInt());
+            }
+        }
         else
             socket->disconnectFromHost();
     }else if(msg.startsWith("REGISTER:"))
