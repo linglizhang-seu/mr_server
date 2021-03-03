@@ -130,12 +130,15 @@ void MessageServer::incomingConnection(qintptr handle)
             /**
              * 协作结束，关闭该服务器，保存文件，释放招用端口号
              */  
-            this->close();
-            qDebug()<<"client is 0,should close "<<neuron;
-            save();
-            Map::NeuronMapMessageServer.remove(this->neuron);
-            qDebug()<<this->neuron<<" has been delete ";
-            p_thread->quit();
+            QTimer::singleShot(60*1000,this,[=]{
+                if(clients.size()) return;
+                this->close();
+                qDebug()<<"client is 0,should close "<<neuron;
+                save();
+                Map::NeuronMapMessageServer.remove(this->neuron);
+                qDebug()<<this->neuron<<" has been delete ";
+                p_thread->quit();
+            });
         }else
         {
             emit sendToAll("/users:"+getUserList().join(";"));
