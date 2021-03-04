@@ -122,6 +122,19 @@ void MessageServer::incomingConnection(qintptr handle)
     MessageSocket* messagesocket = new MessageSocket(handle);
     qDebug()<<"this....."<<messagesocket;
     QObject::connect(messagesocket,&TcpSocket::tcpdisconnected,this,[=]{
+        {
+            QStringList names;
+            std::vector<int> scores;
+            for(auto v:clients.values())
+            {
+                names.push_back(v.username);
+                scores.push_back(v.score);
+            }
+            qDebug()<<names;
+            qDebug()<<scores;
+            qDebug()<<DB::setScore(names,scores);
+        }
+
         if(!clients.remove(messagesocket))
             qDebug()<<"error:messagesocket not in clients";
         delete messagesocket;
@@ -277,16 +290,7 @@ QMap<QStringList,qint64> MessageServer::autosave()
 QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
 {
     qint64 cnt=savedMessageIndex;
-    {
-        QStringList names;
-        std::vector<int> scores;
-        for(auto v:clients.values())
-        {
-            names.push_back(v.username);
-            scores.push_back(v.score);
-        }
-        DB::setScore(names,scores);
-    }
+
     auto nt=V_NeuronSWC_list__2__NeuronTree(segments);
     QString tempAno=neuron;
     QString dirpath=QCoreApplication::applicationDirPath()+"/data";
@@ -531,25 +535,20 @@ int MessageServer::getid(QString username)
 
 MessageServer::~MessageServer()
 {
-    qDebug()<<"2234";
     delete timer;
     timer=0;
-    qDebug()<<"2235";
     if(clients.size()!=0){
         qDebug()<<"error ,when deconstruct MessageServer there are "<<clients.size() <<" connections!";
         auto plist=clients.keys();
 
         for(auto p:plist)
         {
-//            p->deleteLater();
-//            clients
             clients.remove(p);
             p->socket->disconnectFromHost();
             while(p->socket->state()!=QTcpSocket::UnconnectedState)
                 p->socket->waitForDisconnected();
         }
     }
-    qDebug()<<"2236";
 }
 
 NeuronTree MessageServer::convertMsg2NT(QStringList &listwithheader,QString username,int from)

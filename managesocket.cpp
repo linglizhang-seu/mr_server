@@ -27,15 +27,7 @@ bool ManageSocket::processMsg( const QString rmsg)
         int ret=DB::userLogin(loginInfo,res);
         res.push_front(QString::number(ret));
         sendMsg("LOGIN:"+res.join(";;"));
-        if(ret==0)
-        {
-            username=res.at(1);
-            if(loginInfo.at(4)!="0")
-            {
-                processInvite(loginInfo.at(4).toUInt());
-            }
-        }
-        else
+        if(ret)
             socket->disconnectFromHost();
     }else if(msg.startsWith("REGISTER:"))
     {
@@ -44,6 +36,8 @@ bool ManageSocket::processMsg( const QString rmsg)
         //注册验证
         //id pass name
         sendMsg("REGISTER:"+QString::number(DB::userRegister(registerInfo)));
+
+
     }else if(msg.startsWith("FORGETPASSWORD:"))
     {
         QString data=msg.right(msg.size()-QString("FORGETPASSWORD:").size());

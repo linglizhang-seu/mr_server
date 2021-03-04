@@ -5,6 +5,8 @@
 #include <QHostAddress>
 #include <QCoreApplication>
 #include "basicdatamanage.h"
+#include <QMap>
+extern QMap<QString,QStringList> m_MapImageIdWithRes;
 void MessageSocket::sendfiles(MessageSocket* socket,QStringList filepaths)
 {
     if(socket==this)
@@ -54,7 +56,7 @@ bool MessageSocket::processMsg(const QString rmsg)
     }else if(ImageResRex.indexIn(msg)!=-1)
     {
         QString id=ImageResRex.cap(1).trimmed();
-        sendMsg("ImgRes:"+id+";"+QString::number(IP::getImageRes(id)));
+        sendMsg("ImgRes:"+id+";"+QString::number(IP::getImageRes(id))+";"+m_MapImageIdWithRes.value(id).join(';'));
     }
     else if(msgRex.indexIn(msg)!=-1)
     {

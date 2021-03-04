@@ -7,6 +7,9 @@
 #include "basic_c_fun/basic_surf_objs.h"
 #include "neuron_editing/v_neuronswc.h"
 #include "neuron_editing/neuron_format_converter.h"
+#include <QNetworkAccessManager>
+#include <QDateTime>
+#include <QNetworkReply>
 extern QString vaa3dPath;
 extern QMap<QString,QStringList> m_MapImageIdWithRes;
 extern QMap<QString,QString> m_MapImageIdWithDir;
@@ -159,6 +162,49 @@ namespace DB {
                         query.addBindValue(0);
                         if(query.exec())
                         {
+//                            {
+//                                QNetworkAccessManager *accessManager = new QNetworkAccessManager;
+//                                QNetworkRequest request;
+//                                request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
+//                                request.setRawHeader("AppKey","0fda06baee636802cb441b62e6f65549");
+//                                request.setRawHeader("Nonce","12345");
+//                                QDateTime::currentSecsSinceEpoch();
+//                                QString curTime=QString::number(QDateTime::currentSecsSinceEpoch());
+////                                request.setRawHeader("CurTime",curTime);
+////                                request.setRawHeader("CheckSum",);
+//                                request.setRawHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
+//                                QByteArray postData;
+//                                postData.append(QString("accid=%1&password=%2").arg(registerInfo[0]).arg(registerInfo[3]));
+//                                QNetworkReply* reply = accessManager->post(request, postData);
+
+//                                QObject::connect(accessManager,&QNetworkAccessManager::finished,[=]{
+//                                    if(reply->error()==QNetworkReply::NoError)
+//                                    {
+//                                        QByteArray bytes = reply->readAll();      //读取所有字节；
+//                                        qDebug()<<"------------\n"<<bytes<<endl;
+//                                        QJsonParseError error;
+//                                        QJsonDocument doucment = QJsonDocument::fromJson(bytes, &error);
+//                                        if (doucment.isObject())
+//                                        {
+//                                            QJsonObject obj = doucment.object();
+//                                            QJsonValue val;
+//                                            QJsonValue data_value;
+
+//                                            if (obj.contains("code")) {
+//                                                QString succ_msg = obj.value("code").toString();
+//                                                qDebug()<<"code="<<succ_msg<<endl;
+//                                            }
+
+//                                            if (obj.contains("info")) {
+//                                                QString succ_msg = obj.value("info").toString();
+//                                                //ui->plainTextEdit->appendPlainText(tr("\n")+succ_msg);
+//                                                qDebug() << succ_msg;
+//                                            }
+
+//                                        }
+//                                    }
+//                                });
+//                            }
                             return 0;
                         }
                     }
@@ -252,7 +298,7 @@ namespace DB {
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL";
-            return -1;
+            return false;
         }
 
 //        UPDATE mytable SET
@@ -265,15 +311,27 @@ namespace DB {
 
 
         QSqlQuery query(db);
-        QString caseStr;
-        for(int i=0;i<scores.size();i++)
-        {
-            caseStr+=QString("WHEN %1 THEN %2\n").arg(userNames[i]).arg(scores[i]);
-        }
+//        QString caseStr;
+//        for(int i=0;i<scores.size();i++)
+//        {
+//            caseStr+=QString("WHEN %1 THEN %2\n").arg(userNames[i]).arg(scores[i]);
+//        }
 
-        QString order=QString("update %1 score = CASE userName \n%2END WHERE userName = IN (%3)").arg(TableForUserScore).arg(caseStr).arg(userNames.join(','));
+        QSqlQuery q;
+        q.prepare("insert into myTable values (?, ?)");
+
+        QString order=QString("update %1 set score = ? WHERE userName = ?").arg(TableForUserScore);
+        qDebug()<<order;
         query.prepare(order);
-        if(query.exec())
+        QVariantList ints;
+        for(auto v:scores)
+        {
+            ints<<v;
+        }
+        query.addBindValue(ints);
+        query.addBindValue(userNames);
+
+        if(query.execBatch())
         {
            return true;
         }
