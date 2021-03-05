@@ -19,7 +19,7 @@ namespace DB  {
      * 返回一个数据库的连接QSqlDatabase
      */
     QSqlDatabase getNewDbConnection();
-    bool createTableForUser();
+    bool initDB();
 
     char userLogin(QStringList loginInfo,QStringList & res);
     char userRegister(QStringList registerInfo);

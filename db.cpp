@@ -37,47 +37,47 @@ namespace DB {
     bool registerComm(const QStringList &registerInfo)
     {
 
-                QNetworkAccessManager *accessManager = new QNetworkAccessManager;
-                QNetworkRequest request;
-                request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
-                request.setRawHeader("AppKey","0fda06baee636802cb441b62e6f65549");
-                request.setRawHeader("Nonce","12345");
-                QDateTime::currentSecsSinceEpoch();
-                QString curTime=QString::number(QDateTime::currentSecsSinceEpoch());
+            QNetworkAccessManager *accessManager = new QNetworkAccessManager;
+            QNetworkRequest request;
+            request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
+            request.setRawHeader("AppKey","0fda06baee636802cb441b62e6f65549");
+            request.setRawHeader("Nonce","12345");
+            QDateTime::currentSecsSinceEpoch();
+            QString curTime=QString::number(QDateTime::currentSecsSinceEpoch());
 //                                request.setRawHeader("CurTime",curTime);
 //                                request.setRawHeader("CheckSum",);
-                request.setRawHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
-                QByteArray postData;
-                postData.append(QString("accid=%1&password=%2").arg(registerInfo[0]).arg(registerInfo[3]));
-                QNetworkReply* reply = accessManager->post(request, postData);
+            request.setRawHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
+            QByteArray postData;
+            postData.append(QString("accid=%1&password=%2").arg(registerInfo[0]).arg(registerInfo[3]));
+            QNetworkReply* reply = accessManager->post(request, postData);
 
-                QObject::connect(accessManager,&QNetworkAccessManager::finished,[=]{
-                    if(reply->error()==QNetworkReply::NoError)
+            QObject::connect(accessManager,&QNetworkAccessManager::finished,[=]{
+                if(reply->error()==QNetworkReply::NoError)
+                {
+                    QByteArray bytes = reply->readAll();      //读取所有字节；
+                    qDebug()<<"------------\n"<<bytes<<endl;
+                    QJsonParseError error;
+                    QJsonDocument doucment = QJsonDocument::fromJson(bytes, &error);
+                    if (doucment.isObject())
                     {
-                        QByteArray bytes = reply->readAll();      //读取所有字节；
-                        qDebug()<<"------------\n"<<bytes<<endl;
-                        QJsonParseError error;
-                        QJsonDocument doucment = QJsonDocument::fromJson(bytes, &error);
-                        if (doucment.isObject())
-                        {
-                            QJsonObject obj = doucment.object();
-                            QJsonValue val;
-                            QJsonValue data_value;
+                        QJsonObject obj = doucment.object();
+                        QJsonValue val;
+                        QJsonValue data_value;
 
-                            if (obj.contains("code")) {
-                                QString succ_msg = obj.value("code").toString();
-                                qDebug()<<"code="<<succ_msg<<endl;
-                            }
-
-                            if (obj.contains("info")) {
-                                QString succ_msg = obj.value("info").toString();
-                                //ui->plainTextEdit->appendPlainText(tr("\n")+succ_msg);
-                                qDebug() << succ_msg;
-                            }
-
+                        if (obj.contains("code")) {
+                            QString succ_msg = obj.value("code").toString();
+                            qDebug()<<"code="<<succ_msg<<endl;
                         }
+
+                        if (obj.contains("info")) {
+                            QString succ_msg = obj.value("info").toString();
+                            //ui->plainTextEdit->appendPlainText(tr("\n")+succ_msg);
+                            qDebug() << succ_msg;
+                        }
+
                     }
-                });
+                }
+            });
 
     }
 
@@ -200,7 +200,6 @@ namespace DB {
                         query.addBindValue(0);
                         if(query.exec())
                         {
-
                             return 0;
                         }
                     }

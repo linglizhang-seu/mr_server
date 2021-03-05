@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }else
     {
-        if(!DB::createTableForUser())
+        if(!DB::initDB())
         {
             qDebug()<<"mysql error";
             exit(-1);

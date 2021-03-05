@@ -130,8 +130,6 @@ void MessageServer::incomingConnection(qintptr handle)
                 names.push_back(v.username);
                 scores.push_back(v.score);
             }
-            qDebug()<<names;
-            qDebug()<<scores;
             qDebug()<<DB::setScore(names,scores);
         }
 

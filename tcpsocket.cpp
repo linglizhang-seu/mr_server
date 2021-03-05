@@ -19,10 +19,10 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
         qDebug()<<this<<" disocnnect";
         emit tcpdisconnected();
     },Qt::DirectConnection);
-    connect(&timer,&QTimer::timeout,this,[=]{
-        sendMsg("TestSocketConnection");
-    },Qt::DirectConnection);
-    timer.start(2*60*1000);
+//    connect(&timer,&QTimer::timeout,this,[=]{
+//        sendMsg("TestSocketConnection");
+//    },Qt::DirectConnection);
+//    timer.start(2*60*1000);
 
     QTimer::singleShot(60*1000,this,[=]{
         if(username.isEmpty())
