@@ -12,6 +12,8 @@ SOURCES += \
         basic_c_fun/basic_surf_objs.cpp \
         basic_c_fun/v3d_message.cpp \
         basicdatamanage.cpp \
+        db.cpp \
+        ip.cpp \
         main.cpp \
         manageserver.cpp \
         managesocket.cpp \

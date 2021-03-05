@@ -73,7 +73,6 @@ bool ManageSocket::processMsg( const QString rmsg)
          * @brief loadFiles
          * @param 2:0 从零开始，1 继承新开始， 2继承
          */
-
         QString conPath=infos[1];
         if(type==0)
         {
@@ -141,19 +140,14 @@ bool ManageSocket::processMsg( const QString rmsg)
             auto p=makeMessageServer(infos[1]);
             auto port=p?p->port:"-1";
             sendMsg("Port:"+port);
-        }else
-        {
-//            auto p=makeMessageServer(infos[1].section('/',-1,-1).section('.',0));
-//            auto port=p?p->port:"-1";
-//            sendMsg(port+":Port");
         }
     }else if("MUSICLIST")
     {
-        sendMsg("MUSICLIST:"+QDir(QCoreApplication::applicationDirPath()+"/resource/music").entryList().join(" "));
+        sendMsg("MUSICLIST:"+QDir(QCoreApplication::applicationDirPath()+"/resource/music").entryList().join(";"));
     }
     else if(msg.startsWith("GETMUSIC:"))
     {
-        QStringList infos=msg.right(msg.size()-QString("LOADFILES:").size()).split(" ");
+        QStringList infos=msg.right(msg.size()-QString("GETMUSIC:").size()).split(" ");
         QStringList paths;
         for(auto info:infos)
         {
