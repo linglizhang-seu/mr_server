@@ -15,21 +15,13 @@ QString vaa3dPath;
 QMap<QString,QStringList> m_MapImageIdWithRes;
 QMap<QString,QString> m_MapImageIdWithDir;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-void GetCompileTime(struct tm* lpCompileTime);
+void processImageSrc();
 int main(int argc, char *argv[])
 {
     qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
     vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
-    QStringList list18454={
-        "RES(26298x35000x11041)",
-        "RES(13149x17500x5520)",
-        "RES(6574x8750x2760)",
-        "RES(3287x4375x1380)",
-        "RES(1643x2187x690)",
-        "RES(821x1093x345)"};
-    m_MapImageIdWithRes.insert("18454",list18454);
-    m_MapImageIdWithDir.insert("18454","18454");
+    processImageSrc();
     ManageServer server;
     if(!server.listen(QHostAddress::Any,23763))
     {
@@ -49,33 +41,30 @@ int main(int argc, char *argv[])
     return a.exec();
 }
 
-void GetCompileTime(struct tm* lpCompileTime)
+void processImageSrc()
 {
-    char Mmm[4] = "Jan";
-    sscanf(__DATE__, "%3s %d %d", Mmm,
-                &lpCompileTime->tm_mday, &lpCompileTime->tm_year);
-    lpCompileTime->tm_year -= 1900;
-
-    switch (*(uint32_t*)Mmm) {
-        case (uint32_t)('Jan'): lpCompileTime->tm_mon = 1; break;
-        case (uint32_t)('Feb'): lpCompileTime->tm_mon = 2; break;
-        case (uint32_t)('Mar'): lpCompileTime->tm_mon = 3; break;
-        case (uint32_t)('Apr'): lpCompileTime->tm_mon = 4; break;
-        case (uint32_t)('May'): lpCompileTime->tm_mon = 5; break;
-        case (uint32_t)('Jun'): lpCompileTime->tm_mon = 6; break;
-        case (uint32_t)('Jul'): lpCompileTime->tm_mon = 7; break;
-        case (uint32_t)('Aug'): lpCompileTime->tm_mon = 8; break;
-        case (uint32_t)('Sep'): lpCompileTime->tm_mon = 9; break;
-        case (uint32_t)('Oct'): lpCompileTime->tm_mon = 10; break;
-        case (uint32_t)('Nov'): lpCompileTime->tm_mon = 11; break;
-        case (uint32_t)('Dec'): lpCompileTime->tm_mon = 12; break;
-        default:lpCompileTime->tm_mon = 0;
-    }
-    sscanf(__TIME__, "%d:%d:%d", &lpCompileTime->tm_hour,
-                &lpCompileTime->tm_min, &lpCompileTime->tm_sec);
-    lpCompileTime->tm_isdst = lpCompileTime->tm_wday = lpCompileTime->tm_yday = 0;
+        m_MapImageIdWithDir.clear();
+        m_MapImageIdWithRes.clear();
+        QFile data(QCoreApplication::applicationDirPath()+"/imageSrc.txt");
+        if (data.open(QFile::ReadOnly)) {
+            QTextStream in(&data);
+            while (!in.atEnd()) {
+                QString imageId;
+                QString imageName;
+                int resCnt;
+                in>>imageId>>imageName>>resCnt;
+                m_MapImageIdWithDir.insert(imageId,imageName);
+                QStringList list;
+                for(int i=0;i<resCnt;i++)
+                {
+                    in>>imageName;
+                    list.push_back(imageName);
+                }
+                m_MapImageIdWithRes.insert(imageId,list);
+            }
+        }
+        data.close();
 }
-
 
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
