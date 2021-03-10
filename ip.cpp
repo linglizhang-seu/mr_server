@@ -1,4 +1,5 @@
 #include "basicdatamanage.h"
+#include <QCoreApplication>
 extern QString vaa3dPath;
 extern QMap<QString,QStringList> m_MapImageIdWithRes;
 extern QMap<QString,QString> m_MapImageIdWithDir;
@@ -24,6 +25,8 @@ namespace IP {
     QString getImagePath(QString imageId,int res)
     {
         try {
+            qDebug()<<m_MapImageIdWithDir;
+            qDebug()<<m_MapImageIdWithRes;
             return QCoreApplication::applicationDirPath()
                     +"/image/"+m_MapImageIdWithDir.value(imageId)+"/"+m_MapImageIdWithRes.value(imageId).at(res-1);
         }  catch (...) {

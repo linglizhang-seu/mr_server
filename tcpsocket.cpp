@@ -85,6 +85,7 @@ void TcpSocket::onreadyRead()
             {
                 QString msg=socket->readLine(1024);
                 int ret=processHeader(msg);
+                qDebug()<<this<<" process HEADER = "<<ret;
                 if(!ret) onreadyRead();
                 else
                 {

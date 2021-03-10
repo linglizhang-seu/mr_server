@@ -7,6 +7,9 @@
 #include <QDateTime>
 #include <QNetworkReply>
 #include "basicdatamanage.h"
+#include "sha1.h"
+#include <QEventLoop>
+#include <QObject>
 namespace DB {
     uint count =0;
     QMutex locker;
@@ -34,51 +37,46 @@ namespace DB {
         return db;
     }
 
-    bool registerComm(const QStringList &registerInfo)
+    bool registerCommunicate(const QStringList &registerInfo)
     {
 
             QNetworkAccessManager *accessManager = new QNetworkAccessManager;
             QNetworkRequest request;
             request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
-            request.setRawHeader("AppKey","0fda06baee636802cb441b62e6f65549");
+            request.setRawHeader("AppKey","f7ded615794f989e8d8850c931b1d77a");
             request.setRawHeader("Nonce","12345");
             QDateTime::currentSecsSinceEpoch();
             QString curTime=QString::number(QDateTime::currentSecsSinceEpoch());
-//                                request.setRawHeader("CurTime",curTime);
-//                                request.setRawHeader("CheckSum",);
+            request.setRawHeader("CurTime",curTime.toStdString().c_str());
+            QString appSecret = "9fb785abd90d";
+            request.setRawHeader("CheckSum",sha1(QString(appSecret+"12345"+curTime).toStdString()).c_str());
             request.setRawHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
             QByteArray postData;
-            postData.append(QString("accid=%1&password=%2").arg(registerInfo[0]).arg(registerInfo[3]));
+            postData.append(QString("accid=%1&name=%2&token=%3").arg(registerInfo[0]).arg(registerInfo[2]).arg(registerInfo[3]));
+
             QNetworkReply* reply = accessManager->post(request, postData);
 
-            QObject::connect(accessManager,&QNetworkAccessManager::finished,[=]{
-                if(reply->error()==QNetworkReply::NoError)
+            QEventLoop eventLoop;
+            QObject::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+            eventLoop.exec(QEventLoop::ExcludeUserInputEvents);
+
+            if(reply->error()==QNetworkReply::NoError)
+            {
+                QByteArray bytes = reply->readAll();      //读取所有字节；
+                std::cerr<<bytes.toStdString().c_str();
+                QJsonParseError error;
+                QJsonDocument doucment = QJsonDocument::fromJson(bytes, &error);
+                if (doucment.isObject())
                 {
-                    QByteArray bytes = reply->readAll();      //读取所有字节；
-                    qDebug()<<"------------\n"<<bytes<<endl;
-                    QJsonParseError error;
-                    QJsonDocument doucment = QJsonDocument::fromJson(bytes, &error);
-                    if (doucment.isObject())
-                    {
-                        QJsonObject obj = doucment.object();
-                        QJsonValue val;
-                        QJsonValue data_value;
+                    QJsonObject obj = doucment.object();
+                    QJsonValue val;
+                    QJsonValue data_value;
 
-                        if (obj.contains("code")) {
-                            QString succ_msg = obj.value("code").toString();
-                            qDebug()<<"code="<<succ_msg<<endl;
-                        }
-
-                        if (obj.contains("info")) {
-                            QString succ_msg = obj.value("info").toString();
-                            //ui->plainTextEdit->appendPlainText(tr("\n")+succ_msg);
-                            qDebug() << succ_msg;
-                        }
-
-                    }
+                    if (obj.contains("code")&&obj.value("code").toInt()==200)
+                            return true;
                 }
-            });
-
+            }
+            return false;
     }
 
     bool initDB()
@@ -101,7 +99,6 @@ namespace DB {
             QString sql=QString("CREATE TABLE IF NOT EXISTS %1 (%2)").arg(TableForUser).arg(order);
             //        qDebug()<<sql;
             if(!query.exec(sql)){
-
                 qDebug()<<query.lastError().text();
                 return false;
             }
@@ -164,11 +161,13 @@ namespace DB {
      * @brief userRegister
      * @param userName
      * @param passward
-     * @return 0:success;-1:db error;-2:same name
+     * @return 0:success;-1:db error;-2:same name;-3
      */
-    char userRegister(/*QString userName,QString passward*/const QStringList registerInfo)
+    char userRegister(const QStringList registerInfo)
     {
         //username,email,nickname,password,invite
+        if(!registerCommunicate(registerInfo))
+            return -3;
         auto db=getNewDbConnection();
         if(!db.open())
         {
@@ -200,7 +199,7 @@ namespace DB {
                         query.addBindValue(0);
                         if(query.exec())
                         {
-                            return 0;
+                             return 0;
                         }
                     }
                     else return -1;
@@ -288,7 +287,7 @@ namespace DB {
         return 0;
     }
 
-    bool setScore(QStringList userNames,std::vector<int> scores)
+    bool setScores(QStringList userNames,std::vector<int> scores)
     {
         auto db=getNewDbConnection();
         if(!db.open())

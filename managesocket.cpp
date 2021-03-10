@@ -14,8 +14,8 @@ void processInvite(int id)
 }
 bool ManageSocket::processMsg( const QString rmsg)
 {
+    qDebug()<<this<<rmsg;
     if(!rmsg.endsWith('\n')) return false;
-    qDebug()<<this<<"receive msg:"<<rmsg;
     QString msg=rmsg.trimmed();
     if(msg.startsWith("LOGIN:"))
     {
@@ -28,16 +28,16 @@ bool ManageSocket::processMsg( const QString rmsg)
         res.push_front(QString::number(ret));
         sendMsg("LOGIN:"+res.join(";;"));
         if(ret)
-            socket->disconnectFromHost();
+            return false;
     }else if(msg.startsWith("REGISTER:"))
     {
         QString data=msg.right(msg.size()-QString("REGISTER:").size());
         QStringList registerInfo=data.split(' ');
         //注册验证
         //id pass name
-        sendMsg("REGISTER:"+QString::number(DB::userRegister(registerInfo)));
-
-
+        int ret=DB::userRegister(registerInfo);
+        sendMsg("REGISTER:"+QString::number(ret));
+        if(ret) return false;
     }else if(msg.startsWith("FORGETPASSWORD:"))
     {
         QString data=msg.right(msg.size()-QString("FORGETPASSWORD:").size());
@@ -59,7 +59,6 @@ bool ManageSocket::processMsg( const QString rmsg)
         }
         auto pathMapName=FE::getFilesPathFormFileName(conPaths.join(';'));
         sendFiles(pathMapName.firstKey(),pathMapName.value(pathMapName.firstKey()));
-
         //获取conpath文件夹下文件列表
         //conpath("/....")
     }else if(msg.startsWith("LOADFILES:"))
@@ -93,6 +92,7 @@ bool ManageSocket::processMsg( const QString rmsg)
                 QList<CellAPO> cells;
                 CellAPO cell;
                 cell.x=x;cell.y=y;cell.z=z;
+                cell.color.r=0;cell.color.g=20;cell.color.b=200;
                 qDebug()<<x<<" "<<y<<" "<<z;
                 cells.push_back(cell);
                 QFile anofile(QCoreApplication::applicationDirPath()+"/data"+anoName);
@@ -141,13 +141,14 @@ bool ManageSocket::processMsg( const QString rmsg)
             auto port=p?p->port:"-1";
             sendMsg("Port:"+port);
         }
-    }else if("MUSICLIST")
+    }else if(msg.startsWith("MUSICLIST"))
     {
-        sendMsg("MUSICLIST:"+QDir(QCoreApplication::applicationDirPath()+"/resource/music").entryList().join(";"));
+        sendMsg("MUSICLIST:"+QDir(QCoreApplication::applicationDirPath()+"/resource/music").entryList(QDir::NoDotAndDotDot|
+                                                                                                      QDir::Files).join(";"));
     }
     else if(msg.startsWith("GETMUSIC:"))
     {
-        QStringList infos=msg.right(msg.size()-QString("GETMUSIC:").size()).split(" ");
+        QStringList infos=msg.right(msg.size()-QString("GETMUSIC:").size()).split(";");
         QStringList paths;
         for(auto info:infos)
         {

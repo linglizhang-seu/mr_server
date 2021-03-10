@@ -130,11 +130,11 @@ void MessageServer::incomingConnection(qintptr handle)
                 names.push_back(v.username);
                 scores.push_back(v.score);
             }
-            qDebug()<<DB::setScore(names,scores);
+            qDebug()<<DB::setScores(names,scores);
         }
 
         if(!clients.remove(messagesocket))
-            qDebug()<<"error:messagesocket not in clients";
+            qDebug()<<"Confirm:messagesocket not in clients";
         delete messagesocket;
         qDebug()<<"remove socket";
         if(clients.size()==0) {
@@ -179,6 +179,7 @@ void MessageServer::userLogin(QString name)
             }
         }
     }
+
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
     UserInfo info;
@@ -269,20 +270,6 @@ void MessageServer::processmessage()
 }
 QMap<QStringList,qint64> MessageServer::autosave()
 {
-//    if(clients.size()==0) {
-//        /**
-//         * 协作结束，关闭该服务器，保存文件，释放招用端口号
-//         */
-//        this->close();
-//        qDebug()<<"autosave client is 0,should close "<<neuron;
-//        save();
-//        Map::NeuronMapMessageServer.remove(this->neuron);
-//        qDebug()<<this->neuron<<" has been delete ";
-//        p_thread->quit();
-//    }else
-//    {
-//        emit sendToAll("/users:"+getUserList().join(";"));
-//    }
     return save(1);
 }
 QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
@@ -312,7 +299,7 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     if(anofile.open(QIODevice::WriteOnly))
     {
         QTextStream out(&anofile);
-        out<<"APOFILE="+tempAno+".apo"<<endl<<"SWCFILE="+tempAno+".eswc";
+        out<<"APOFILE="+tempAno.section('/',-1)+".apo"<<endl<<"SWCFILE="+tempAno.section('/',-1)+".eswc";
         anofile.close();
 
         writeESWC_file(dirpath+tempAno+".eswc",nt);
@@ -321,7 +308,7 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     {
         qDebug()<<anofile.errorString();
     }
-    return {  {{dirpath+"/"+tempAno,dirpath+"/"+tempAno+".apo",dirpath+"/"+tempAno+".eswc"},cnt}};
+    return {  {{dirpath+tempAno,dirpath+tempAno+".apo",dirpath+tempAno+".eswc"},cnt}};
 }
 QStringList MessageServer::getUserList()
 {
@@ -628,13 +615,6 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
     }
     return result;
 }
-
-//void MessageServer::getBBSWC(QString paraStr)
-//{
-//    auto t=autosave();
-//    auto p=(MessageSocket*)(sender());
-//    emit sendfiles(p,t.keys().at(0));
-//}
 
 
 

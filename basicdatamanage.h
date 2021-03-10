@@ -27,7 +27,8 @@ namespace DB  {
     int getid(QString userName);
 
     int getScore(QString id);
-    bool setScore(QStringList userNames,std::vector<int> scores);
+    bool setScores(QStringList userNames,std::vector<int> scores);
+     bool registerCommunicate(const QStringList &registerInfo);
 }
 
 

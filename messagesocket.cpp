@@ -50,7 +50,7 @@ bool MessageSocket::processMsg(const QString rmsg)
         sendFiles({name_path.at(1)},{name_path.at(0)});
     }else if(GetBBSWCRex.indexIn(msg)!=-1)
     {
-        if(msg=="/GetBBSwc:")
+        if(msg=="/GetBBSwc:COLL")
             emit getBBSWC("");
         else emit getBBSWC(GetBBSWCRex.cap(1).trimmed()+QString::number(this->socket->socketDescriptor()));
     }else if(ImageResRex.indexIn(msg)!=-1)

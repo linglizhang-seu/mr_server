@@ -25,6 +25,7 @@ SOURCES += \
         neuron_editing/neuron_sim_scores.cpp \
         neuron_editing/neuron_xforms.cpp \
         neuron_editing/v_neuronswc.cpp \
+        sha1.cpp \
         tcpsocket.cpp
 
 # Default rules for deployment.
@@ -49,4 +50,5 @@ HEADERS += \
     neuron_editing/neuron_sim_scores.h \
     neuron_editing/neuron_xforms.h \
     neuron_editing/v_neuronswc.h \
+    sha1.h \
     tcpsocket.h

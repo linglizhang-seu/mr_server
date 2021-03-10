@@ -10,6 +10,7 @@
 #include "basicdatamanage.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <iostream>
 //传入的apo需要重新保存，使得n按顺序
 QString vaa3dPath;
 QMap<QString,QStringList> m_MapImageIdWithRes;
@@ -18,8 +19,11 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 void processImageSrc();
 int main(int argc, char *argv[])
 {
-    qInstallMessageHandler(myMessageOutput);
+
+
+//    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
+//       std::cerr<< DB::registerCommunicate({"gfdgddshl44333","","huanglei","123456"});
     vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
     processImageSrc();
     ManageServer server;
@@ -43,27 +47,27 @@ int main(int argc, char *argv[])
 
 void processImageSrc()
 {
-        m_MapImageIdWithDir.clear();
-        m_MapImageIdWithRes.clear();
-        QFile data(QCoreApplication::applicationDirPath()+"/imageSrc.txt");
-        if (data.open(QFile::ReadOnly)) {
-            QTextStream in(&data);
-            while (!in.atEnd()) {
-                QString imageId;
-                QString imageName;
-                int resCnt;
-                in>>imageId>>imageName>>resCnt;
-                m_MapImageIdWithDir.insert(imageId,imageName);
-                QStringList list;
-                for(int i=0;i<resCnt;i++)
-                {
-                    in>>imageName;
-                    list.push_back(imageName);
-                }
-                m_MapImageIdWithRes.insert(imageId,list);
+    m_MapImageIdWithDir.clear();
+    m_MapImageIdWithRes.clear();
+    QFile data(QCoreApplication::applicationDirPath()+"/imageSrc.txt");
+    if (data.open(QFile::ReadOnly)) {
+        QTextStream in(&data);
+        while (!in.atEnd()) {
+            QString imageId;
+            QString imageName;
+            int resCnt;
+            in>>imageId>>imageName>>resCnt;
+            m_MapImageIdWithDir.insert(imageId,imageName);
+            QStringList list;
+            for(int i=0;i<resCnt;i++)
+            {
+                in>>imageName;
+                list.push_back(imageName);
             }
+            m_MapImageIdWithRes.insert(imageId,list);
         }
-        data.close();
+    }
+    data.close();
 }
 
 
