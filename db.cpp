@@ -97,7 +97,7 @@ namespace DB {
                 "nickName VARCHAR(50) NOT NULL"
                 ;
             QString sql=QString("CREATE TABLE IF NOT EXISTS %1 (%2)").arg(TableForUser).arg(order);
-            //        qDebug()<<sql;
+//                    qDebug()<<sql;
             if(!query.exec(sql)){
                 qDebug()<<query.lastError().text();
                 return false;

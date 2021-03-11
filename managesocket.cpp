@@ -82,7 +82,7 @@ bool ManageSocket::processMsg( const QString rmsg)
             double x=conPath.left(iy).right(iy-ix-2).toDouble();
             double y=conPath.left(iz).right(iz-iy-2).toDouble();
             double z=conPath.left(idot).right(idot-iz-2).toDouble();
-            qDebug()<<x<<" "<<y<<" "<<z;
+//            qDebug()<<x<<" "<<y<<" "<<z;
             {
                 QString anoName=infos[2];
                 QString apoName=infos[2]+".apo";
@@ -93,7 +93,7 @@ bool ManageSocket::processMsg( const QString rmsg)
                 CellAPO cell;
                 cell.x=x;cell.y=y;cell.z=z;
                 cell.color.r=0;cell.color.g=20;cell.color.b=200;
-                qDebug()<<x<<" "<<y<<" "<<z;
+//                qDebug()<<x<<" "<<y<<" "<<z;
                 cells.push_back(cell);
                 QFile anofile(QCoreApplication::applicationDirPath()+"/data"+anoName);
                 anofile.open(QIODevice::WriteOnly);
@@ -109,7 +109,7 @@ bool ManageSocket::processMsg( const QString rmsg)
             auto p=makeMessageServer(infos[2]);
             auto port=p?p->port:"-1";
             sendMsg("Port:"+port);
-            qDebug()<<"endlllll";
+
         }else if(type==1)
         {
             {
@@ -136,7 +136,7 @@ bool ManageSocket::processMsg( const QString rmsg)
             sendMsg("Port:"+port);
         }else if(type==2)
         {
-            qDebug()<<infos[1];
+//            qDebug()<<infos[1];
             auto p=makeMessageServer(infos[1]);
             auto port=p?p->port:"-1";
             sendMsg("Port:"+port);

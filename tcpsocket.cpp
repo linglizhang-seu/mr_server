@@ -51,7 +51,7 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
     {
         for(auto filepath:filePathList)
         {
-            qDebug()<<username<<"filePath:"<<filepath;
+//            qDebug()<<username<<"filePath:"<<filepath;
             QFile f(filepath);
             QString filename=filepath.section('/',-1);
 
@@ -85,7 +85,7 @@ void TcpSocket::onreadyRead()
             {
                 QString msg=socket->readLine(1024);
                 int ret=processHeader(msg);
-                qDebug()<<this<<" process HEADER = "<<ret;
+//                qDebug()<<this<<" process HEADER = "<<ret;
                 if(!ret) onreadyRead();
                 else
                 {
@@ -148,7 +148,7 @@ void TcpSocket::resetDataType()
 
 char TcpSocket::processHeader(const QString rmsg)
 {
-    qDebug()<<username<<"processHeader:"<<rmsg;
+//    qDebug()<<username<<"processHeader:"<<rmsg;
     int ret = 0;
     if(rmsg.endsWith('\n'))
     {

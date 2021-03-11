@@ -87,7 +87,7 @@ MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObjec
     this->port=port;
     this->p_thread=pthread;
     QStringList filepaths=FE::getLoadFile(neuron);//ano,apo,eswc
-    qDebug()<<filepaths;
+//    qDebug()<<filepaths;
     if(filepaths.isEmpty()) throw  "";
     wholePoint=readAPO_file(filepaths.at(1));
     auto NT=readSWC_file(filepaths.at(2));
@@ -120,7 +120,7 @@ MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObjec
 void MessageServer::incomingConnection(qintptr handle)
 {
     MessageSocket* messagesocket = new MessageSocket(handle);
-    qDebug()<<"this....."<<messagesocket;
+//    qDebug()<<"this....."<<messagesocket;
     QObject::connect(messagesocket,&TcpSocket::tcpdisconnected,this,[=]{
         {
             QStringList names;
@@ -130,13 +130,13 @@ void MessageServer::incomingConnection(qintptr handle)
                 names.push_back(v.username);
                 scores.push_back(v.score);
             }
-            qDebug()<<DB::setScores(names,scores);
+            /*qDebug()<<*/DB::setScores(names,scores);
         }
 
         if(!clients.remove(messagesocket))
             qDebug()<<"Confirm:messagesocket not in clients";
         delete messagesocket;
-        qDebug()<<"remove socket";
+        qDebug()<<"remove old socket";
         if(clients.size()==0) {
             /**
              * 协作结束，关闭该服务器，保存文件，释放招用端口号
@@ -205,7 +205,7 @@ void MessageServer::userLogin(QString name)
         timer->start(5*60*1000);
     }
     p->username=name;
-    qDebug()<<"user login end";
+//    qDebug()<<"user login end";
 }
 
 void MessageServer::pushMessagelist(QString msg)
@@ -279,7 +279,7 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     auto nt=V_NeuronSWC_list__2__NeuronTree(segments);
     QString tempAno=neuron;
     QString dirpath=QCoreApplication::applicationDirPath()+"/data";
-    qDebug()<<dirpath;
+//    qDebug()<<dirpath;
     if(!QDir(dirpath).exists())
     {
        qDebug()<< QDir(QCoreApplication::applicationDirPath()).mkdir("data");
@@ -295,7 +295,7 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
         }
     }
     QFile anofile(dirpath+tempAno);
-    qDebug()<<anofile;
+//    qDebug()<<anofile;
     if(anofile.open(QIODevice::WriteOnly))
     {
         QTextStream out(&anofile);
@@ -362,7 +362,7 @@ void MessageServer::delline(QString msg)
 
     newTempNT=convertMsg2NT(listwithheader);
     auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
-    qDebug()<<segments.seg.size();
+//    qDebug()<<segments.seg.size();
     auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
 
     if(it!=segments.seg.end())
@@ -451,7 +451,7 @@ void MessageServer::retypeline(QString msg)
 
     newTempNT=convertMsg2NT(listwithheader);
     auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
-    qDebug()<<segments.seg.size();
+//    qDebug()<<segments.seg.size();
     auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
 
     if(it!=segments.seg.end())

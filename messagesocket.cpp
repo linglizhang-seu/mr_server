@@ -40,7 +40,7 @@ bool MessageSocket::processMsg(const QString rmsg)
     QRegExp msgRex("^/(.*)_(.*):(.*)");
 
     QString msg=rmsg.trimmed();
-    qDebug()<<this<<"message:"<<msg;
+//    qDebug()<<this<<"message:"<<msg;
     if(loginRex.indexIn(msg)!=-1)
     {
         emit userLogin(loginRex.cap(1));
