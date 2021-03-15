@@ -61,8 +61,8 @@ bool MessageSocket::processMsg(const QString rmsg)
     else if(msgRex.indexIn(msg)!=-1)
     {
         emit pushMsg(msg);
-    }
-    else {
+    }else if(msg!="HeartBeat:")
+    {
         return false;
     }
     return true;

@@ -26,7 +26,10 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
 
     QTimer::singleShot(60*1000,this,[=]{
         if(username.isEmpty())
+        {
+            std::cerr<<"user name is empty,server will close this socket"<<endl;
             socket->disconnectFromHost();
+        }
     });
 }
 
@@ -204,16 +207,16 @@ void TcpSocket::errorprocess(int errcode,QString msg)
         std::cerr<<QString("ERROR:%1 not start wth \"DataTypeWithSize\"").arg(msg).toStdString().c_str();
     }else if(errcode==3)
     {
-        std::cerr<<QString("ERROR:%1 not 2/3 paras").arg(msg).toStdString().c_str();
+        std::cerr<<QString("ERROR:%1 not 2/3 paras\n").arg(msg).toStdString().c_str();
     }else if(errcode==4){
-        std::cerr<<QString("ERROR:%1 cannot open file").arg(msg).toStdString().c_str();
+        std::cerr<<QString("ERROR:%1 cannot open file\n").arg(msg).toStdString().c_str();
     }else if(errcode==5){
-        std::cerr<<QString("ERROR:%1 read socket != write file").arg(msg).toStdString().c_str();
+        std::cerr<<QString("ERROR:%1 read socket != write file\n").arg(msg).toStdString().c_str();
     }else if(errcode==6){
-        std::cerr<<QString("ERROR:%1 next read size < 0").arg(msg).toStdString().c_str();
+        std::cerr<<QString("ERROR:%1 next read size < 0\n").arg(msg).toStdString().c_str();
     }else if(errcode==7)
     {
-        std::cerr<<"";
+        std::cerr<<QString("ERROR:%1 can not be solved\n").arg(msg).toStdString().c_str();
     }
     this->socket->disconnectFromHost();
 //    std::cerr<<"We have disconnected socket.\n";

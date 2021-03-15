@@ -29,6 +29,8 @@ bool ManageSocket::processMsg( const QString rmsg)
         sendMsg("LOGIN:"+res.join(";;"));
         if(ret)
             return false;
+        else
+            username=loginInfo[0];
     }else if(msg.startsWith("REGISTER:"))
     {
         QString data=msg.right(msg.size()-QString("REGISTER:").size());

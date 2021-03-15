@@ -298,7 +298,6 @@ namespace DB {
 
         QSqlQuery query(db);
         QString order=QString("update %1 set score = ? WHERE userName = ?").arg(TableForUserScore);
-        qDebug()<<order;
         query.prepare(order);
         QVariantList ints;
         for(auto v:scores)

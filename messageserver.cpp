@@ -130,13 +130,13 @@ void MessageServer::incomingConnection(qintptr handle)
                 names.push_back(v.username);
                 scores.push_back(v.score);
             }
-            /*qDebug()<<*/DB::setScores(names,scores);
+            DB::setScores(names,scores);
         }
 
         if(!clients.remove(messagesocket))
             qDebug()<<"Confirm:messagesocket not in clients";
         delete messagesocket;
-        qDebug()<<"remove old socket";
+
         if(clients.size()==0) {
             /**
              * 协作结束，关闭该服务器，保存文件，释放招用端口号
@@ -191,7 +191,7 @@ void MessageServer::userLogin(QString name)
     if(kp)
     {
         qDebug()<<"find same name ,first"<<kp<<",second "<<p;
-        clients.remove(kp);
+//        clients.remove(kp);
         disconnectName(kp);
     }
     emit sendToAll("/users:"+getUserList().join(";"));
@@ -205,7 +205,6 @@ void MessageServer::userLogin(QString name)
         timer->start(5*60*1000);
     }
     p->username=name;
-//    qDebug()<<"user login end";
 }
 
 void MessageServer::pushMessagelist(QString msg)
