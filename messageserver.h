@@ -139,7 +139,7 @@ private:
 
     vector<V_NeuronSWC>::iterator findseg(vector<V_NeuronSWC>::iterator begin,vector<V_NeuronSWC>::iterator end,const V_NeuronSWC seg);
 
-
+    void setscores();
 
 signals:
     /**
@@ -188,7 +188,8 @@ private:
 
 };
 namespace Map {
-
+   extern QMap<QString,MessageServer*> NeuronMapMessageServer;
+   extern QMutex mutex;
 };
 
 #endif // MESSAGESERVER_H

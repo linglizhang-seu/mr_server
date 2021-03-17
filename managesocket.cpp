@@ -159,7 +159,11 @@ bool ManageSocket::processMsg( const QString rmsg)
         sendFiles(paths,infos);
     }else if(msg.startsWith("GETSCORE"))
     {
-            sendMsg(QString("Score:%1 %2").arg(username).arg(DB::getScore(username)));
+         sendMsg(QString("Score:%1 %2").arg(username).arg(DB::getScore(username)));
+    }else if(msg.startsWith("SETSOCRE:"))
+    {
+        int s=msg.right(msg.size()-QString("SETSOCRE:").size()).toUInt();
+        DB::setScores({username},{s});
     }
     else if(msg.startsWith("GETALLACTIVECollABORATE"))
     {

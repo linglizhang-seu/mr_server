@@ -40,8 +40,8 @@ bool TcpSocket::sendMsg(QString str)
         const QString data=str+"\n";
         int datalength=data.size();
         QString header=QString("DataTypeWithSize:%1 %2\n").arg(0).arg(datalength);
-        qDebug()<<username<<endl<<socket->write(header.toStdString().c_str(),header.size())<<header;
-        qDebug()<<username<<endl<<socket->write(data.toStdString().c_str(),data.size())<<data;
+        qDebug()<<username<<" "<<socket->write(header.toStdString().c_str(),header.size())<<header;
+        qDebug()<<username<<" "<<socket->write(data.toStdString().c_str(),data.size())<<data;
         socket->flush();
         return true;
     }
