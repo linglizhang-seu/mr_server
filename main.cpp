@@ -12,16 +12,25 @@
 #include <QNetworkReply>
 #include <iostream>
 #include <signal.h>
+#include <messageserver.h>
 //传入的apo需要重新保存，使得n按顺序
 QString vaa3dPath;
 QMap<QString,QStringList> m_MapImageIdWithRes;
 QMap<QString,QString> m_MapImageIdWithDir;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 void processImageSrc();
+
+void signalhandle(int )
+{
+    auto servers=Map::NeuronMapMessageServer.values();
+    for(auto s:servers)
+        s->autosave();
+}
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     signal(SIGFPE,SIG_IGN);
+    signal(SIGSEGV,signalhandle);
     vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
     processImageSrc();
     ManageServer server;
