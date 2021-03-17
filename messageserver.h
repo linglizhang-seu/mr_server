@@ -14,7 +14,7 @@ class MessageServer : public QTcpServer
         QString id;
         int userid;
         QString::size_type sendedsize;
-        int score;
+        int score=-1;
     };
 
     Q_OBJECT
@@ -83,6 +83,15 @@ public slots:
     void onstarted()
     {
 
+    }
+
+    void setscore(int s)
+    {
+        MessageSocket *kp=(MessageSocket*)sender();
+        if(clients.contains(kp))
+        {
+            clients[kp].score=s;
+        }
     }
 private:
     /**
@@ -175,7 +184,6 @@ private:
     QTextStream msglogstream;
     const int defaulttype=3;
     const float ths=1;
-//    enum ClientType {}
     static const QStringList clienttypes;
 
 };
@@ -183,14 +191,4 @@ namespace Map {
 
 };
 
-//inline void print(V_NeuronSWC seg)
-//{
-//    qDebug()<<"----------------------------";
-//    for(int i=0;i<seg.row.size();i++)
-//    {
-//        qDebug()<<i<<":"<<seg.row[i].x<<","<<seg.row[i].y<<" "<<seg.row[i].z;
-//    }
-//    qDebug()<<"-----------------------------";
-//    return;
-//}
 #endif // MESSAGESERVER_H

@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include <cmath>
 #include <QtGlobal>
+#include <iostream>
 namespace Map {
 QMap<QString,MessageServer*> NeuronMapMessageServer;
 QMutex mutex;
@@ -130,7 +131,8 @@ void MessageServer::incomingConnection(qintptr handle)
                 names.push_back(v.username);
                 scores.push_back(v.score);
             }
-            DB::setScores(names,scores);
+            if(DB::setScores(names,scores))
+                std::cerr<<"Fatal error, write scores error"<<endl;
         }
 
         if(!clients.remove(messagesocket))
@@ -163,6 +165,15 @@ void MessageServer::incomingConnection(qintptr handle)
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
     connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
     connect(messagesocket,SIGNAL(getBBSWC(QString)),this,SLOT(getBBSWC(QString)));
+    connect(messagesocket,&MessageSocket::getscore,this,[=]{
+         MessageSocket *kp=(MessageSocket*)sender();
+         if(clients.contains(kp))
+         {
+            emit  sendmsgs(kp,{QString("Score:%1 %2").arg(clients[kp].username).arg(clients[kp].score)});
+         }else
+             emit  sendmsgs(kp,{QString("Please login before getscores!")});
+    });
+    connect(messagesocket,SIGNAL(setscore(int)),this,SLOT(setscore(int)));
 }
 
 void MessageServer::userLogin(QString name)
@@ -209,10 +220,6 @@ void MessageServer::userLogin(QString name)
 
 void MessageServer::pushMessagelist(QString msg)
 {
-    //score
-        auto p=(MessageSocket*)sender();
-        clients[p].score+=1;
-    //
     messagelist.push_back(msg);
     emit messagecome();
     for(auto p:clients.keys())
@@ -529,8 +536,8 @@ MessageServer::~MessageServer()
         {
             clients.remove(p);
             p->socket->disconnectFromHost();
-            while(p->socket->state()!=QTcpSocket::UnconnectedState)
-                p->socket->waitForDisconnected();
+//            while(p->socket->state()!=QTcpSocket::UnconnectedState)
+//                p->socket->waitForDisconnected();
         }
     }
 }

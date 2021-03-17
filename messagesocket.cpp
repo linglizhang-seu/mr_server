@@ -61,7 +61,14 @@ bool MessageSocket::processMsg(const QString rmsg)
     else if(msgRex.indexIn(msg)!=-1)
     {
         emit pushMsg(msg);
-    }else if(msg!="HeartBeat:")
+    }else if (msg=="GETSCORE")
+    {
+        emit getscore();
+    }else if(msg.startsWith("SETSOCRE:"))
+    {
+        emit setscore(msg.right(msg.size()-QString("SETSOCRE:").size()).toUInt());
+    }
+    else if(msg!="HeartBeat:")
     {
         return false;
     }

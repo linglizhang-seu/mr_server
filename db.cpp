@@ -270,6 +270,7 @@ namespace DB {
 
     int getScore(QString userName)
     {
+        if(userName.isEmpty()) return -2;
         auto db=getNewDbConnection();
         if(!db.open())
         {
@@ -283,8 +284,18 @@ namespace DB {
         if(query.exec()&&query.next())
         {
            return query.value(0).toUInt();
+        }else
+        {
+            order=QString("INSERT INTO %1 (userName,score) VALUES(?,?)").arg(TableForUserScore);
+            query.prepare(order);
+            query.addBindValue(userName);
+            query.addBindValue(0);
+            if(query.exec())
+                return 0;
+            else
+                return -1;
         }
-        return 0;
+
     }
 
     bool setScores(QStringList userNames,std::vector<int> scores)

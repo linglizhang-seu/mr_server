@@ -11,6 +11,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <iostream>
+#include <signal.h>
 //传入的apo需要重新保存，使得n按顺序
 QString vaa3dPath;
 QMap<QString,QStringList> m_MapImageIdWithRes;
@@ -19,11 +20,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 void processImageSrc();
 int main(int argc, char *argv[])
 {
-
-
-//    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-//       std::cerr<< DB::registerCommunicate({"gfdgddshl44333","","huanglei","123456"});
+    signal(SIGFPE,SIG_IGN);
     vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
     processImageSrc();
     ManageServer server;
@@ -39,7 +37,7 @@ int main(int argc, char *argv[])
             exit(-1);
         }else
         {
-            qDebug()<<"server(2.0.5.0) for vr_farm started!\nBuild "<<__DATE__<<__TIME__;
+            qDebug()<<"server(2.0.5.1) for vr_farm started!\nBuild "<<__DATE__<<__TIME__;
         }
     }
     return a.exec();

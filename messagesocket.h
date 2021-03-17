@@ -19,8 +19,8 @@ public slots:
         if(this==p)
         {
             this->socket->disconnectFromHost();
-            while(this->socket->state()!=QTcpSocket::UnconnectedState)
-                this->socket->waitForDisconnected();
+//            while(this->socket->state()!=QTcpSocket::UnconnectedState)
+//                this->socket->waitForDisconnected();
         }
     }
     void slotSendMsg(const QString & str)
@@ -31,6 +31,8 @@ signals:
     void pushMsg(QString );
     void userLogin(QString);
     void getBBSWC(QString);
+    void getscore();
+    void setscore(int);
 private:
     bool processMsg(const QString msg);
     bool processFile(const QString filepath);

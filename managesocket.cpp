@@ -157,6 +157,9 @@ bool ManageSocket::processMsg( const QString rmsg)
             paths.push_back(QCoreApplication::applicationDirPath()+"/resource/music/"+info);
         }
         sendFiles(paths,infos);
+    }else if(msg.startsWith("GETSCORE"))
+    {
+            sendMsg(QString("Score:%1 %2").arg(username).arg(DB::getScore(username)));
     }
     else if(msg.startsWith("GETALLACTIVECollABORATE"))
     {
