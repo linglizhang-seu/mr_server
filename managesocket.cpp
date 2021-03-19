@@ -130,8 +130,12 @@ bool ManageSocket::processMsg( const QString rmsg)
                 out<<str1<<endl<<str2;
                 anofile.close();
 
+
                 writeESWC_file(swcName,nt);
                 writeAPO_file(apoName,cells);
+                QString t=infos[1].section('/',0,-2);
+                QFile(QCoreApplication::applicationDirPath()+"/data"+t+"/msglog/"+infos[1].section("/",-1,-1)+".txt")
+                        .copy(QCoreApplication::applicationDirPath()+"/data"+t+"/msglog/"+apoName.section("/",-1,-1)+".txt");
             }
             auto p=makeMessageServer(infos[2]);
             auto port=p?p->port:"-1";
