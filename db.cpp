@@ -320,8 +320,10 @@ namespace DB {
 
         if(query.execBatch())
         {
+            std::cout<<"set score success"<<endl;
            return true;
         }
+       std::cerr<<"set score failed"<<endl;
         return false;
     }
 }

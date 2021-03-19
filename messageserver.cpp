@@ -127,7 +127,7 @@ void MessageServer::setscores()
         names.push_back(v.username);
         scores.push_back(v.score);
     }
-    if(DB::setScores(names,scores))
+    if(!DB::setScores(names,scores))
         std::cerr<<"Fatal error, write scores error"<<endl;
 }
 
@@ -283,7 +283,7 @@ QMap<QStringList,qint64> MessageServer::autosave()
 }
 QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
 {
-    setscores();
+//    setscores();
     qint64 cnt=savedMessageIndex;
 
     auto nt=V_NeuronSWC_list__2__NeuronTree(segments);
@@ -356,7 +356,7 @@ void MessageServer::drawline(QString msg)
 
     NeuronTree newTempNT=convertMsg2NT(listwithheader,username,from);
     segments.append(NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0]);
-    qDebug()<<"add in seg sucess "<<msg;
+//    qDebug()<<"add in seg sucess "<<msg;
 }
 void MessageServer::delline(QString msg)
 {
@@ -378,7 +378,7 @@ void MessageServer::delline(QString msg)
     if(it!=segments.seg.end())
     {
         segments.seg.erase(it);
-        qDebug()<<"find delete line sucess"<<msg;
+//        qDebug()<<"find delete line sucess"<<msg;
     }else
         qDebug()<<"not find delete line "<<msg;
 }
@@ -404,7 +404,7 @@ void MessageServer::addmarker(QString msg)
         marker.color.b=neuron_type_color[type][2];
     }
     wholePoint.push_back(marker);
-    qDebug()<<"add in seg marker "<<msg;
+//    qDebug()<<"add in seg marker "<<msg;
 }
 void MessageServer::delmarekr(QString msg)
 {
@@ -435,8 +435,8 @@ void MessageServer::delmarekr(QString msg)
     }
     if(index>=0)
     {
-        qDebug()<<"delete marker:"<<wholePoint[index].x<<" "<<wholePoint[index].y<<" "<<wholePoint[index].z
-               <<",msg = "<<msg;
+//        qDebug()<<"delete marker:"<<wholePoint[index].x<<" "<<wholePoint[index].y<<" "<<wholePoint[index].z
+//               <<",msg = "<<msg;
        wholePoint.removeAt(index);
     }else
     {
@@ -470,7 +470,7 @@ void MessageServer::retypeline(QString msg)
         {
             unit.type=newtype;
         }
-        qDebug()<<"find retype line sucess "<<msg;
+//        qDebug()<<"find retype line sucess "<<msg;
         return;
     }
     qDebug()<<"not find retype line "<<msg;
