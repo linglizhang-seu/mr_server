@@ -137,7 +137,7 @@ void MessageServer::incomingConnection(qintptr handle)
 //    qDebug()<<"this....."<<messagesocket;
     QObject::connect(messagesocket,&TcpSocket::tcpdisconnected,this,[=]{
 
-        setscores();
+//        setscores();
         if(!clients.remove(messagesocket))
             qDebug()<<"Confirm:messagesocket not in clients";
         delete messagesocket;
