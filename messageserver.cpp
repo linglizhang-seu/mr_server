@@ -181,7 +181,7 @@ void MessageServer::incomingConnection(qintptr handle)
 
 void MessageServer::userLogin(QString name)
 {
-
+    qDebug()<<"user login:"<<name<<",port="<<port;
     MessageSocket *kp=nullptr;
     {
         for(MessageSocket* key:clients.keys())
@@ -204,7 +204,7 @@ void MessageServer::userLogin(QString name)
     clients.insert(p,info);
     if(kp)
     {
-        qDebug()<<"find same name ,first"<<kp<<",second "<<p;
+        qDebug()<<"find same name ,first"<<kp<<",second "<<p<<",SERVER PORT:"<<port;
 //        clients.remove(kp);
         disconnectName(kp);
     }

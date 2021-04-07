@@ -18,6 +18,7 @@
 QString vaa3dPath;
 QMap<QString,QStringList> m_MapImageIdWithRes;
 QMap<QString,QString> m_MapImageIdWithDir;
+QFile file("log.txt");
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 void processImageSrc();
 
@@ -29,7 +30,12 @@ void signalhandle(int )
 }
 int main(int argc, char *argv[])
 {
+//   auto nt= readSWC_file("C:/Users/penglab/Desktop/zll.eswc");
+//   NeuronTree__2__V_NeuronSWC_list(nt);
+//    return 0;
     QCoreApplication a(argc, argv);
+    qInstallMessageHandler(myMessageOutput);
+    file.open(QIODevice::ReadWrite | QIODevice::Append);
     signal(SIGFPE,SIG_IGN);
     signal(SIGSEGV,signalhandle);
     vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
@@ -84,24 +90,17 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     // 加锁
     static QMutex mutex;
     mutex.lock();
-
     QByteArray localMsg = msg.toLocal8Bit();
-
     // 设置输出信息格式
     QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss : ");
-//    QString strMessage = QString("%1 File:%2  Line:%3  Function:%4  DateTime:%5\n")
-//            .arg(localMsg.constData()).arg(context.file).arg(context.line).arg(context.function).arg(strDateTime);
-    QString strMessage=strDateTime+localMsg.constData()+"\n";
-    // 输出信息至文件中（读写、追加形式）
-    QFile file("log.txt");
-    file.open(QIODevice::ReadWrite | QIODevice::Append);
+    QString strMessage = QString("DateTime:%1 %2\n")
+            .arg(strDateTime)/*.arg(context.file).arg(context.line).arg(context.function)*/.arg(localMsg.constData());
+// File:%2  Line:%3  Function:%4\n
     QTextStream stream(&file);
     stream << strMessage ;
-    std::cerr<<strMessage.toStdString();
     file.flush();
-
-    file.close();
     // 解锁
-    mutex.unlock();
+
     fprintf(stderr,strMessage.toStdString().c_str());
+    mutex.unlock();
 }

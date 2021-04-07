@@ -43,12 +43,12 @@ namespace DB {
             QNetworkAccessManager *accessManager = new QNetworkAccessManager;
             QNetworkRequest request;
             request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
-            request.setRawHeader("AppKey","f7ded615794f989e8d8850c931b1d77a");
+            request.setRawHeader("AppKey","337591b817815b770bc6b7551bb90b28");
             request.setRawHeader("Nonce","12345");
             QDateTime::currentSecsSinceEpoch();
             QString curTime=QString::number(QDateTime::currentSecsSinceEpoch());
             request.setRawHeader("CurTime",curTime.toStdString().c_str());
-            QString appSecret = "9fb785abd90d";
+            QString appSecret = "a7f7660048ae";
             request.setRawHeader("CheckSum",sha1(QString(appSecret+"12345"+curTime).toStdString()).c_str());
             request.setRawHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
             QByteArray postData;
