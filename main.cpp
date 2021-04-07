@@ -5,6 +5,7 @@
 #include <QFile>
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
 #include "manageserver.h"
 //传入的apo需要重新保存，使得n按顺序
 #include "basicdatamanage.h"
@@ -96,6 +97,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     file.open(QIODevice::ReadWrite | QIODevice::Append);
     QTextStream stream(&file);
     stream << strMessage ;
+    std::cerr<<strMessage.toStdString();
     file.flush();
 
     file.close();

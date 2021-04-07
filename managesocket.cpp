@@ -8,6 +8,7 @@
 #include "basicdatamanage.h"
 #include "messageserver.h"
 
+extern QMap<QString,QString> m_MapImageIdWithDir;
 void processInvite(int id)
 {
 
@@ -194,5 +195,6 @@ bool ManageSocket::processFile( const QString filePath)
 
 MessageServer* ManageSocket::makeMessageServer(QString neuron)
 {
+    if(!m_MapImageIdWithDir.contains( neuron.section('/',0,0,QString::SectionSkipEmpty).trimmed())) return nullptr;
     return MessageServer::makeMessageServer(neuron);
 }
