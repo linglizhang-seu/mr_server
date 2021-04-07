@@ -60,7 +60,7 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
 
             if(!f.open(QIODevice::ReadOnly))
             {
-                std::cout<<"can not read file "<<filename.toStdString().c_str()<<","<<f.errorString().toStdString().c_str()<<std::endl;
+                qDebug()<<"can not read file "<<filename.toStdString().c_str()<<","<<f.errorString().toStdString().c_str()<<endl;
                 continue;
             }
             QByteArray fileData=f.readAll();
@@ -198,6 +198,7 @@ void TcpSocket::errorprocess(int errcode,QString msg)
     //4:cannot open file
     //5:read socket != write file
     //6:next read size < 0
+
     std::cerr<<"errorcode = "<<errcode<<",";
     if(errcode==1)
     {

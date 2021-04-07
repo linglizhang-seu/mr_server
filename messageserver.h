@@ -139,7 +139,7 @@ private:
 
     vector<V_NeuronSWC>::iterator findseg(vector<V_NeuronSWC>::iterator begin,vector<V_NeuronSWC>::iterator end,const V_NeuronSWC seg);
 
-    void setscores();
+//    void setscores();
 
 signals:
     /**

@@ -118,18 +118,18 @@ MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObjec
 
 }
 
-void MessageServer::setscores()
-{
-    QStringList names;
-    std::vector<int> scores;
-    for(auto v:clients.values())
-    {
-        names.push_back(v.username);
-        scores.push_back(v.score);
-    }
-    if(!DB::setScores(names,scores))
-        std::cerr<<"Fatal error, write scores error"<<endl;
-}
+//void MessageServer::setscores()
+//{
+//    QStringList names;
+//    std::vector<int> scores;
+//    for(auto v:clients.values())
+//    {
+//        names.push_back(v.username);
+//        scores.push_back(v.score);
+//    }
+//    if(!DB::setScores(names,scores))
+//        std::cerr<<"Fatal error, write scores error"<<endl;
+//}
 
 void MessageServer::incomingConnection(qintptr handle)
 {
@@ -283,13 +283,13 @@ QMap<QStringList,qint64> MessageServer::autosave()
 }
 QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
 {
-//    setscores();
+
     qint64 cnt=savedMessageIndex;
 
     auto nt=V_NeuronSWC_list__2__NeuronTree(segments);
     QString tempAno=neuron;
     QString dirpath=QCoreApplication::applicationDirPath()+"/data";
-//    qDebug()<<dirpath;
+
     if(!QDir(dirpath).exists())
     {
        qDebug()<< QDir(QCoreApplication::applicationDirPath()).mkdir("data");
@@ -305,7 +305,6 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
         }
     }
     QFile anofile(dirpath+tempAno);
-//    qDebug()<<anofile;
     if(anofile.open(QIODevice::WriteOnly))
     {
         QTextStream out(&anofile);
