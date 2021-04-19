@@ -13,10 +13,10 @@
 namespace DB {
     uint count =0;
     QMutex locker;
-    const QString databaseName="BrainTell";
+    const QString databaseName="Hi5";
     const QString dbHostName="localhost";
-    const QString dbUserName="root";
-    const QString dbPassword="1234";
+    const QString dbUserName="hi5";
+    const QString dbPassword="!helloHi5";
 
     const QString TableForUser="TableForUser";
     const QString TableForUserScore="TableForUserScore";
@@ -43,12 +43,12 @@ namespace DB {
             QNetworkAccessManager *accessManager = new QNetworkAccessManager;
             QNetworkRequest request;
             request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
-            request.setRawHeader("AppKey","337591b817815b770bc6b7551bb90b28");
+            request.setRawHeader("AppKey","614728a863de5e1ae3ed42137d0911f6");
             request.setRawHeader("Nonce","12345");
             QDateTime::currentSecsSinceEpoch();
             QString curTime=QString::number(QDateTime::currentSecsSinceEpoch());
             request.setRawHeader("CurTime",curTime.toStdString().c_str());
-            QString appSecret = "a7f7660048ae";
+            QString appSecret = "0b1c781bab70";
             request.setRawHeader("CheckSum",sha1(QString(appSecret+"12345"+curTime).toStdString()).c_str());
             request.setRawHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
             QByteArray postData;
@@ -84,7 +84,7 @@ namespace DB {
         auto db=getNewDbConnection();
         if(!db.open())
         {
-            qDebug()<<"Error:can not connect SQL";
+            qDebug()<<"Error:can not connect SQL,"<<db.lastError().text();
             return false;
         }
         //TableForUser
