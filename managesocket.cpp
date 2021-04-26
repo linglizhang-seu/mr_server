@@ -7,6 +7,7 @@
 #include <QTime>
 #include "basicdatamanage.h"
 #include "messageserver.h"
+extern QSqlDatabase globalDB;
 
 extern QMap<QString,QString> m_MapImageIdWithDir;
 void processInvite(int id)
@@ -25,7 +26,7 @@ bool ManageSocket::processMsg( const QString rmsg)
         //id pass
         //登陆验证
         QStringList res;
-        int ret=DB::userLogin(loginInfo,res);
+        int ret=DB::userLogin(globalDB,loginInfo,res);
         res.push_front(QString::number(ret));
         sendMsg("LOGIN:"+res.join(";;"));
         if(ret)
@@ -38,7 +39,7 @@ bool ManageSocket::processMsg( const QString rmsg)
         QStringList registerInfo=data.split(' ');
         //注册验证
         //id pass name
-        int ret=DB::userRegister(registerInfo);
+        int ret=DB::userRegister(globalDB,registerInfo);
         sendMsg("REGISTER:"+QString::number(ret));
         if(ret) return false;
     }else if(msg.startsWith("FORGETPASSWORD:"))
@@ -47,7 +48,7 @@ bool ManageSocket::processMsg( const QString rmsg)
         //密码找回验证
         //id
         QStringList res;
-        int ret=DB::findPassword(data,res);
+        int ret=DB::findPassword(globalDB,data,res);
         //发送密码邮件
     }else if(msg.startsWith("GETFILELIST:"))
     {
@@ -164,11 +165,11 @@ bool ManageSocket::processMsg( const QString rmsg)
         sendFiles(paths,infos);
     }else if(msg.startsWith("GETSCORE"))
     {
-         sendMsg(QString("Score:%1 %2").arg(username).arg(DB::getScore(username)));
+         sendMsg(QString("Score:%1 %2").arg(username).arg(DB::getScore(globalDB,username)));
     }else if(msg.startsWith("SETSOCRE:"))
     {
         int s=msg.right(msg.size()-QString("SETSOCRE:").size()).toUInt();
-        DB::setScores({username},{s});
+        DB::setScores(globalDB,{username},{s});
     }
     else if(msg.startsWith("GETALLACTIVECollABORATE"))
     {

@@ -6,6 +6,13 @@
 #include <cmath>
 #include <QtGlobal>
 #include <iostream>
+#include <QString>
+#include <QSqlDatabase>
+extern QString databaseName;
+extern QString dbHostName;
+extern QString dbUserName;
+extern QString dbPassword;
+
 namespace Map {
     QMap<QString,MessageServer*> NeuronMapMessageServer;
     QMutex mutex;
@@ -66,6 +73,11 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
             connect(p_thread,&QThread::finished,p,&MessageServer::deleteLater);
             connect(p,SIGNAL(messagecome()),p,SLOT(processmessage()));
             connect(p_thread,SIGNAL(started()),p,SLOT(onstarted()));
+            if(p) p->db=QSqlDatabase::addDatabase("QMYSQL",p->port);
+            p->db.setDatabaseName(databaseName);
+            p->db.setHostName(dbHostName);
+            p->db.setUserName(dbUserName);
+            p->db.setPassword(dbPassword);
             p->moveToThread(p_thread);
             p_thread->start();
             qDebug()<<"create server for "<<neuron<<" success "<<p->port;
@@ -73,6 +85,7 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
             qDebug()<<"Message:failed to create server";
         }
         Map::mutex.unlock();
+
         return p;
 }
 
@@ -200,7 +213,7 @@ void MessageServer::userLogin(QString name)
     info.username=name;
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
-    info.score=DB::getScore(name);
+    info.score=DB::getScore(db,name);
     clients.insert(p,info);
     if(kp)
     {
@@ -523,7 +536,7 @@ int MessageServer::getid(QString username)
 //    return username.toUInt();
     static QMap<QString,int> name_id;
     if(!name_id.contains(username))
-        name_id[username]=DB::getid(username);
+        name_id[username]=DB::getid(db,username);
     return name_id[username];
 }
 

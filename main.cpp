@@ -14,11 +14,22 @@
 #include <iostream>
 #include <signal.h>
 #include <messageserver.h>
+
+#include <QSqlDatabase>
+
 //传入的apo需要重新保存，使得n按顺序
 QString vaa3dPath;
 QMap<QString,QStringList> m_MapImageIdWithRes;
 QMap<QString,QString> m_MapImageIdWithDir;
+QSqlDatabase globalDB=QSqlDatabase::addDatabase("QMYSQL","global");
 QFile file("log.txt");
+
+QString databaseName="Hi5";
+QString dbHostName="localhost";
+QString dbUserName="hi5";
+QString dbPassword="!helloHi5";
+
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 void processImageSrc();
 
@@ -38,6 +49,12 @@ int main(int argc, char *argv[])
     file.open(QIODevice::ReadWrite | QIODevice::Append);
     signal(SIGFPE,SIG_IGN);
     signal(SIGSEGV,signalhandle);
+
+    globalDB.setDatabaseName(databaseName);
+    globalDB.setHostName(dbHostName);
+    globalDB.setUserName(dbUserName);
+    globalDB.setPassword(dbPassword);
+
     vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
     processImageSrc();
     ManageServer server;
@@ -47,7 +64,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }else
     {
-        if(!DB::initDB())
+        if(!DB::initDB(globalDB))
         {
             qDebug()<<"mysql error";
             exit(-1);

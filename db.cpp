@@ -13,29 +13,29 @@
 namespace DB {
     uint count =0;
     QMutex locker;
-    const QString databaseName="Hi5";
-    const QString dbHostName="localhost";
-    const QString dbUserName="hi5";
-    const QString dbPassword="!helloHi5";
+//    const QString databaseName="Hi5";
+//    const QString dbHostName="localhost";
+//    const QString dbUserName="hi5";
+//    const QString dbPassword="!helloHi5";
 
-    const QString TableForUser="TableForUser";
-    const QString TableForUserScore="TableForUserScore";
+    QString TableForUser="TableForUser";
+    QString TableForUserScore="TableForUserScore";
     //    const QString TableForImage="TableForImage";//图像数据表
     //    const QString TableForPreReConstruct="TableForPreReConstruct";//预重建数据表
     //    const QString TableForFullSwc="TableForFullSwc";//重建完成数据表
     //    const QString TableForProof="TableForProof";//校验数据表
     //    const QString TableForCheckResult="TableForCheckResult";//校验结果数据表
-    QSqlDatabase getNewDbConnection()
-    {
-        locker.lock();
-        QSqlDatabase db=QSqlDatabase::addDatabase("QMYSQL",QString::number(count++));
-        locker.unlock();
-        db.setDatabaseName(databaseName);
-        db.setHostName(dbHostName);
-        db.setUserName(dbUserName);
-        db.setPassword(dbPassword);
-        return db;
-    }
+//    QSqlDatabase getNewDbConnection()
+//    {
+//        locker.lock();
+//        QSqlDatabase db=QSqlDatabase::addDatabase("QMYSQL",QString::number(count++));
+//        locker.unlock();
+//        db.setDatabaseName(databaseName);
+//        db.setHostName(dbHostName);
+//        db.setUserName(dbUserName);
+//        db.setPassword(dbPassword);
+//        return db;
+//    }
 
     bool registerCommunicate(const QStringList &registerInfo)
     {
@@ -79,9 +79,9 @@ namespace DB {
             return false;
     }
 
-    bool initDB()
+    bool initDB(QSqlDatabase &db)
     {
-        auto db=getNewDbConnection();
+//        auto db=getNewDbConnection();
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL,"<<db.lastError().text();
@@ -124,9 +124,8 @@ namespace DB {
      * @param passward
      * @return 0:success;-1:db error;-2:no name;-3 wrong password
      */
-    char userLogin(QStringList loginInfo,QStringList & res)
+    char userLogin(QSqlDatabase &db,QStringList loginInfo,QStringList & res)
     {
-        auto db=getNewDbConnection();
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL";
@@ -163,12 +162,11 @@ namespace DB {
      * @param passward
      * @return 0:success;-1:db error;-2:same name;-3
      */
-    char userRegister(const QStringList registerInfo)
+    char userRegister(QSqlDatabase &db,const QStringList registerInfo)
     {
         //username,email,nickname,password,invite
         if(!registerCommunicate(registerInfo))
             return -3;
-        auto db=getNewDbConnection();
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL";
@@ -213,9 +211,8 @@ namespace DB {
     }
 
 
-    char findPassword(QString data,QStringList & res)
+    char findPassword(QSqlDatabase &db,QString data,QStringList & res)
     {
-        auto db=getNewDbConnection();
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL";
@@ -242,9 +239,8 @@ namespace DB {
         }
     }
 
-    int getid(QString userName)
+    int getid(QSqlDatabase &db,QString userName)
     {
-        auto db=getNewDbConnection();
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL";
@@ -268,10 +264,9 @@ namespace DB {
         }
     }
 
-    int getScore(QString userName)
+    int getScore(QSqlDatabase &db,QString userName)
     {
         if(userName.isEmpty()) return -2;
-        auto db=getNewDbConnection();
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL";
@@ -298,9 +293,8 @@ namespace DB {
 
     }
 
-    bool setScores(QStringList userNames,std::vector<int> scores)
+    bool setScores(QSqlDatabase &db,QStringList userNames,std::vector<int> scores)
     {
-        auto db=getNewDbConnection();
         if(!db.open())
         {
             qDebug()<<"Error:can not connect SQL";

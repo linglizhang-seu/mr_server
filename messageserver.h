@@ -171,6 +171,7 @@ signals:
 public:
     QString port;
     QThread *p_thread=nullptr;
+    QSqlDatabase db;
 
 private:
     QString neuron;

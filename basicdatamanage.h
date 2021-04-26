@@ -18,16 +18,16 @@ namespace DB  {
      * @return
      * 返回一个数据库的连接QSqlDatabase
      */
-    QSqlDatabase getNewDbConnection();
-    bool initDB();
+//    QSqlDatabase getNewDbConnection();
+    bool initDB(QSqlDatabase&);
 
-    char userLogin(QStringList loginInfo,QStringList & res);
-    char userRegister(QStringList registerInfo);
-    char findPassword(QString data,QStringList & res);
-    int getid(QString userName);
+    char userLogin(QSqlDatabase&,QStringList loginInfo,QStringList & res);
+    char userRegister(QSqlDatabase&,QStringList registerInfo);
+    char findPassword(QSqlDatabase&,QString data,QStringList & res);
+    int getid(QSqlDatabase&,QString userName);
 
-    int getScore(QString id);
-    bool setScores(QStringList userNames,std::vector<int> scores);
+    int getScore(QSqlDatabase&,QString id);
+    bool setScores(QSqlDatabase&,QStringList userNames,std::vector<int> scores);
      bool registerCommunicate(const QStringList &registerInfo);
 }
 
