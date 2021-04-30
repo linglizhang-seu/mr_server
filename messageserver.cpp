@@ -543,6 +543,7 @@ int MessageServer::getid(QString username)
 MessageServer::~MessageServer()
 {
     delete timer;
+    db.close();
     timer=0;
     if(clients.size()!=0){
         qDebug()<<"error ,when deconstruct MessageServer there are "<<clients.size() <<" connections!";

@@ -21,7 +21,7 @@
 QString vaa3dPath;
 QMap<QString,QStringList> m_MapImageIdWithRes;
 QMap<QString,QString> m_MapImageIdWithDir;
-QSqlDatabase globalDB=QSqlDatabase::addDatabase("QMYSQL","global");
+QSqlDatabase globalDB;
 QFile file("log.txt");
 
 QString databaseName="Hi5";
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     signal(SIGFPE,SIG_IGN);
     signal(SIGSEGV,signalhandle);
 
+    globalDB=QSqlDatabase::addDatabase("QMYSQL","global");
     globalDB.setDatabaseName(databaseName);
     globalDB.setHostName(dbHostName);
     globalDB.setUserName(dbUserName);
