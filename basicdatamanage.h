@@ -29,6 +29,7 @@ namespace DB  {
     int getScore(QSqlDatabase&,QString id);
     bool setScores(QSqlDatabase&,QStringList userNames,std::vector<int> scores);
      bool registerCommunicate(const QStringList &registerInfo);
+     QString getFirstK(QSqlDatabase &db,int K);
 }
 
 

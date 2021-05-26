@@ -7,8 +7,9 @@
 #include <QTime>
 #include "basicdatamanage.h"
 #include "messageserver.h"
+#include <QSet>
 extern QSqlDatabase globalDB;
-
+QSet<QString> ManageSocket::onLineUsers;
 extern QMap<QString,QString> m_MapImageIdWithDir;
 void processInvite(int id)
 {
@@ -22,17 +23,24 @@ bool ManageSocket::processMsg( const QString rmsg)
     if(msg.startsWith("LOGIN:"))
     {
         QString data=msg.right(msg.size()-QString("LOGIN:").size());
-        QStringList loginInfo=data.split(' ');
         //id pass
         //登陆验证
+        QStringList loginInfo=data.split(' ');
         QStringList res;
-        int ret=DB::userLogin(globalDB,loginInfo,res);
+        int ret;
+        if(onLineUsers.contains(loginInfo[0]))
+            ret =-4;
+        else
+            ret=DB::userLogin(globalDB,loginInfo,res);
         res.push_front(QString::number(ret));
         sendMsg("LOGIN:"+res.join(";;"));
         if(ret)
             return false;
         else
+        {
             username=loginInfo[0];
+            onLineUsers.insert(username);
+        }
     }else if(msg.startsWith("REGISTER:"))
     {
         QString data=msg.right(msg.size()-QString("REGISTER:").size());
@@ -171,6 +179,12 @@ bool ManageSocket::processMsg( const QString rmsg)
         int s=msg.right(msg.size()-QString("SETSOCRE:").size()).toUInt();
         DB::setScores(globalDB,{username},{s});
     }
+    else if(msg.startsWith("GETFIRSTK:"))
+    {
+        int k=msg.right(msg.size()-QString("GETFIRSTK:").size()).toUInt();
+        if(!(k>0&&k<11)) k=3;
+        sendMsg("GETFIRSTK:"+DB::getFirstK(globalDB,k));
+    }
     else if(msg.startsWith("GETALLACTIVECollABORATE"))
     {
         //获取当前所有的协作列表
@@ -181,8 +195,6 @@ bool ManageSocket::processMsg( const QString rmsg)
 //        {
 //            res.push_back(it.key()+" "+it.value()->clients.values().first().username);
 //        }
-
-    }else{
 
     }
     return true;

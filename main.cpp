@@ -33,11 +33,12 @@ QString dbPassword="!helloHi5";
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 void processImageSrc();
 
-void signalhandle(int )
+void signalhandle(int k)
 {
-    auto servers=Map::NeuronMapMessageServer.values();
-    for(auto s:servers)
-        s->autosave();
+    qDebug()<<"Main ThreadId:"<<QThread::currentThreadId()<<",Signal "<<k;
+//    auto servers=Map::NeuronMapMessageServer.values();
+//    for(auto s:servers)
+//        s->autosave();
 }
 int main(int argc, char *argv[])
 {
@@ -47,8 +48,9 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     qInstallMessageHandler(myMessageOutput);
     file.open(QIODevice::ReadWrite | QIODevice::Append);
-    signal(SIGFPE,SIG_IGN);
+    signal(SIGFPE,signalhandle);
     signal(SIGSEGV,signalhandle);
+    signal(SIGPIPE,signalhandle);
 
     globalDB=QSqlDatabase::addDatabase("QMYSQL","global");
     globalDB.setDatabaseName(databaseName);

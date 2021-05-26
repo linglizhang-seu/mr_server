@@ -160,7 +160,7 @@ namespace DB {
      * @brief userRegister
      * @param userName
      * @param passward
-     * @return 0:success;-1:db error;-2:same name;-3
+     * @return 0:success;-1:db error;-2:same name;-3:netease error
      */
     char userRegister(QSqlDatabase &db,const QStringList registerInfo)
     {
@@ -319,5 +319,23 @@ namespace DB {
         }
        std::cerr<<"set score failed"<<endl;
         return false;
+    }
+
+    QString getFirstK(QSqlDatabase &db,int K)
+    {
+        QString res;
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+            return res;
+        }
+        QSqlQuery query(db);
+        QString order=QString("select * from %1 order by score desc limit 0,%2").arg(TableForUserScore).arg(K);
+        query.prepare(order);
+        if(query.exec())
+            while (query.next()) {
+                res+=query.value(0).toString()+';'+query.value(1).toString()+';';
+            }
+        return res;
     }
 }

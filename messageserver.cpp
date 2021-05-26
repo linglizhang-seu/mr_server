@@ -13,6 +13,13 @@ extern QString dbHostName;
 extern QString dbUserName;
 extern QString dbPassword;
 
+static void signalhandle(int k)
+{
+    qDebug()<<"Child ThreadId:"<<QThread::currentThreadId()<<",Signal "<<k;
+    auto servers=Map::NeuronMapMessageServer.values();
+    for(auto s:servers)
+        s->autosave();
+}
 namespace Map {
     QMap<QString,MessageServer*> NeuronMapMessageServer;
     QMutex mutex;
@@ -42,6 +49,12 @@ const int neuron_type_color[colorsize][3] = {
     {168, 128, 255}, //	18
         };
 
+void MessageServer:: proSignal()
+{
+    signal(SIGFPE,signalhandle);
+    signal(SIGSEGV,signalhandle);
+    signal(SIGPIPE,signalhandle);
+}
 const QStringList MessageServer::clienttypes={"TeraFly","TeraVR","TeraAI","HI5"};
 
 MessageServer* MessageServer::makeMessageServer(QString neuron)
@@ -79,6 +92,9 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
             p->db.setUserName(dbUserName);
             p->db.setPassword(dbPassword);
             p->moveToThread(p_thread);
+            connect(p_thread,&QThread::started,[=]{
+                p->proSignal();
+            });
             p_thread->start();
             qDebug()<<"create server for "<<neuron<<" success "<<p->port;
         }  catch (...) {
@@ -161,6 +177,7 @@ void MessageServer::incomingConnection(qintptr handle)
              */  
             QTimer::singleShot(60*1000,this,[=]{
                 if(clients.size()) return;
+                db.close();
                 this->close();
                 qDebug()<<"client is 0,should close "<<neuron;
                 save();

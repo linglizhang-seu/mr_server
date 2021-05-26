@@ -6,6 +6,7 @@
 #include "neuron_editing/neuron_format_converter.h"
 #include "messagesocket.h"
 #include <QThread>
+#include <signal.h>
 #include "basicdatamanage.h"
 class MessageServer : public QTcpServer
 {
@@ -93,6 +94,8 @@ public slots:
             clients[kp].score=s;
         }
     }
+
+    void proSignal();
 private:
     /**
      * @brief incomingConnection

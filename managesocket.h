@@ -24,6 +24,7 @@ public:
     {
 
     }
+    static QSet<QString> onLineUsers;
 private:
     /**
      * @brief processMsg 处理command
@@ -45,6 +46,7 @@ private:
      * @return
      */
     MessageServer* makeMessageServer(QString neuron);
+
 };
 #endif // MANAGESOCKET_H
 
