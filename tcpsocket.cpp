@@ -13,12 +13,15 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket,&QTcpSocket::readyRead,this,&TcpSocket::onreadyRead);
     connect(socket,&QTcpSocket::disconnected,this,[=]{
-        socket->deleteLater();
+//        socket->deleteLater();
+        socket->close();
+//        socket->waitForDisconnected();
         socket=nullptr;
         resetDataType();
         qDebug()<<this<<" disocnnect";
         emit tcpdisconnected();
     },Qt::DirectConnection);
+
 //    connect(&timer,&QTimer::timeout,this,[=]{
 //        sendMsg("TestSocketConnection");
 //    },Qt::DirectConnection);
@@ -43,6 +46,8 @@ bool TcpSocket::sendMsg(QString str)
         socket->write(header.toStdString().c_str(),header.size());
         socket->write(data.toStdString().c_str(),data.size());
         socket->flush();
+        qDebug()<<this <<" send :"<<header;
+        qDebug()<<this <<" send :"<<data;
         return true;
     }
     return false;
@@ -72,6 +77,8 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
 
             f.close();
             if(filepath.contains("/tmp/")) f.remove();
+            qDebug()<<this <<" send :"<<header;
+            qDebug()<<this <<" send :"<<filename;
         }
         return true;
     }
