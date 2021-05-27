@@ -35,6 +35,7 @@ public:
      * @param parent
      */
     explicit MessageServer(QString neuron,QString port,QThread *p,QObject *parent = nullptr);
+    explicit MessageServer()=default;
     ~MessageServer();
 
 public slots:
@@ -93,6 +94,12 @@ public slots:
             clients[kp].score=s;
         }
     }
+     void drawline(QString);
+     void delline(QString);
+     void addmarker(QString);
+     void delmarekr(QString);
+     void retypeline(QString);
+     void retypemarker(QString);
 private:
     /**
      * @brief incomingConnection
@@ -119,12 +126,7 @@ private:
     int getid(QString username);
     //**********************************************
 
-    void drawline(QString);
-    void delline(QString);
-    void addmarker(QString);
-    void delmarekr(QString);
-    void retypeline(QString);
-    void retypemarker(QString);
+
 
     NeuronTree convertMsg2NT(QStringList &listwithheader,QString username=0,int from=0);
 
@@ -179,13 +181,15 @@ private:
     QMap<MessageSocket *,UserInfo> clients;//(socket ,(user , msgcntsend))
     QStringList messagelist;
     QList <CellAPO> wholePoint;
-    V_NeuronSWC_list segments;
+
     quint32 savedMessageIndex;
     QFile msgLog;
     QTextStream msglogstream;
     const int defaulttype=3;
     const float ths=1;
     static const QStringList clienttypes;
+public:
+        V_NeuronSWC_list segments;
 
 };
 namespace Map {

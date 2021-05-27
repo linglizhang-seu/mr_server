@@ -30,7 +30,7 @@ QString databaseName="Hi5";
 QString dbHostName="localhost";
 QString dbUserName="hi5";
 QString dbPassword="!helloHi5";
-QString filedir="/Users/huanglei/Desktop/swc";
+QString filedir="/Users/huanglei/Desktop/swc1";
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 void processImageSrc();
@@ -42,53 +42,98 @@ void signalhandle(int )
     for(auto s:servers)
         s->autosave();
 }
+void head1(QString filename);
+void doVersion(QString);
 int main(int argc, char *argv[])
 {
-//   auto nt= readSWC_file("C:/Users/penglab/Desktop/zll.eswc");
-//   NeuronTree__2__V_NeuronSWC_list(nt);
-//    return 0;
     QCoreApplication a(argc, argv);
 
+   auto filenames=QDir(filedir).entryInfoList(QDir::Files);
 
-
-//    qInstallMessageHandler(myMessageOutput);
-//    file.open(QIODevice::ReadWrite | QIODevice::Append);
-//    signal(SIGFPE,SIG_IGN);
-//    signal(SIGSEGV,signalhandle);
-
-//    globalDB=QSqlDatabase::addDatabase("QMYSQL","global");
-//    globalDB.setDatabaseName(databaseName);
-//    globalDB.setHostName(dbHostName);
-//    globalDB.setUserName(dbUserName);
-//    globalDB.setPassword(dbPassword);
-
-//    vaa3dPath=QCoreApplication::applicationDirPath()+"/vaa3d";
-//    processImageSrc();
-//    ManageServer server;
-//    if(!server.listen(QHostAddress::Any,23763))
-//    {
-//        qDebug()<<"Error:cannot start server in port 9999,please check!";
-//        exit(-1);
-//    }else
-//    {
-//        if(!DB::initDB(globalDB))
-//        {
-//            qDebug()<<"mysql error";
-//            exit(-1);
-//        }else
-//        {
-//            qDebug()<<"server(2.0.5.1) for vr_farm started!\nBuild "<<__DATE__<<__TIME__;
-//        }
-//    }
-   QStringList filenames=QDir(filedir).entryList(QDir::Files);
-   for(auto filename:filenames)
+   for(auto &file:filenames)
    {
-       qDebug()<<filename;
-       main_my_type_user(filedir+"/"+filename);
-       main_my_heat(filedir+"/"+filename);
+//        doVersion(filedir+"/"+file.baseName());
+       head1(filedir+"/"+file.baseName());
    }
     exit(0);
     return a.exec();
+}
+bool isOther(const NeuronSWC &n,const NeuronTree &nt,int s)
+{
+    for(auto node:nt.listNeuron)
+    {
+        if(
+          int(node.r)/10!=int(n.r)/10
+        &&node.x>=n.x-s&&node.x<=n.x+s
+        &&node.y>=n.y-s&&node.y<=n.y+s
+        &&node.z>=n.z-s&&node.z<=n.z+s
+                )
+            return true;
+    }
+    return false;
+}
+void head1(QString filename)
+{
+    auto nt=readSWC_file(filename+".eswc");
+    int s=32;
+    for(auto &node:nt.listNeuron)
+    {
+        node.type=isOther(node,nt,s)?2:3;//有其他人->2号色
+    }
+    writeESWC_file(filename+QString("__%1.eswc").arg(s),nt);
+}
+
+void doVersion(QString filename)
+{
+    QStringList ods;
+
+    QFile f(filename+".txt");
+    f.open(QIODevice::ReadOnly|QIODevice::Text);
+   while(!f.atEnd())
+   {
+       auto ss=f.readLine().trimmed();
+       ods.push_back(ss.right(ss.size()-22));
+   }
+    int k=0;
+    for(auto p:{0.125,0.25,0.375,0.625,1.0})
+    {
+        MessageServer s;
+        k=ods.size()*p;
+        for(int i=0;i<k;i++)
+        {
+            QRegExp msgreg("/(.*)_(.*):(.*)");
+            if(msgreg.indexIn(ods[i])!=-1)
+            {
+
+
+                QString operationtype=msgreg.cap(1).trimmed();
+    //                bool isNorm=msgreg.cap(2).trimmed()=="norm";
+                QString operatorMsg=msgreg.cap(3).trimmed();
+                if(operationtype == "drawline" )
+                {
+                    s.drawline(operatorMsg);
+                }
+                else if(operationtype == "delline")
+                {
+                    s.delline(operatorMsg);
+                }
+                else if(operationtype == "addmarker")
+                {
+                   s.addmarker(operatorMsg);
+                }
+                else if(operationtype == "delmarker")
+                {
+                   s.delmarekr(operatorMsg);
+                }
+                else if(operationtype == "retypeline")
+                {
+                   s.retypeline(operatorMsg);
+                }
+            }
+        }
+        writeESWC_file(filename+QString("_%1.eswc").arg(p),V_NeuronSWC_list__2__NeuronTree(s.segments));
+    }
+
 }
 
 void processImageSrc()
