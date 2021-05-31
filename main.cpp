@@ -30,7 +30,7 @@ QString databaseName="Hi5";
 QString dbHostName="localhost";
 QString dbUserName="hi5";
 QString dbPassword="!helloHi5";
-QString filedir="/Users/huanglei/Desktop/swc1";
+QString filedir="/Users/huanglei/Desktop/swc2";
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 void processImageSrc();
@@ -44,6 +44,7 @@ void signalhandle(int )
 }
 void head1(QString filename);
 void doVersion(QString);
+void doVersionNT(QString);
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -53,7 +54,8 @@ int main(int argc, char *argv[])
    for(auto &file:filenames)
    {
 //        doVersion(filedir+"/"+file.baseName());
-       head1(filedir+"/"+file.baseName());
+//       head1(filedir+"/"+file.baseName());
+        doVersionNT(filedir+"/"+file.baseName());
    }
     exit(0);
     return a.exec();
@@ -81,6 +83,26 @@ void head1(QString filename)
         node.type=isOther(node,nt,s)?2:3;//有其他人->2号色
     }
     writeESWC_file(filename+QString("__%1.eswc").arg(s),nt);
+}
+
+bool compare(V_NeuronSWC seg1,V_NeuronSWC seg2)
+{
+    return seg1.row[0].timestamp<seg2.row[0].timestamp;
+}
+
+void doVersionNT(QString filename)
+{
+    auto nt=readSWC_file(filename+".eswc");
+    auto nts=NeuronTree__2__V_NeuronSWC_list(nt);
+    sort(nts.seg.begin(),nts.seg.end(),compare);
+    int cnt=nts.seg.size();
+    for(auto p:{0.125,0.25,0.4,0.6,1.0})
+    {
+        V_NeuronSWC_list nt_;
+        for(int i=0;i<p*cnt;i++)
+            nt_.seg.push_back(nts.seg[i]);
+       writeESWC_file(filename+QString("_%1.eswc").arg(p),V_NeuronSWC_list__2__NeuronTree(nt_));
+    }
 }
 
 void doVersion(QString filename)
