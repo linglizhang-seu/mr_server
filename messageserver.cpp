@@ -234,7 +234,7 @@ void MessageServer::userLogin(QString name)
     clients.insert(p,info);
     if(kp)
     {
-        qDebug()<<"find same name ,first"<<kp<<",second "<<p<<",SERVER PORT:"<<port;
+        qDebug()<<"find same name ,first"<<kp<<" "<<kp->username<<",second "<<p<<",SERVER PORT:"<<port;
 //        clients.remove(kp);
         disconnectName(kp);
     }

@@ -17,10 +17,13 @@ void processInvite(int id)
 }
 bool ManageSocket::processMsg( const QString rmsg)
 {
-    qDebug()<<this<<rmsg;
+    qDebug()<<this <<" "<<username<<" receive:"<<rmsg;
     if(!rmsg.endsWith('\n')) return false;
     QString msg=rmsg.trimmed();
-    if(msg.startsWith("LOGIN:"))
+    if(msg.startsWith("HeartBeat"))
+    {
+        heat=true;
+    }else if(msg.startsWith("LOGIN:"))
     {
         QString data=msg.right(msg.size()-QString("LOGIN:").size());
         //id pass

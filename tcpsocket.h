@@ -31,15 +31,19 @@ public slots:
 public:
     QTcpSocket *socket=nullptr;
     QString username;
+    QTimer timer;
+    bool heat=true;
+
 private:
     qintptr socketDescriptor;
     DataType datatype;
-    QTimer timer;
 
 private:
     void resetDataType();
     char processHeader(const QString msg);
     void errorprocess(int,QString msg="");
+
+
 
 signals:
     void tcpdisconnected();

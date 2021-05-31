@@ -22,7 +22,15 @@ public:
      */
     ManageSocket(qintptr handle,QObject * parent=nullptr):TcpSocket(handle,parent)
     {
-
+        connect(&timer,&QTimer::timeout,[=]{
+            if(heat)
+            {
+                sendMsg("TestSocketConnection");
+                heat=false;
+            }else
+                this->socket->disconnectFromHost();
+        });
+        timer.start(5*1000);
     }
     static QSet<QString> onLineUsers;
 private:

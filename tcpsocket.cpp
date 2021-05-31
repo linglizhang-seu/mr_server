@@ -13,24 +13,15 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket,&QTcpSocket::readyRead,this,&TcpSocket::onreadyRead);
     connect(socket,&QTcpSocket::disconnected,this,[=]{
-//        socket->deleteLater();
-        socket->close();
-//        socket->waitForDisconnected();
-        socket=nullptr;
         resetDataType();
-        qDebug()<<this<<" disocnnect";
+        qDebug()<<this<<" "<<username<<" disocnnect";
         emit tcpdisconnected();
     },Qt::DirectConnection);
-
-//    connect(&timer,&QTimer::timeout,this,[=]{
-//        sendMsg("TestSocketConnection");
-//    },Qt::DirectConnection);
-//    timer.start(2*60*1000);
 
     QTimer::singleShot(60*1000,this,[=]{
         if(username.isEmpty())
         {
-            std::cerr<<"user name is empty,server will close this socket"<<endl;
+            std::cerr<<"user name is empty,server will close this socket"<<std::endl;
             socket->disconnectFromHost();
         }
     });
@@ -46,8 +37,8 @@ bool TcpSocket::sendMsg(QString str)
         socket->write(header.toStdString().c_str(),header.size());
         socket->write(data.toStdString().c_str(),data.size());
         socket->flush();
-        qDebug()<<this <<" send :"<<header;
-        qDebug()<<this <<" send :"<<data;
+        qDebug()<<this<<" send to "<<username+" :" <<header;
+        qDebug()<<this <<" send "<<username+" :"<<data;
         return true;
     }
     return false;
@@ -77,8 +68,8 @@ bool TcpSocket::sendFiles(QStringList filePathList,QStringList fileNameList)
 
             f.close();
             if(filepath.contains("/tmp/")) f.remove();
-            qDebug()<<this <<" send :"<<header;
-            qDebug()<<this <<" send :"<<filename;
+            qDebug()<<this<<" send to "<<username+" :" <<header;
+            qDebug()<<this <<" send to"<<username+" :"<<filename;
         }
         return true;
     }
@@ -95,7 +86,6 @@ void TcpSocket::onreadyRead()
             {
                 QString msg=socket->readLine(1024);
                 int ret=processHeader(msg);
-//                qDebug()<<this<<" process HEADER = "<<ret;
                 if(!ret) onreadyRead();
                 else
                 {

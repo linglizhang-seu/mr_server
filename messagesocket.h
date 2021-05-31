@@ -9,7 +9,7 @@ public:
     explicit MessageSocket(qintptr handle,QObject *parent = nullptr)
         :TcpSocket(handle,parent){}
     ~MessageSocket() {
-        qDebug()<<this<<"delete";
+        qDebug()<<(MessageSocket*)this <<" " <<this->username<<" delete";
     }
 public slots:
     void sendfiles(MessageSocket* socket,QStringList filepath);

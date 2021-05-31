@@ -42,9 +42,6 @@ void signalhandle(int k)
 }
 int main(int argc, char *argv[])
 {
-//   auto nt= readSWC_file("C:/Users/penglab/Desktop/zll.eswc");
-//   NeuronTree__2__V_NeuronSWC_list(nt);
-//    return 0;
     QCoreApplication a(argc, argv);
     qInstallMessageHandler(myMessageOutput);
     file.open(QIODevice::ReadWrite | QIODevice::Append);
