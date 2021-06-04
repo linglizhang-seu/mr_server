@@ -36,9 +36,6 @@ void processImageSrc();
 void signalhandle(int k)
 {
     qDebug()<<"Main ThreadId:"<<QThread::currentThreadId()<<",Signal "<<k;
-//    auto servers=Map::NeuronMapMessageServer.values();
-//    for(auto s:servers)
-//        s->autosave();
 }
 int main(int argc, char *argv[])
 {

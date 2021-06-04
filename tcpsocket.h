@@ -28,6 +28,7 @@ public:
     bool sendFiles(QStringList filePathList,QStringList fileNameList);
 public slots:
     void onreadyRead();
+    void onDiconnected();
 public:
     QTcpSocket *socket=nullptr;
     QString username;

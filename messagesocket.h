@@ -14,19 +14,9 @@ public:
 public slots:
     void sendfiles(MessageSocket* socket,QStringList filepath);
     void sendmsgs(MessageSocket* socket,QStringList msglist);
-    void disconnectName(MessageSocket * p)
-    {
-        if(this==p)
-        {
-            this->socket->disconnectFromHost();
-//            while(this->socket->state()!=QTcpSocket::UnconnectedState)
-//                this->socket->waitForDisconnected();
-        }
-    }
-    void slotSendMsg(const QString & str)
-    {
-        sendMsg(str);
-    }
+    void disconnectName(MessageSocket * p);
+    void slotSendMsg(const QString & str);
+
 signals:
     void pushMsg(QString );
     void userLogin(QString);

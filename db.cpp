@@ -43,12 +43,12 @@ namespace DB {
             QNetworkAccessManager *accessManager = new QNetworkAccessManager;
             QNetworkRequest request;
             request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
-            request.setRawHeader("AppKey","1063145e7579a0935229ddb0d4f7a5b4");
+            request.setRawHeader("AppKey","86a7aa13ac797a95247a03c54ed483b4");
             request.setRawHeader("Nonce","12345");
             QDateTime::currentSecsSinceEpoch();
             QString curTime=QString::number(QDateTime::currentSecsSinceEpoch());
             request.setRawHeader("CurTime",curTime.toStdString().c_str());
-            QString appSecret = "fec12215822f";
+            QString appSecret = "3272122d3bdf";
             request.setRawHeader("CheckSum",sha1(QString(appSecret+"12345"+curTime).toStdString()).c_str());
             request.setRawHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
             QByteArray postData;
@@ -60,10 +60,11 @@ namespace DB {
             QObject::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
             eventLoop.exec(QEventLoop::ExcludeUserInputEvents);
 
-            if(reply->error()==QNetworkReply::NoError)
+            auto res=reply->error();
+            if(QNetworkReply::NoError)
             {
                 QByteArray bytes = reply->readAll();      //读取所有字节；
-                std::cerr<<bytes.toStdString().c_str();
+                qDebug()<<bytes;
                 QJsonParseError error;
                 QJsonDocument doucment = QJsonDocument::fromJson(bytes, &error);
                 if (doucment.isObject())
@@ -75,6 +76,9 @@ namespace DB {
                     if (obj.contains("code")&&obj.value("code").toInt()==200)
                             return true;
                 }
+            }else
+            {
+                qDebug()<<res;
             }
             return false;
     }

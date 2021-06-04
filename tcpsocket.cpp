@@ -12,13 +12,10 @@ TcpSocket::TcpSocket(qintptr handle,QObject *parent) : QObject(parent)
     socket=new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket,&QTcpSocket::readyRead,this,&TcpSocket::onreadyRead);
-    connect(socket,&QTcpSocket::disconnected,this,[=]{
-        resetDataType();
-        qDebug()<<this<<" "<<username<<" disocnnect";
-        emit tcpdisconnected();
-    },Qt::DirectConnection);
+//    connect(socket,&QTcpSocket::disconnected,this,&QTcpSocket::onDisconnected,Qt::DirectConnection);
+    connect(socket,&QTcpSocket::disconnected,this,&TcpSocket::onDiconnected,Qt::DirectConnection);
 
-    QTimer::singleShot(60*1000,this,[=]{
+    QTimer::singleShot(60*1000,this,[&]{
         if(username.isEmpty())
         {
             std::cerr<<"user name is empty,server will close this socket"<<std::endl;
@@ -221,4 +218,11 @@ void TcpSocket::errorprocess(int errcode,QString msg)
 //    while (this->socket->state()!=QAbstractSocket::UnconnectedState) {
 //        this->socket->waitForDisconnected();
 //    }
+}
+
+void TcpSocket::onDiconnected()
+{
+    resetDataType();
+    qDebug()<<this<<" "<<username<<" disocnnect";
+    emit tcpdisconnected();
 }

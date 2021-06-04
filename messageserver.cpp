@@ -79,25 +79,24 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
             }
         }
         MessageServer* p=0;
+        QThread *p_thread=nullptr;
         try {
-            QThread * p_thread = getNewThread();
+            p_thread = getNewThread();
             p = new MessageServer(neuron,messageport,p_thread);
             Map::NeuronMapMessageServer.insert(neuron,p);
             connect(p_thread,&QThread::finished,p,&MessageServer::deleteLater);
             connect(p,SIGNAL(messagecome()),p,SLOT(processmessage()));
-            connect(p_thread,SIGNAL(started()),p,SLOT(onstarted()));
-            if(p) p->db=QSqlDatabase::addDatabase("QMYSQL",p->port);
-            p->db.setDatabaseName(databaseName);
-            p->db.setHostName(dbHostName);
-            p->db.setUserName(dbUserName);
-            p->db.setPassword(dbPassword);
+            connect(p_thread,SIGNAL(started()),p,SLOT(onstarted()),Qt::DirectConnection);
             p->moveToThread(p_thread);
-            connect(p_thread,&QThread::started,[=]{
-                p->proSignal();
-            });
+            connect(p_thread,&QThread::started,p,&MessageServer::proSignal);
             p_thread->start();
             qDebug()<<"create server for "<<neuron<<" success "<<p->port;
         }  catch (...) {
+            if(p_thread)
+            {
+                p_thread->quit();
+                p_thread=0;
+            }
             qDebug()<<"Message:failed to create server";
         }
         Map::mutex.unlock();
@@ -122,7 +121,6 @@ MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObjec
     wholePoint=readAPO_file(filepaths.at(1));
     auto NT=readSWC_file(filepaths.at(2));
     segments=NeuronTree__2__V_NeuronSWC_list(NT);
-
     if(!this->listen(QHostAddress::Any,this->port.toInt()))
     {
         qDebug()<<"cannot listen messageserver in port "<<this->port;
@@ -132,65 +130,15 @@ MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObjec
         qDebug()<<"messageserver setup "<<this->neuron<<" "<<this->port;
     }
 
-    {
-        if(!QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)+"/msglog").exists())
-        {
-            QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)).mkdir("msglog");
-        }
-        msgLog.setFileName(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)+"/msglog/"+neuron.section('/',-1,-1)+".txt");
-        if(!msgLog.open(QIODevice::Append|QIODevice::Text|QIODevice::WriteOnly))
-        {
-            qDebug()<<"failed to open msglog file for "<<this->neuron<<msgLog.errorString();
-        }else
-        msglogstream.setDevice(&msgLog);
-    }
-
 }
-
-//void MessageServer::setscores()
-//{
-//    QStringList names;
-//    std::vector<int> scores;
-//    for(auto v:clients.values())
-//    {
-//        names.push_back(v.username);
-//        scores.push_back(v.score);
-//    }
-//    if(!DB::setScores(names,scores))
-//        std::cerr<<"Fatal error, write scores error"<<endl;
-//}
 
 void MessageServer::incomingConnection(qintptr handle)
 {
     MessageSocket* messagesocket = new MessageSocket(handle);
-//    qDebug()<<"this....."<<messagesocket;
-    QObject::connect(messagesocket,&TcpSocket::tcpdisconnected,this,[=]{
 
-//        setscores();
-        if(!clients.remove(messagesocket))
-            qDebug()<<"Confirm:messagesocket not in clients";
-        delete messagesocket;
-
-        if(clients.size()==0) {
-            /**
-             * 协作结束，关闭该服务器，保存文件，释放招用端口号
-             */  
-            QTimer::singleShot(60*1000,this,[=]{
-                if(clients.size()) return;
-                db.close();
-                this->close();
-                qDebug()<<"client is 0,should close "<<neuron;
-                save();
-                Map::NeuronMapMessageServer.remove(this->neuron);
-                qDebug()<<this->neuron<<" has been delete ";
-                p_thread->quit();
-            });
-        }else
-        {
-            emit sendToAll("/users:"+getUserList().join(";"));
-        }
-    },Qt::DirectConnection);
-
+//    QObject::connect(messagesocket,&TcpSocket::tcpdisconnected,this,MessageServer::sockDisconnect,Qt::DirectConnection);
+    connect(messagesocket,&TcpSocket::tcpdisconnected,this,&MessageServer::sockDisconnect);
+//    connect(shutdownTimer,&QTimer::timeout,this,&MessageServer::shutdown);/
     connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(slotSendMsg(const QString &)),Qt::DirectConnection);
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)),Qt::DirectConnection);
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)),Qt::DirectConnection);
@@ -198,14 +146,7 @@ void MessageServer::incomingConnection(qintptr handle)
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
     connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
     connect(messagesocket,SIGNAL(getBBSWC(QString)),this,SLOT(getBBSWC(QString)));
-    connect(messagesocket,&MessageSocket::getscore,this,[=]{
-         MessageSocket *kp=(MessageSocket*)sender();
-         if(clients.contains(kp))
-         {
-            emit  sendmsgs(kp,{QString("Score:%1 %2").arg(clients[kp].username).arg(clients[kp].score)});
-         }else
-             emit  sendmsgs(kp,{QString("Please login before getscores!")});
-    });
+    connect(messagesocket,&MessageSocket::getscore,this,&MessageServer::getScore);
     connect(messagesocket,SIGNAL(setscore(int)),this,SLOT(setscore(int)));
 }
 
@@ -231,11 +172,11 @@ void MessageServer::userLogin(QString name)
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
     info.score=DB::getScore(db,name);
+
     clients.insert(p,info);
     if(kp)
     {
         qDebug()<<"find same name ,first"<<kp<<" "<<kp->username<<",second "<<p<<",SERVER PORT:"<<port;
-//        clients.remove(kp);
         disconnectName(kp);
     }
     emit sendToAll("/users:"+getUserList().join(";"));
@@ -334,11 +275,14 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
             wholePoint[i].n=i;
         }
     }
+    qDebug()<<"save:1";
     QFile anofile(dirpath+tempAno);
     if(anofile.open(QIODevice::WriteOnly))
     {
         QTextStream out(&anofile);
-        out<<"APOFILE="+tempAno.section('/',-1)+".apo"<<endl<<"SWCFILE="+tempAno.section('/',-1)+".eswc";
+        qDebug()<<"save:2";
+        out<<QString("APOFILE="+tempAno.section('/',-1)+".apo")<<endl<<QString("SWCFILE="+tempAno.section('/',-1)+".eswc");
+        qDebug()<<"save:3";
         anofile.close();
 
         writeESWC_file(dirpath+tempAno+".eswc",nt);
@@ -347,6 +291,7 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     {
         qDebug()<<anofile.errorString();
     }
+    qDebug()<<"save:4";
     return {  {{dirpath+tempAno,dirpath+tempAno+".apo",dirpath+tempAno+".eswc"},cnt}};
 }
 QStringList MessageServer::getUserList()
@@ -560,8 +505,12 @@ int MessageServer::getid(QString username)
 MessageServer::~MessageServer()
 {
     delete timer;
+    delete shutdownTimer;
     db.close();
+    QSqlDatabase::removeDatabase(port+neuron);
+    Map::NeuronMapMessageServer.remove(this->neuron);
     timer=0;
+    shutdownTimer=0;
     if(clients.size()!=0){
         qDebug()<<"error ,when deconstruct MessageServer there are "<<clients.size() <<" connections!";
         auto plist=clients.keys();
@@ -656,12 +605,103 @@ vector<V_NeuronSWC>::iterator MessageServer::findseg(vector<V_NeuronSWC>::iterat
     return result;
 }
 
+void MessageServer::getBBSWC(QString paraStr)
+{
+    if(paraStr.isEmpty())
+    {
+        auto t=autosave();
+        auto p=(MessageSocket*)(sender());
+        emit sendfiles(p,t.keys().at(0));
+        clients[p].sendedsize=savedMessageIndex;
+    }
+    else
+    {
+        auto swc_name_path=IP::getSwcInBlock(paraStr,segments);
+        auto apo_name_path=IP::getApoInBlock(paraStr,wholePoint);
+        emit sendfiles((MessageSocket*)(sender()),{swc_name_path.at(1),apo_name_path.at(1)});
+        clients[(MessageSocket*)(sender())].sendedsize=savedMessageIndex;
+    }
+}
+
+void MessageServer::setscore(int s)
+{
+    MessageSocket *kp=(MessageSocket*)sender();
+    if(clients.contains(kp))
+    {
+        clients[kp].score=s;
+    }
+}
+
+void MessageServer::sockDisconnect()
+{
+    MessageSocket* p=(MessageSocket*)(sender());
+    if(!clients.remove(p))
+        qDebug()<<"Confirm:messagesocket not in clients";
+
+    if(clients.size()==0)
+    {
+        shutdownTimer->start(60*1000);
+//        shutdown();
+    }else {
+        emit sendToAll("/users:"+getUserList().join(";"));
+    }
+    p->deleteLater();
+}
+
+void MessageServer::shutdown()
+{
+    if(clients.size())
+    {
+        shutdownTimer->stop();
+    }
+    else
+    {
+        qDebug()<<"client is 0,should close "<<neuron;
+        save();
+        qDebug()<<"save success";
+
+        qDebug()<<this->neuron<<" has been delete ";
+        p_thread->quit();
+    }
+}
+
+void MessageServer::getScore()
+{
+    MessageSocket *kp=(MessageSocket*)sender();
+    if(clients.contains(kp))
+    {
+       emit  sendmsgs(kp,{QString("Score:%1 %2").arg(clients[kp].username).arg(clients[kp].score)});
+    }else
+        emit  sendmsgs(kp,{QString("Please login before getscores!")});
+}
+
+void MessageServer::onstarted()
+{
+    shutdownTimer=new QTimer;
+    connect(shutdownTimer,&QTimer::timeout,this,&MessageServer::shutdown,Qt::DirectConnection);
 
 
+    {
+        if(!QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)+"/msglog").exists())
+        {
+            QDir(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)).mkdir("msglog");
+        }
+        msgLog.setFileName(QCoreApplication::applicationDirPath()+"/data"+neuron.section("/",0,-2)+"/msglog/"+neuron.section('/',-1,-1)+".txt");
+        if(!msgLog.open(QIODevice::Append|QIODevice::Text|QIODevice::WriteOnly))
+        {
+            qDebug()<<"failed to open msglog file for "<<this->neuron<<msgLog.errorString();
+        }else
+        msglogstream.setDevice(&msgLog);
+    }
+    qDebug()<<"Set up databse :"<<port+neuron;
 
-
-
-
+    db=QSqlDatabase::addDatabase("QMYSQL",port+neuron);
+    db.setDatabaseName(databaseName);
+    db.setHostName(dbHostName);
+    db.setUserName(dbUserName);
+    db.setPassword(dbPassword);
+    qDebug()<<"Set up databse :"<<port+neuron<<" end";
+}
 
 
 

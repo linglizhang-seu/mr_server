@@ -8,6 +8,7 @@
 #include <QThread>
 #include <signal.h>
 #include "basicdatamanage.h"
+#include <QSqlDatabase>
 class MessageServer : public QTcpServer
 {
     struct UserInfo{
@@ -64,38 +65,18 @@ public slots:
      */
     QMap<QStringList,qint64> autosave();//
 
-    void getBBSWC(QString paraStr)
-    {
-        if(paraStr.isEmpty())
-        {
-            auto t=autosave();
-            auto p=(MessageSocket*)(sender());
-            emit sendfiles(p,t.keys().at(0));
-            clients[p].sendedsize=savedMessageIndex;
-        }
-        else
-        {
-            auto swc_name_path=IP::getSwcInBlock(paraStr,segments);
-            auto apo_name_path=IP::getApoInBlock(paraStr,wholePoint);
-            emit sendfiles((MessageSocket*)(sender()),{swc_name_path.at(1),apo_name_path.at(1)});
-            clients[(MessageSocket*)(sender())].sendedsize=savedMessageIndex;
-        }
-    }
-    void onstarted()
-    {
+    void getBBSWC(QString paraStr);
+    void onstarted();
 
-    }
-
-    void setscore(int s)
-    {
-        MessageSocket *kp=(MessageSocket*)sender();
-        if(clients.contains(kp))
-        {
-            clients[kp].score=s;
-        }
-    }
+    void setscore(int s);
 
     void proSignal();
+
+    void sockDisconnect();
+
+    void shutdown();
+
+    void getScore();
 private:
     /**
      * @brief incomingConnection
@@ -179,6 +160,7 @@ public:
 private:
     QString neuron;
     QTimer *timer;
+    QTimer *shutdownTimer;
     QMap<MessageSocket *,UserInfo> clients;//(socket ,(user , msgcntsend))
     QStringList messagelist;
     QList <CellAPO> wholePoint;

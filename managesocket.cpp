@@ -11,6 +11,33 @@
 extern QSqlDatabase globalDB;
 QSet<QString> ManageSocket::onLineUsers;
 extern QMap<QString,QString> m_MapImageIdWithDir;
+
+ManageSocket::ManageSocket(qintptr handle,QObject * parent):TcpSocket(handle,parent)
+{
+    connect(&timer,&QTimer::timeout,this,&ManageSocket::slotTestConnect);
+    QObject::connect(this,&TcpSocket::tcpdisconnected,this,&ManageSocket::slotDisconnect,Qt::DirectConnection);
+    timer.start(5*1000);
+}
+
+void ManageSocket::slotDisconnect()
+{
+    if(!this->username.isEmpty())
+    {
+        qDebug()<<"remove "<<this->username<< "from Set"<< ManageSocket::onLineUsers.remove(this->username);
+    }
+    this->deleteLater();
+}
+
+void ManageSocket::slotTestConnect()
+{
+    if(heat)
+    {
+        sendMsg("TestSocketConnection");
+        heat=false;
+    }else
+        this->socket->disconnectFromHost();
+}
+
 void processInvite(int id)
 {
 

@@ -12,10 +12,7 @@ void ManageServer::incomingConnection(qintptr handle)
 {
     ManageSocket * manageSokcet = new ManageSocket(handle);
     qDebug()<<manageSokcet<<" "<<manageSokcet->username <<" connect";
-    QObject::connect(manageSokcet,&TcpSocket::tcpdisconnected,this,[=]{
-        if(!manageSokcet->username.isEmpty())
-              qDebug()<<"remove "<<manageSokcet->username<< "from Set"<< ManageSocket::onLineUsers.remove(manageSokcet->username);
-         manageSokcet->deleteLater();
-    },Qt::DirectConnection);
+
 }
+
 

@@ -20,19 +20,12 @@ public:
      * 初始化类的各个属性，建立一个新的QTcpSocket，并设置其socket描述符
      * 建立该对象的信号和槽连接     *
      */
-    ManageSocket(qintptr handle,QObject * parent=nullptr):TcpSocket(handle,parent)
-    {
-        connect(&timer,&QTimer::timeout,[=]{
-            if(heat)
-            {
-                sendMsg("TestSocketConnection");
-                heat=false;
-            }else
-                this->socket->disconnectFromHost();
-        });
-        timer.start(5*1000);
-    }
+    ManageSocket(qintptr handle,QObject * parent=nullptr);
     static QSet<QString> onLineUsers;
+public slots:
+    void slotDisconnect();
+
+    void slotTestConnect();
 private:
     /**
      * @brief processMsg 处理command

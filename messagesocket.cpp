@@ -79,3 +79,17 @@ bool MessageSocket::processFile(const QString filepath)
 {
     return true;
 }
+
+void MessageSocket::disconnectName(MessageSocket * p)
+{
+    if(this==p)
+    {
+        this->socket->disconnectFromHost();
+//            while(this->socket->state()!=QTcpSocket::UnconnectedState)
+//                this->socket->waitForDisconnected();
+    }
+}
+void MessageSocket::slotSendMsg(const QString & str)
+{
+    sendMsg(str);
+}
