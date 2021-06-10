@@ -24,6 +24,8 @@ namespace IP {
 
     QString getImagePath(QString imageId,int res)
     {
+        if(!m_MapImageIdWithRes.contains(imageId))
+            return "";
         try {
             qDebug()<<m_MapImageIdWithDir;
             qDebug()<<m_MapImageIdWithRes;

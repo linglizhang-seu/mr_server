@@ -4,7 +4,7 @@
 inline QThread* getNewThread()
 {
     auto p=new QThread();
-    QObject::connect(p,&QThread::finished,p,&QThread::deleteLater);
+
     return p;
 }
 

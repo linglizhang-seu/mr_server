@@ -40,6 +40,7 @@ namespace DB {
     bool registerCommunicate(const QStringList &registerInfo)
     {
 
+
             QNetworkAccessManager *accessManager = new QNetworkAccessManager;
             QNetworkRequest request;
             request.setUrl(QUrl("https://api.netease.im/nimserver/user/create.action"));
@@ -61,7 +62,7 @@ namespace DB {
             eventLoop.exec(QEventLoop::ExcludeUserInputEvents);
 
             auto res=reply->error();
-            if(QNetworkReply::NoError)
+            if(res==QNetworkReply::NoError)
             {
                 QByteArray bytes = reply->readAll();      //读取所有字节；
                 qDebug()<<bytes;
@@ -79,8 +80,9 @@ namespace DB {
             }else
             {
                 qDebug()<<res;
+                return false;
             }
-            return false;
+
     }
 
     bool initDB(QSqlDatabase &db)

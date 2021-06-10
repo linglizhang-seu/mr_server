@@ -85,10 +85,11 @@ MessageServer* MessageServer::makeMessageServer(QString neuron)
             p = new MessageServer(neuron,messageport,p_thread);
             Map::NeuronMapMessageServer.insert(neuron,p);
             connect(p_thread,&QThread::finished,p,&MessageServer::deleteLater);
-            connect(p,SIGNAL(messagecome()),p,SLOT(processmessage()));
+            connect(p_thread,&QThread::finished,p_thread,&QThread::deleteLater);
             connect(p_thread,SIGNAL(started()),p,SLOT(onstarted()),Qt::DirectConnection);
-            p->moveToThread(p_thread);
             connect(p_thread,&QThread::started,p,&MessageServer::proSignal);
+            connect(p,SIGNAL(messagecome()),p,SLOT(processmessage()));
+            p->moveToThread(p_thread);
             p_thread->start();
             qDebug()<<"create server for "<<neuron<<" success "<<p->port;
         }  catch (...) {
@@ -275,14 +276,14 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
             wholePoint[i].n=i;
         }
     }
-    qDebug()<<"save:1";
+
     QFile anofile(dirpath+tempAno);
     if(anofile.open(QIODevice::WriteOnly))
     {
         QTextStream out(&anofile);
-        qDebug()<<"save:2";
+
         out<<QString("APOFILE="+tempAno.section('/',-1)+".apo")<<endl<<QString("SWCFILE="+tempAno.section('/',-1)+".eswc");
-        qDebug()<<"save:3";
+
         anofile.close();
 
         writeESWC_file(dirpath+tempAno+".eswc",nt);
@@ -291,7 +292,6 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     {
         qDebug()<<anofile.errorString();
     }
-    qDebug()<<"save:4";
     return {  {{dirpath+tempAno,dirpath+tempAno+".apo",dirpath+tempAno+".eswc"},cnt}};
 }
 QStringList MessageServer::getUserList()
@@ -662,6 +662,7 @@ void MessageServer::shutdown()
 
         qDebug()<<this->neuron<<" has been delete ";
         p_thread->quit();
+        p_thread=nullptr;
     }
 }
 
