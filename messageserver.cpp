@@ -254,6 +254,7 @@ void MessageServer::processmessage()
                 }
 
             }
+            qDebug()<<"End process "<<savedMessageIndex;
 
 
 

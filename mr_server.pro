@@ -22,7 +22,8 @@ SOURCES += \
         neuron_editing/neuron_format_converter.cpp \
         neuron_editing/neuron_sim_scores.cpp \
         neuron_editing/neuron_xforms.cpp \
-        neuron_editing/v_neuronswc.cpp
+        neuron_editing/v_neuronswc.cpp \
+        simclient.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -40,9 +41,11 @@ HEADERS += \
     managesocket.h \
     messageserver.h \
     messagesocket.h \
+    mytest.h \
     neuron_editing/apo_xforms.h \
     neuron_editing/global_feature_compute.h \
     neuron_editing/neuron_format_converter.h \
     neuron_editing/neuron_sim_scores.h \
     neuron_editing/neuron_xforms.h \
-    neuron_editing/v_neuronswc.h
+    neuron_editing/v_neuronswc.h \
+    simclient.h

@@ -34,6 +34,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     fprintf(stderr,strMessage.toStdString().c_str());
 }
 
+
 int main(int argc, char *argv[])
 {
     qInstallMessageHandler(myMessageOutput);
