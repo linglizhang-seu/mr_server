@@ -29,6 +29,7 @@ QString dbHostName="localhost";
 QString dbUserName="hi5";
 QString dbPassword="!helloHi5";
 
+QTimer ziptimer;
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 void processImageSrc();
@@ -70,6 +71,16 @@ int main(int argc, char *argv[])
             qDebug()<<"server(2.0.5.1) for vr_farm started!\nBuild "<<__DATE__<<__TIME__;
         }
     }
+
+    {
+        QTimer timer;
+        QObject::connect(&timer,&QTimer::timeout,[&]{
+            DB::zipDayTask(globalDB,QCoreApplication::applicationDirPath()+"/zipdir");
+            timer.start(24*2600*1000-QTime::currentTime().msecsSinceStartOfDay());
+        });
+        timer.start(24*2600*1000-QTime::currentTime().msecsSinceStartOfDay());
+    }
+
     return a.exec();
 }
 

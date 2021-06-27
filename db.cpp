@@ -20,6 +20,7 @@ namespace DB {
 
     QString TableForUser="TableForUser";
     QString TableForUserScore="TableForUserScore";
+    QString TableForSomaList="somaList";
     //    const QString TableForImage="TableForImage";//图像数据表
     //    const QString TableForPreReConstruct="TableForPreReConstruct";//预重建数据表
     //    const QString TableForFullSwc="TableForFullSwc";//重建完成数据表
@@ -121,6 +122,18 @@ namespace DB {
                 return false;
             }
         }
+
+        {
+            QString order="id varchar(100) primary key not null, x int not null, y int not null, z int not null,acktime Date";
+            QString sql=QString("create table if not exists %1 (%2)").arg(TableForSomaList).arg(order);
+            if(!query.exec(sql)){
+
+                qDebug()<<query.lastError().text();
+                return false;
+            }
+        }
+
+
         return true;
     }
 
@@ -344,4 +357,110 @@ namespace DB {
             }
         return res;
     }
+
+    void zipDayTask(QSqlDatabase &db,QString dirname)
+    {
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+        }
+        QSqlQuery query(db);
+        QString order=QString("select id,x,y,z from %1 where acktime = %2")
+                .arg(TableForSomaList).
+                arg(QDate::currentDate().addDays(-1).toString("yyyy-MM-DD"));
+
+        query.prepare(order);
+        if(query.exec())
+        {
+            QMap<QString,QVector<int>> somalist;
+            while(query.next())
+            {
+                somalist[query.value(0).toString()]={query.value(1).toInt(),query.value(2).toInt(),query.value(3).toInt()};
+            }
+            {
+                auto tempName=QCoreApplication::applicationDirPath()+"/tmp";
+                QDir dir(tempName);
+                auto foldname=QDate::currentDate().toString("yyyy-MM-DD");
+                dir.mkdir(foldname);
+                for(auto s:somalist.keys())
+                {
+                    QString brainId=s.split("_").at(0);
+                    QFile::copy(QCoreApplication::applicationDirPath()+"/data/"+brainId+"/"+s+"/"+s+".ano",
+                                tempName+"/"+foldname+"/"+s+".ano");
+                    QFile::copy(QCoreApplication::applicationDirPath()+"/data/"+brainId+"/"+s+"/"+s+".ano.apo",
+                                tempName+"/"+foldname+"/"+s+".ano.apo");
+
+                    auto nt=readSWC_file(QCoreApplication::applicationDirPath()+"/data/"+brainId+"/"+s+"/"+s+".ano.eswc");
+                    for(auto &node:nt.listNeuron)
+                    {
+                        node.x+=(somalist[s][0]-256);
+                        node.y+=(somalist[s][1]-256);
+                        node.z+=(somalist[s][2]-256);
+                    }
+                    writeESWC_file(tempName+"/"+foldname+"/"+s+".ano.eswc",nt);
+                }
+                system(QString("zip -q -r %1/%2.zip %3").arg(dirname).arg(foldname).arg(tempName+"/"+foldname).toStdString().c_str());
+                dir.cd(foldname);dir.removeRecursively();
+            }
+        }
+
+    }
+    bool setAck(QSqlDatabase &db,QString id)
+    {
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+        }
+        QSqlQuery query(db);
+        QString order=QString("update %1 set acktime = NOW()").arg(TableForSomaList);
+        if(!query.exec())
+        {
+            return false;
+        }
+        return true;
+    }
+
+    bool insertAck(QSqlDatabase &db,QString somalist)
+    {
+        if(!db.open())
+        {
+            qDebug()<<"Error:can not connect SQL";
+        }
+        QSqlQuery query(db);
+        QVector<QString> ss;
+        QVariantList xs,ys,zs;
+        auto somas=QDir(somalist).entryInfoList(QDir::Files);
+        for(auto s:somas)
+        {
+            auto apo=readAPO_file(s.absoluteFilePath());
+            ss.push_back(s.baseName());
+            xs<<int(apo.at(0).x);
+            ys<<int(apo.at(0).y);
+            zs<<int(apo.at(0).z);
+
+            QDir dir(QCoreApplication::applicationDirPath()+"/data");
+            dir.mkdir(s.baseName().split('_').at(0));
+            dir.cd(s.baseName().split('_').at(0));
+            dir.mkdir(s.baseName());
+            QFile f(QCoreApplication::applicationDirPath()+"/data/"
+                    +s.baseName().split('_').at(0)
+                    +"/"+s.baseName()
+                    +"/"+s.baseName()
+                    +QString("_x%1.000_y%2.000_z%3.000.ano")
+                    .arg(int(apo.at(0).x))
+                    .arg(int(apo.at(0).y))
+                    .arg(int(apo.at(0).z))
+                    );
+        }
+        QString order = "INSERT INTO %1 (id,x,y,z) Values(?,?,?,?)";
+        query.prepare(order);
+        query.addBindValue(ss);
+        query.addBindValue(xs);
+        query.addBindValue(ys);
+        query.addBindValue(zs);
+        if(!query.execBatch())
+            return false;
+        return true;
+    }
+
 }

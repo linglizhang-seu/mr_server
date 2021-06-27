@@ -23,6 +23,7 @@ signals:
     void getBBSWC(QString);
     void getscore();
     void setscore(int);
+    void ackNeuron(QString);
 private:
     bool processMsg(const QString msg);
     bool processFile(const QString filepath);

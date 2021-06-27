@@ -149,6 +149,7 @@ void MessageServer::incomingConnection(qintptr handle)
     connect(messagesocket,SIGNAL(getBBSWC(QString)),this,SLOT(getBBSWC(QString)));
     connect(messagesocket,&MessageSocket::getscore,this,&MessageServer::getScore);
     connect(messagesocket,SIGNAL(setscore(int)),this,SLOT(setscore(int)));
+    connect(messagesocket,SIGNAL(ackNeuron(QString)),this,SLOT(ackNeuron(QString)));
 }
 
 void MessageServer::userLogin(QString name)
@@ -245,6 +246,7 @@ void MessageServer::processmessage()
                 {
                     retypeline(operatorMsg);
                 }
+
             }
         }
     }
@@ -674,6 +676,11 @@ void MessageServer::getScore()
        emit  sendmsgs(kp,{QString("Score:%1 %2").arg(clients[kp].username).arg(clients[kp].score)});
     }else
         emit  sendmsgs(kp,{QString("Please login before getscores!")});
+}
+
+void MessageServer::ackNeuron(QString id)
+{
+    DB::setAck(db,id);
 }
 
 void MessageServer::onstarted()

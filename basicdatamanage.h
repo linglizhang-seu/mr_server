@@ -30,6 +30,9 @@ namespace DB  {
     bool setScores(QSqlDatabase&,QStringList userNames,std::vector<int> scores);
      bool registerCommunicate(const QStringList &registerInfo);
      QString getFirstK(QSqlDatabase &db,int K);
+     void zipDayTask(QSqlDatabase &db,QString dirname);
+     bool setAck(QSqlDatabase &db,QString id);
+     bool insertAck(QSqlDatabase &db,QString somalist);
 }
 
 

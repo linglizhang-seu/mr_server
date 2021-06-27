@@ -37,6 +37,10 @@ bool MessageSocket::processMsg(const QString rmsg)
     QRegExp ImgBlockRex("^/Imgblock:(.*)");
     QRegExp GetBBSWCRex("^/GetBBSwc:(.*)");
     QRegExp ImageResRex("^/ImageRes:(.*)");
+
+//    QRegExp
+
+    //-------
     QRegExp msgRex("^/(.*)_(.*):(.*)");
 
     QString msg=rmsg.trimmed();
@@ -64,7 +68,11 @@ bool MessageSocket::processMsg(const QString rmsg)
     }else if (msg=="GETSCORE")
     {
         emit getscore();
-    }else if(msg.startsWith("SETSOCRE:"))
+    }else if(msg.startsWith("AckNeuron:"))
+    {
+        emit ackNeuron(msg.right(msg.size()-QString("AckNeuron:").size()));
+    }
+    else if(msg.startsWith("SETSOCRE:"))
     {
         emit setscore(msg.right(msg.size()-QString("SETSOCRE:").size()).toUInt());
     }

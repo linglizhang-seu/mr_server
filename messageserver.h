@@ -77,6 +77,8 @@ public slots:
     void shutdown();
 
     void getScore();
+
+    void ackNeuron(QString);
 private:
     /**
      * @brief incomingConnection
