@@ -45,4 +45,5 @@ HEADERS += \
     neuron_editing/neuron_format_converter.h \
     neuron_editing/neuron_sim_scores.h \
     neuron_editing/neuron_xforms.h \
-    neuron_editing/v_neuronswc.h
+    neuron_editing/v_neuronswc.h \
+    simclient.h

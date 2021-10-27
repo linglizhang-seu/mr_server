@@ -8,6 +8,8 @@
 #include <basic_c_fun/basic_surf_objs.h>
 #include <basic_c_fun/neuron_format_converter.h>
 #include "manageserver.h"
+#include "simclient.h"
+
 //传入的apo需要重新保存，使得n按顺序
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -72,8 +74,8 @@ QString UpdateAddMarkerMsg(float X, float Y, float Z,int type,QString clienttype
     result.push_back(QString("%1 %2 %3 %4 %5").arg(i).arg(clienttype).arg(10000).arg(10000).arg(10000));
     result.push_back(QString("%1 %2 %3 %4").arg(type).arg(X).arg(Y).arg(Z));
     return QString("/addmarker_norm:"+result.join(";"));
-
 }
+
 QString UpdateDelMarkerSeg(float x,float y,float z,QString clienttype,int i)
 {
     QStringList result;
@@ -220,37 +222,33 @@ QList<QStringList> prepareMsg(NeuronTree nt)
     return MsgWaitSend(addline,delline,retypeline,addmarker,delmarker);
 }
 
-
-
-
 int main(int argc, char *argv[])
 {
 
     auto nt=readSWC_file("/Users/huanglei/Desktop/prefanceTest.eswc");
-    qDebug()<<nt.listNeuron.size();
-    qDebug()<<NeuronTree__2__V_NeuronSWC_list(nt).seg.size();
+    auto msgLists=prepareMsg(nt);
+    QString ip,port;
 
-    random_shuffle(nt.listNeuron.begin(),nt.listNeuron.end());
-    int markerCnt=2;
-    int peopleCnt=10;
-    int packageCnt=1;
-    QList<NeuronSWC> markers(nt.listNeuron.begin(),nt.listNeuron.begin()+markerCnt*peopleCnt*packageCnt);
-
-
-
-
-    qInstallMessageHandler(myMessageOutput);
-    QCoreApplication a(argc, argv);
-
-    ManageServer server;
-    if(!server.listen(QHostAddress::Any,26371))
-    {
-        qDebug()<<"Error:cannot start server in port 9999,please check!";
-        exit(-1);
-    }else
-    {
-        qDebug()<<"server(2.0.4.1) for vr_farm started!";
+    QThread *threads=new QThread[peopleCnt];
+    QVector<SimClient> clients;
+    for(int i=0;i<peopleCnt;i++){
+        clients.push_back(SimClient(ip,port,QString::number(i),msgLists[i]));
+        clients[i].moveToThread(threads+i);
     }
-    return a.exec();
+
+    return 0;
+//    qInstallMessageHandler(myMessageOutput);
+//    QCoreApplication a(argc, argv);
+
+//    ManageServer server;
+//    if(!server.listen(QHostAddress::Any,26371))
+//    {
+//        qDebug()<<"Error:cannot start server in port 9999,please check!";
+//        exit(-1);
+//    }else
+//    {
+//        qDebug()<<"server(2.0.4.1) for vr_farm started!";
+//    }
+//    return a.exec();
 }
 
