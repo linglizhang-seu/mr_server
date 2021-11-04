@@ -332,7 +332,7 @@ NeuronTree readSWC_file(const QString& filename)
         count++;
         NeuronSWC S;
 
-        QStringList qsl = QString(buf).trimmed().split(" ",QString::SkipEmptyParts);
+        QStringList qsl = QString(buf).trimmed().split(" ",Qt::SkipEmptyParts);
         if (qsl.size()==0)   continue;
 
         for (int i=0; i<qsl.size(); i++)

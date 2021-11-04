@@ -5,9 +5,9 @@
 #include <QFile>
 #include <cstdlib>
 #include <cstdio>
+#include <vector>
 #include <basic_c_fun/basic_surf_objs.h>
 #include <basic_c_fun/neuron_format_converter.h>
-#include "manageserver.h"
 #include "simclient.h"
 
 //传入的apo需要重新保存，使得n按顺序
@@ -92,11 +92,11 @@ QString UpdateRetypeSegMsg(V_NeuronSWC seg,int type,QString clienttype,int i)
     return QString("/retypeline_norm:"+result.join(";"));
 }
 
-QList<QStringList> MsgForAddMarker(const NeuronTree &nt)
+QList<QStringList> MsgForAddMarker(NeuronTree nt)
 {
     int cnt=2;
     const int cntForPeople=cnt*packageCnt;
-    random_shuffle(nt.listNeuron.begin(),nt.listNeuron.end());
+//    std::shuffle(nt.listNeuron.begin(),nt.listNeuron.end(),std::default_random_engine());
     QList<NeuronSWC> markers(nt.listNeuron.begin(),nt.listNeuron.end()+peopleCnt*cntForPeople);
     QList<QStringList> res;
     for(int i=0;i<peopleCnt;i++)
@@ -112,11 +112,11 @@ QList<QStringList> MsgForAddMarker(const NeuronTree &nt)
 
 }
 
-QList<QStringList> MsgForDeleteMarker(const NeuronTree &nt)
+QList<QStringList> MsgForDeleteMarker(NeuronTree nt)
 {
     int cnt=1;
     const int cntForPeople=cnt*packageCnt;
-    random_shuffle(nt.listNeuron.begin(),nt.listNeuron.end());
+//    std::shuffle(nt.listNeuron.begin(),nt.listNeuron.end(),std::default_random_engine());
     QList<NeuronSWC> markers(nt.listNeuron.begin(),nt.listNeuron.end()+cnt*peopleCnt*packageCnt);
     QList<QStringList> res;
     for(int i=0;i<peopleCnt;i++)
@@ -133,14 +133,15 @@ QList<QStringList> MsgForDeleteMarker(const NeuronTree &nt)
 
 QList<QStringList> MsgForAddLine(V_NeuronSWC_list nt)
 {
-    int cnt=10;
+    int cnt=10;//每个包加线命令的条数
     const int cntForPeople=cnt*packageCnt;
-    QList<QList<V_NeuronSWC>> segments;
+    QList<QList<V_NeuronSWC>> segments; //每个人的线集合
     for(int i=0;i<peopleCnt;i++){
-        random_shuffle(nt.seg.begin(),nt.seg.end());
+//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
         segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
     }
-    QList<QStringList> res;
+
+    QList<QStringList> res;//每个人的线集合->每个人的消息集合
     for(int i=0;i<peopleCnt;i++){
         QStringList tmp;
         for(int j=0;j<cntForPeople;j++){
@@ -153,11 +154,11 @@ QList<QStringList> MsgForAddLine(V_NeuronSWC_list nt)
 
 QList<QStringList> MsgForDeleteLine(V_NeuronSWC_list nt)
 {
-    int cnt=3;
+    int cnt=3;//每个包里减线命令的条数
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments;
     for(int i=0;i<peopleCnt;i++){
-        random_shuffle(nt.seg.begin(),nt.seg.end());
+//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
         segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
     }
     QList<QStringList> res;
@@ -177,7 +178,7 @@ QList<QStringList> MsgForRetypeLine(V_NeuronSWC_list nt)
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments;
     for(int i=0;i<peopleCnt;i++){
-        random_shuffle(nt.seg.begin(),nt.seg.end());
+//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
         segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
     }
     QList<QStringList> res;
@@ -195,15 +196,14 @@ QList<QStringList> MsgForRetypeLine(V_NeuronSWC_list nt)
 QList<QStringList> MsgWaitSend(QList<QStringList> addline,
                                QList<QStringList> delline,
                                QList<QStringList> retypeline,
-                               QList<QStringList> splitline,
                                QList<QStringList> addmarker,
                                QList<QStringList> deletemarker)
 
 {
-    QList<QStringList> res;
+    QList<QStringList> res;//每个人的操作集合
     for(int i=0;i<peopleCnt;i++){
         QStringList msgs=addline[i]+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];
-        random_shuffle(msgs.begin(),msgs.end());
+//        std::shuffle(msgs.begin(),msgs.end(),std::default_random_engine());
         res.push_back(msgs);
     }
     return res;
@@ -230,10 +230,10 @@ int main(int argc, char *argv[])
     QString ip,port;
 
     QThread *threads=new QThread[peopleCnt];
-    QVector<SimClient> clients;
+    QVector<SimClient*> clients;
     for(int i=0;i<peopleCnt;i++){
-        clients.push_back(SimClient(ip,port,QString::number(i),msgLists[i]));
-        clients[i].moveToThread(threads+i);
+        clients.push_back(new SimClient(ip,port,QString::number(i),msgLists[i]));
+        clients[i]->moveToThread(threads+i);
     }
 
     return 0;
