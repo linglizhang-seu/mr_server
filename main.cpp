@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
     for(int i=0;i<peopleCnt;i++){
         auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
         clients.push_back(p);
-        QObject::connect(threads+i,SIGNAL(started()),p,SLOT(onstarted));
+        QObject::connect(threads+i,SIGNAL(started()),p,SLOT(onstarted()));
         clients[i]->moveToThread(threads+i);
     }
     for(int i=0;i<peopleCnt;i++)
