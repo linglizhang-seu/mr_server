@@ -38,7 +38,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     fprintf(stderr,strMessage.toStdString().c_str());
 }
 
-int peopleCnt=10;
+int peopleCnt=20;
 int packageCnt=1;
 QStringList V_NeuronSWCToSendMSG(V_NeuronSWC seg)
 {
@@ -225,26 +225,32 @@ QList<QStringList> prepareMsg(NeuronTree nt)
 int main(int argc, char *argv[])
 {
     qInstallMessageHandler(myMessageOutput);
+    QCoreApplication a(argc, argv);
     auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
     auto msgLists=prepareMsg(nt);
-    for(int i=0;i<peopleCnt;i++){
-        qDebug()<<"---------------------------------------------------";
-        for(int j=0;j<msgLists[i].size();j++){
-            qDebug()<<msgLists[i][j];
-        }
-    }
-//    QString ip,port;
-
-//    QThread *threads=new QThread[peopleCnt];
-//    QVector<SimClient*> clients;
 //    for(int i=0;i<peopleCnt;i++){
-//        clients.push_back(new SimClient(ip,port,QString::number(i),msgLists[i]));
-//        clients[i]->moveToThread(threads+i);
+//        qDebug()<<"---------------------------------------------------";
+//        for(int j=0;j<msgLists[i].size();j++){
+//            qDebug()<<msgLists[i][j];
+//        }
 //    }
+    QString ip="139.155.28.154";
+    QString port="4815";
 
-    return 0;
+    QThread *threads=new QThread[peopleCnt];
+    QVector<SimClient*> clients;
+    for(int i=0;i<peopleCnt;i++){
+        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
+        clients.push_back(p);
+        QObject::connect(threads+i,SIGNAL(started()),p,SLOT(onstarted));
+        clients[i]->moveToThread(threads+i);
+    }
+    for(int i=0;i<peopleCnt;i++)
+            threads[i].start();
+
+    return a.exec();
 //    qInstallMessageHandler(myMessageOutput);
-//    QCoreApplication a(argc, argv);
+//
 
 //    ManageServer server;
 //    if(!server.listen(QHostAddress::Any,26371))
