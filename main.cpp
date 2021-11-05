@@ -96,7 +96,7 @@ QList<QStringList> MsgForAddMarker(NeuronTree nt)
 {
     int cnt=2;
     const int cntForPeople=cnt*packageCnt;
-//    std::shuffle(nt.listNeuron.begin(),nt.listNeuron.end(),std::default_random_engine());
+    std::shuffle(nt.listNeuron.begin(),nt.listNeuron.end(),std::default_random_engine());
     QList<NeuronSWC> markers(nt.listNeuron.begin(),nt.listNeuron.end()+peopleCnt*cntForPeople);
     QList<QStringList> res;
     for(int i=0;i<peopleCnt;i++)
@@ -116,7 +116,7 @@ QList<QStringList> MsgForDeleteMarker(NeuronTree nt)
 {
     int cnt=1;
     const int cntForPeople=cnt*packageCnt;
-//    std::shuffle(nt.listNeuron.begin(),nt.listNeuron.end(),std::default_random_engine());
+    std::shuffle(nt.listNeuron.begin(),nt.listNeuron.end(),std::default_random_engine());
     QList<NeuronSWC> markers(nt.listNeuron.begin(),nt.listNeuron.end()+cnt*peopleCnt*packageCnt);
     QList<QStringList> res;
     for(int i=0;i<peopleCnt;i++)
@@ -137,7 +137,7 @@ QList<QStringList> MsgForAddLine(V_NeuronSWC_list nt)
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments; //每个人的线集合
     for(int i=0;i<peopleCnt;i++){
-//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
+        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
         segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
     }
 
@@ -158,7 +158,7 @@ QList<QStringList> MsgForDeleteLine(V_NeuronSWC_list nt)
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments;
     for(int i=0;i<peopleCnt;i++){
-//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
+        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
         segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
     }
     QList<QStringList> res;
@@ -178,7 +178,7 @@ QList<QStringList> MsgForRetypeLine(V_NeuronSWC_list nt)
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments;
     for(int i=0;i<peopleCnt;i++){
-//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
+        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
         segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
     }
     QList<QStringList> res;
@@ -203,7 +203,7 @@ QList<QStringList> MsgWaitSend(QList<QStringList> addline,
     QList<QStringList> res;//每个人的操作集合
     for(int i=0;i<peopleCnt;i++){
         QStringList msgs=addline[i]+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];
-//        std::shuffle(msgs.begin(),msgs.end(),std::default_random_engine());
+        std::shuffle(msgs.begin(),msgs.end(),std::default_random_engine());
         res.push_back(msgs);
     }
     return res;
@@ -224,17 +224,23 @@ QList<QStringList> prepareMsg(NeuronTree nt)
 
 int main(int argc, char *argv[])
 {
-
-    auto nt=readSWC_file("/Users/huanglei/Desktop/prefanceTest.eswc");
+    qInstallMessageHandler(myMessageOutput);
+    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
     auto msgLists=prepareMsg(nt);
-    QString ip,port;
-
-    QThread *threads=new QThread[peopleCnt];
-    QVector<SimClient*> clients;
     for(int i=0;i<peopleCnt;i++){
-        clients.push_back(new SimClient(ip,port,QString::number(i),msgLists[i]));
-        clients[i]->moveToThread(threads+i);
+        qDebug()<<"---------------------------------------------------";
+        for(int j=0;j<msgLists[i].size();j++){
+            qDebug()<<msgLists[i][j];
+        }
     }
+//    QString ip,port;
+
+//    QThread *threads=new QThread[peopleCnt];
+//    QVector<SimClient*> clients;
+//    for(int i=0;i<peopleCnt;i++){
+//        clients.push_back(new SimClient(ip,port,QString::number(i),msgLists[i]));
+//        clients[i]->moveToThread(threads+i);
+//    }
 
     return 0;
 //    qInstallMessageHandler(myMessageOutput);
