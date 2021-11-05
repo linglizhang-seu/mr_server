@@ -11,7 +11,9 @@
 #include "simclient.h"
 
 //传入的apo需要重新保存，使得n按顺序
-
+QString port="4167";
+int peopleCnt=20;
+int packageCnt=1;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -38,8 +40,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     fprintf(stderr,strMessage.toStdString().c_str());
 }
 
-int peopleCnt=20;
-int packageCnt=1;
+
 QStringList V_NeuronSWCToSendMSG(V_NeuronSWC seg)
 {
     QStringList result;
@@ -235,7 +236,7 @@ int main(int argc, char *argv[])
 //        }
 //    }
     QString ip="139.155.28.154";
-    QString port="4815";
+
 
     QThread *threads=new QThread[peopleCnt];
     QVector<SimClient*> clients;
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
         clients[i]->moveToThread(threads+i);
     }
     for(int i=0;i<peopleCnt;i++)
-            threads[i].start();
+        threads[i].start();
 
     return a.exec();
 //    qInstallMessageHandler(myMessageOutput);

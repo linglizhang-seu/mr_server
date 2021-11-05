@@ -32,17 +32,17 @@ public slots:
 
 private:
 
-    void sendMsg(QString str)
+    void sendMsg(QString msg)
     {
-        if(socket->state()==QAbstractSocket::ConnectedState)
-        {
-            const QString data=str+"\n";
-            int datalength=data.size();
-            QString header=QString("DataTypeWithSize:%1;;%2\n").arg(0).arg(datalength);
-            socket->write(header.toStdString().c_str(),header.size());
-            socket->write(data.toStdString().c_str(),data.size());
-            socket->flush();
-        }
+        qint32 stringSize=msg.toUtf8().size();
+        qint32 totalsize=3*sizeof (qint32)+stringSize;
+        QByteArray block;
+        QDataStream dts(&block,QIODevice::WriteOnly);
+        dts<<qint32(totalsize)<<qint32(stringSize)<<qint32(0);
+        block+=msg.toUtf8();
+        socket->write(block);
+        socket->flush();
+        qDebug()<<"send to server:"<<msg;
     }
 
     QTcpSocket *socket;
