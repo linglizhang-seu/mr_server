@@ -11,21 +11,16 @@
 #include "simclient.h"
 
 //传入的apo需要重新保存，使得n按顺序
-QString port="4341";
-int peopleCnt=90;
-int packageCnt=10;//MESSGE CNOUT
-
-
-
+QString port;
+int peopleCnt;
+int packageCnt;//MESSGE CNOUT
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
     static QMutex mutex;
     mutex.lock();
-
     QByteArray localMsg = msg.toLocal8Bit();
-
     // 设置输出信息格式
     QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss : ");
 //    QString strMessage = QString("%1 File:%2  Line:%3  Function:%4  DateTime:%5\n")
@@ -37,7 +32,6 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     QTextStream stream(&file);
     stream << strMessage ;
     file.flush();
-
     file.close();
     // 解锁
     mutex.unlock();
@@ -231,15 +225,19 @@ int main(int argc, char *argv[])
 {
     qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
+
+    port=QString(argv[1]);
+    peopleCnt=atoi(argv[2]);
+    packageCnt=atoi(argv[3]);
+
     auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
     auto msgLists=prepareMsg(nt);
     int sum=0;
     for(auto list:msgLists){
         sum+=list.size();
     }
-    qDebug()<<sum;
+//    qDebug()<<sum;
     QString ip="139.155.28.154";
-
 
     QThread *threads=new QThread[peopleCnt];
     QVector<SimClient*> clients;
