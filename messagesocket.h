@@ -38,6 +38,7 @@ private:
 
     qintptr socketDescriptor;
     DataInfo dataInfo;
+    QString username;
 private:
     void resetDataInfo();
     void processMsg(const QString msg);
