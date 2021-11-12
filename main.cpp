@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     ManageServer server;
-    if(!server.listen(QHostAddress::Any,26371))
+    if(!server.listen(QHostAddress::Any,26375))
     {
         qDebug()<<"Error:cannot start server in port 9999,please check!";
         exit(-1);
