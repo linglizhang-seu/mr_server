@@ -20,7 +20,7 @@ void writeMap(QString name,std::unordered_map<int,double> hashmap);
 int main(int argc, char *argv[])
 {
     NeuronTree nt=readSWC_file(NeuronName);
-    QString baseName=QString::fromStdString(NeuronName.toStdString().substr(NeuronName.lastIndexOf('/'),NeuronName.lastIndexOf('.')-NeuronName.lastIndexOf('/')));
+    QString baseName=QString::fromStdString(NeuronName.toStdString().substr(NeuronName.lastIndexOf('/')+1,NeuronName.lastIndexOf('.')-NeuronName.lastIndexOf('/')-1));
     writeESWC_file(baseName+"_type.eswc",nt);
     V_NeuronSWC_list segs=NeuronTree__2__V_NeuronSWC_list(nt);
     //计算每个用户的标注的长度
@@ -50,8 +50,9 @@ std::unordered_map<int,double> lengthPerUser(V_NeuronSWC_list segs)
 {
     std::unordered_map<int,double> lengthMap;
     for(auto seg:segs.seg){
-        lengthMap[seg.row[0].r/10]+=length(seg);
+        lengthMap[int(seg.row[0].r)/10]+=length(seg);
     }
+    return lengthMap;
 }
 
 NeuronTree colorNeuronByModality(NeuronTree nt){
@@ -123,6 +124,7 @@ NeuronTree colorNeuronWithColUsers(V_NeuronSWC_list segs,const NeuronTree nt){
 
 void writeMap(QString name,std::unordered_map<int,double> hashmap){
     QFile f(name);
+    f.open(QIODevice::WriteOnly);
     QTextStream stream(&f);
     for(auto it=hashmap.begin();it!=hashmap.end();it++){
         stream<<it->first<<"\t"<<it->second<<"\n";
