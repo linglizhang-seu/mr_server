@@ -137,21 +137,17 @@ void MessageServer::incomingConnection(qintptr handle)
 
 void MessageServer::userLogin(QString name)
 {
-    qDebug()<<"start to remove some name user";
+
     for(MessageSocket* key:clients.keys())
     {
         if(clients.value(key).username==name)
         {
             clients.remove(key);
             disconnectName(key);
-//            if(key->socket)
-//                key->socket->disconnectFromHost();
-////            key->deleteLater();
-//            while(key->socket->state()!=QTcpSocket::UnconnectedState)
-//                key->socket->waitForDisconnected();
+            qDebug()<<"Error:Same Name User";
         }
     }
-    qDebug()<<"remove some name user success";
+
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
     emit sendfiles(p,t.keys().at(0));
@@ -214,16 +210,6 @@ void MessageServer::processmessage()
     if(savedMessageIndex!=messagelist.size())
     {
         QRegExp msgreg("/(.*)_(.*):(.*)");
-
-//        QRegExp drawlineRex("^/drawline:(.*)$");
-//        QRegExp dellineRex("^/delline:(.*)");
-
-//        QRegExp addmarkerRex("^/addmarker:(.*)");
-//        QRegExp delmarkerRex("^/delmarker:(.*)");
-
-//        QRegExp retypelineRex("^/retypeline:(.*)");
-//        QRegExp retypemarkerRex("^/retypemarker:(.*)");
-
         for(int maxProcess=0;maxProcess<5&&savedMessageIndex<messagelist.size();maxProcess++)
         {
             QString msg=messagelist[savedMessageIndex++];
@@ -252,31 +238,8 @@ void MessageServer::processmessage()
                 {
                     retypeline(operatorMsg);
                 }
-
+                qDebug()<<"receive:"<<++cnt;
             }
-
-
-
-//            if(drawlineRex.indexIn(msg)!=-1)
-//            {
-//                drawline(drawlineRex.cap(1).trimmed());
-//            }else if(dellineRex.indexIn(msg)!=-1)
-//            {
-//                delline(dellineRex.cap(1).trimmed());
-//            }else if(addmarkerRex.indexIn(msg)!=-1)
-//            {
-//                addmarker(addmarkerRex.cap(1).trimmed());
-//            }else if(delmarkerRex.indexIn(msg)!=-1)
-//            {
-//                delmarekr(delmarkerRex.cap(1).trimmed());
-//            }else if(retypelineRex.indexIn(msg)!=-1)
-//            {
-//                retypeline(retypelineRex.cap(1).trimmed());
-//            }
-//            else if(retypemarkerRex.indexIn(msg)!=-1)
-//            {
-//                retypemarker(retypemarkerRex.cap(1).trimmed());
-//            }
         }
     }
 }
