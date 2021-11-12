@@ -28,7 +28,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     QString strMessage=strDateTime+localMsg.constData()+"\n";
     // 输出信息至文件中（读写、追加形式）
     QFile file("log.txt");
-    file.open(QIODevice::ReadWrite | QIODevice::Append);
+    if(file.open(QIODevice::ReadWrite | QIODevice::Append))
+        qDebug()<<file.errorString();
     QTextStream stream(&file);
     stream << strMessage ;
     file.flush();
