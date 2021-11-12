@@ -13,7 +13,7 @@
 //传入的apo需要重新保存，使得n按顺序
 QString port="4167";
 int peopleCnt=20;
-int packageCnt=1;
+int packageCnt=10;//MESSGE CNOUT
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -134,7 +134,7 @@ QList<QStringList> MsgForDeleteMarker(NeuronTree nt)
 
 QList<QStringList> MsgForAddLine(V_NeuronSWC_list nt)
 {
-    int cnt=10;//每个包加线命令的条数
+    int cnt=1;//每个包加线命令的条数
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments; //每个人的线集合
     for(int i=0;i<peopleCnt;i++){
@@ -215,12 +215,12 @@ QList<QStringList> prepareMsg(NeuronTree nt)
     auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
 
     auto addline=MsgForAddLine(segments);
-    auto delline=MsgForDeleteLine(segments);
-    auto retypeline=MsgForRetypeLine(segments);
-    auto addmarker=MsgForAddMarker(nt);
-    auto delmarker=MsgForDeleteMarker(nt);
+//    auto delline=MsgForDeleteLine(segments);
+//    auto retypeline=MsgForRetypeLine(segments);
+//    auto addmarker=MsgForAddMarker(nt);
+//    auto delmarker=MsgForDeleteMarker(nt);
 
-    return MsgWaitSend(addline,delline,retypeline,addmarker,delmarker);
+    return MsgWaitSend(addline,{},{},{},{});
 }
 
 int main(int argc, char *argv[])
@@ -229,12 +229,6 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
     auto msgLists=prepareMsg(nt);
-//    for(int i=0;i<peopleCnt;i++){
-//        qDebug()<<"---------------------------------------------------";
-//        for(int j=0;j<msgLists[i].size();j++){
-//            qDebug()<<msgLists[i][j];
-//        }
-//    }
     QString ip="139.155.28.154";
 
 
@@ -250,18 +244,5 @@ int main(int argc, char *argv[])
         threads[i].start();
 
     return a.exec();
-//    qInstallMessageHandler(myMessageOutput);
-//
-
-//    ManageServer server;
-//    if(!server.listen(QHostAddress::Any,26371))
-//    {
-//        qDebug()<<"Error:cannot start server in port 9999,please check!";
-//        exit(-1);
-//    }else
-//    {
-//        qDebug()<<"server(2.0.4.1) for vr_farm started!";
-//    }
-//    return a.exec();
 }
 
