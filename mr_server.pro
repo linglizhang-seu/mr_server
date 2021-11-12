@@ -24,7 +24,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ThreadPool.h \
     basic_c_fun/basic_surf_objs.h \
     basic_c_fun/v3d_basicdatatype.h \
     basic_c_fun/v3d_message.h \
@@ -33,5 +32,4 @@ HEADERS += \
     neuron_editing/global_feature_compute.h \
     neuron_editing/neuron_format_converter.h \
     neuron_editing/neuron_xforms.h \
-    neuron_editing/v_neuronswc.h \
-    simclient.h
+    neuron_editing/v_neuronswc.h
