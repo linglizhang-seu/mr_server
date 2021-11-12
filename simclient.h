@@ -42,7 +42,7 @@ private:
         block+=msg.toUtf8();
         socket->write(block);
         socket->flush();
-        qDebug()<<"send to server:"<<msg;
+//        qDebug()<<"send to server:"<<msg;
     }
 
     QTcpSocket *socket;

@@ -233,6 +233,11 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
     auto msgLists=prepareMsg(nt);
+    int sum=0;
+    for(auto list:msgLists){
+        sum+=list.size();
+    }
+    qDebug()<<sum;
     QString ip="139.155.28.154";
 
 
