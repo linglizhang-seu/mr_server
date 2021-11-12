@@ -11,9 +11,13 @@
 #include "simclient.h"
 
 //传入的apo需要重新保存，使得n按顺序
-QString port="4167";
-int peopleCnt=20;
+QString port="4341";
+int peopleCnt=90;
 int packageCnt=10;//MESSGE CNOUT
+
+
+
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -203,7 +207,7 @@ QList<QStringList> MsgWaitSend(QList<QStringList> addline,
 {
     QList<QStringList> res;//每个人的操作集合
     for(int i=0;i<peopleCnt;i++){
-        QStringList msgs=addline[i]+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];
+        QStringList msgs=addline[i]/*+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];*/;
         std::shuffle(msgs.begin(),msgs.end(),std::default_random_engine());
         res.push_back(msgs);
     }
