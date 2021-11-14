@@ -83,7 +83,7 @@ MessageServer::MessageServer(QString neuron,QString port,QObject *parent) : QTcp
     this->neuron=neuron;
     this->port=port;
     QStringList filepaths=FE::getLoadFile(neuron);//ano,apo,eswc
-    qDebug()<<filepaths;
+//    qDebug()<<filepaths;
     if(filepaths.isEmpty()) throw  "";
     wholePoint=readAPO_file(filepaths.at(1));
     auto NT=readSWC_file(filepaths.at(2));
@@ -127,7 +127,7 @@ void MessageServer::incomingConnection(qintptr handle)
     connect(this,SIGNAL(sendToAll(const QString &)),messagesocket,SLOT(sendMsg(const QString &)));
     connect(this,SIGNAL(sendfiles(MessageSocket*,QStringList)),messagesocket,SLOT(sendfiles(MessageSocket*,QStringList)));
     connect(this,SIGNAL(sendmsgs(MessageSocket*,QStringList)),messagesocket,SLOT(sendmsgs(MessageSocket*,QStringList)));
-    connect(this,SIGNAL(disconnectName(MessageSocket*)),messagesocket,SLOT(MessageSocket*));
+    connect(this,SIGNAL(disconnectName(MessageSocket*)),messagesocket,SLOT(disconnectName(MessageSocket*)));
     connect(messagesocket,SIGNAL(userLogin(QString)),this,SLOT(userLogin(QString)));
     connect(messagesocket,SIGNAL(pushMsg(QString)),this,SLOT(pushMessagelist(QString)));
     connect(thread,SIGNAL(started()),messagesocket,SLOT(onstarted()));
@@ -151,15 +151,15 @@ void MessageServer::userLogin(QString name)
     auto t=autosave();
     auto p=(MessageSocket*)(sender());
     emit sendfiles(p,t.keys().at(0));
-    qDebug()<<"strp 1";
+//    qDebug()<<"strp 1";
     UserInfo info;
     info.username=name;
     info.userid=getid(name);
     info.sendedsize=t.values().at(0);
     clients.insert(p,info);
-    qDebug()<<"strp 2";
+//    qDebug()<<"strp 2";
     emit sendToAll("/users:"+getUserList().join(";"));
-    qDebug()<<"strp 3";
+//    qDebug()<<"strp 3";
     if(timer==nullptr)
     {
         timer=new QTimer();
@@ -255,7 +255,7 @@ QMap<QStringList,qint64> MessageServer::save(bool autosave/*=0*/)
     auto nt=V_NeuronSWC_list__2__NeuronTree(segments);
     QString tempAno=neuron;
     QString dirpath=QCoreApplication::applicationDirPath()+"/data";
-    qDebug()<<dirpath;
+//    qDebug()<<dirpath;
     if(!QDir(dirpath).exists())
     {
        qDebug()<< QDir(QCoreApplication::applicationDirPath()).mkdir("data");
@@ -325,7 +325,7 @@ void MessageServer::drawline(QString msg)
 
     NeuronTree newTempNT=convertMsg2NT(listwithheader,username,from);
     segments.append(NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0]);
-    qDebug()<<"add in seg sucess "<<msg;
+//    qDebug()<<"add in seg sucess "<<msg;
 }
 void MessageServer::delline(QString msg)
 {
