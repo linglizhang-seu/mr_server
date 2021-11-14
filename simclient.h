@@ -37,7 +37,7 @@ public slots:
 //        while(!(socket->state() == QAbstractSocket::UnconnectedState
 //               || socket->waitForDisconnected(1000))) ;
         qDebug()<<id <<" has complete!";
-        QThread::currentThread()->yieldCurrentThread();
+//        QThread::currentThread()->yieldCurrentThread();
     }
 
     void onRead(){

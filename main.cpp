@@ -10,11 +10,13 @@
 #include <basic_c_fun/neuron_format_converter.h>
 #include "simclient.h"
 #include <iostream>
+#include <QFile>
+#include <QTime>
 //传入的apo需要重新保存，使得n按顺序
-QString port="4528";
-int peopleCnt=100;
-int packageCnt=1;//MESSGE CNOUT
-const int threadCnt=peopleCnt;
+QString port="4353";
+int peopleCnt=180;
+int packageCnt=10;//MESSGE CNOUT
+const int threadCnt=peopleCnt/2;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -222,30 +224,87 @@ QList<QStringList> prepareMsg(NeuronTree nt)
     return MsgWaitSend(addline,{},{},{},{});
 }
 
+
+QString preProcess(QString infilepath,QString outfilepath){
+    QString order=QString("cat %1 | grep receive: > %2").arg(infilepath).arg(outfilepath);
+    system(order.toStdString().c_str());
+    return outfilepath;
+}
+
+vector<double> cacPerMsgDelay(QString infilepath,QString basename){
+    QFile file(infilepath);
+    if(!file.open(QIODevice::ReadOnly)){
+        qDebug()<<file.errorString();
+    }
+    QStringList paras=basename.split('_');
+
+    QStringList list=QString(file.readAll()).split('\n',Qt::SkipEmptyParts);
+    file.close();
+    if(list.size()!=paras[0].toUInt()*paras[1].toUInt()){
+        qDebug()<<"Error:"+infilepath;
+    }
+
+    QDateTime start=QDateTime::fromString(list[0].left(19),"yyyy-MM-dd hh:mm:ss");
+    QDateTime end=QDateTime::fromString(list.back().left(19),"yyyy-MM-dd hh:mm:ss");
+    return {paras[0].toDouble(),paras[1].toDouble(),start.msecsTo(end)*1.0/list.size()};
+}
+
+void processData(QString dirName){
+    QDir dir(dirName);
+    dir.rmdir("processed");
+    dir.mkdir("processed");
+    auto filelist=dir.entryInfoList(QDir::Files,QDir::Name);
+
+    for(auto file:filelist){
+        preProcess(file.absoluteFilePath(),dirName+"/processed/"+file.fileName());
+    }
+
+    dir.cd("processed");
+    filelist=dir.entryInfoList(QDir::Files);
+    vector<vector<double>> table;
+    for(auto file:filelist){
+        table.push_back(cacPerMsgDelay(file.absoluteFilePath(),file.baseName()));
+    }
+
+    QFile file(dirName+"/report");
+    if(!file.open(QIODevice::WriteOnly)){
+        qDebug()<<file.errorString();
+    }
+
+    QTextStream steam(&file);
+    steam<<"UserCount\tMessageCount\tDelayPerMessgae\n";
+    for(auto row:table){
+        steam<<row[0]<<"\t"<<row[1]<<"\t"<<row[2]<<"\n";
+    }
+    file.close();
+
+
+}
+
+
 int main(int argc, char *argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
 
-    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
-    auto msgLists=prepareMsg(nt);
-//    int sum=0;
-//    for(auto list:msgLists){
-//        sum+=list.size();
-//    }
-    QString ip="139.155.28.154";
+//    processData("/Users/huanglei/Desktop/pressurelog");
+    processData("/Users/huanglei/Desktop/brustlog");
+//    processData("/Users/huanglei/Desktop/log");
+//    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
+//    auto msgLists=prepareMsg(nt);
 
-    QThread *threads=new QThread[threadCnt];
-    QVector<SimClient*> clients;
-    for(int i=0;i<peopleCnt;i++){
-        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
-        clients.push_back(p);
-        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
-        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
-    }
-    for(int i=0;i<threadCnt;i++)
-        threads[i].start();
+//    QString ip="139.155.28.154";
+
+//    QThread *threads=new QThread[threadCnt];
+//    QVector<SimClient*> clients;
+//    for(int i=0;i<peopleCnt;i++){
+//        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
+//        clients.push_back(p);
+//        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
+//        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
+//    }
+//    for(int i=0;i<threadCnt;i++)
+//        threads[i].start();
 
     return a.exec();
 }
-
