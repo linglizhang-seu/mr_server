@@ -9,12 +9,12 @@
 #include <basic_c_fun/basic_surf_objs.h>
 #include <basic_c_fun/neuron_format_converter.h>
 #include "simclient.h"
-
+#include <iostream>
 //传入的apo需要重新保存，使得n按顺序
-QString port;
-int peopleCnt;
-int packageCnt;//MESSGE CNOUT
-
+QString port="4528";
+int peopleCnt=100;
+int packageCnt=1;//MESSGE CNOUT
+const int threadCnt=peopleCnt;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -27,8 +27,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 //            .arg(localMsg.constData()).arg(context.file).arg(context.line).arg(context.function).arg(strDateTime);
     QString strMessage=strDateTime+localMsg.constData()+"\n";
     // 输出信息至文件中（读写、追加形式）
-    QFile file("log.txt");
-    if(file.open(QIODevice::ReadWrite | QIODevice::Append))
+    QFile file("/Users/huanglei/Desktop/log.txt");
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Append))
         qDebug()<<file.errorString();
     QTextStream stream(&file);
     stream << strMessage ;
@@ -224,31 +224,26 @@ QList<QStringList> prepareMsg(NeuronTree nt)
 
 int main(int argc, char *argv[])
 {
-    qInstallMessageHandler(myMessageOutput);
+//    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-
-    port=QString(argv[1]);
-    peopleCnt=atoi(argv[2]);
-    packageCnt=atoi(argv[3]);
 
     auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
     auto msgLists=prepareMsg(nt);
-    int sum=0;
-    for(auto list:msgLists){
-        sum+=list.size();
-    }
-//    qDebug()<<sum;
+//    int sum=0;
+//    for(auto list:msgLists){
+//        sum+=list.size();
+//    }
     QString ip="139.155.28.154";
 
-    QThread *threads=new QThread[peopleCnt];
+    QThread *threads=new QThread[threadCnt];
     QVector<SimClient*> clients;
     for(int i=0;i<peopleCnt;i++){
         auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
         clients.push_back(p);
-        QObject::connect(threads+i,SIGNAL(started()),p,SLOT(onstarted()));
-        clients[i]->moveToThread(threads+i);
+        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
+        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
     }
-    for(int i=0;i<peopleCnt;i++)
+    for(int i=0;i<threadCnt;i++)
         threads[i].start();
 
     return a.exec();
