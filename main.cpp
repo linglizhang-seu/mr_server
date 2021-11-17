@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <QFile>
 
-QString NeuronName="/Users/huanglei/Desktop/2.eswc";
+//QString NeuronName="/Users/huanglei/Desktop/2.eswc";
 
 void printV_NeuronSWC_List(V_NeuronSWC_list segs);
 double length(V_NeuronSWC seg);
@@ -17,8 +17,8 @@ std::unordered_set<int> getPeopleColWithBB(const NeuronTree nt,std::vector<doubl
 NeuronTree colorNeuronWithColUsers(V_NeuronSWC_list segs,const NeuronTree nt);
 void writeMap(QString name,std::unordered_map<int,double> hashmap);
 
-int main(int argc, char *argv[])
-{
+
+void call(QString NeuronName){
     NeuronTree nt=readSWC_file(NeuronName);
     QString baseName=QString::fromStdString(NeuronName.toStdString().substr(NeuronName.lastIndexOf('/')+1,NeuronName.lastIndexOf('.')-NeuronName.lastIndexOf('/')-1));
     writeESWC_file(baseName+"_type.eswc",nt);
@@ -32,8 +32,12 @@ int main(int argc, char *argv[])
     //热度图
     auto heatNT=colorNeuronWithColUsers(segs,nt);
     writeESWC_file(baseName+"_heat.eswc",heatNT);
-    //计算
+}
+int main(int argc, char *argv[])
+{
 
+    call("/Users/huanglei/Desktop/DATA0609/18454_00051.ano.eswc");
+            call("/Users/huanglei/Desktop/DATA0609/17543_00126.ano.eswc");
     return 0;
 }
 
@@ -57,7 +61,7 @@ std::unordered_map<int,double> lengthPerUser(V_NeuronSWC_list segs)
 
 NeuronTree colorNeuronByModality(NeuronTree nt){
     for(auto &node:nt.listNeuron){
-        node.type=int(node.r)%10;
+        node.type=int(node.r)%10+2;
     }
     return nt;
 }
@@ -116,7 +120,7 @@ NeuronTree colorNeuronWithColUsers(V_NeuronSWC_list segs,const NeuronTree nt){
         auto BB=getBB(seg);
         int cnt=getPeopleColWithBB(nt,BB).size();
         for(auto &node:seg.row){
-            node.type=cnt-1;
+            node.type=cnt-1+2;
         }
     }
     return V_NeuronSWC_list__2__NeuronTree(segs);
