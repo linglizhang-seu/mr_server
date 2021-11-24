@@ -454,7 +454,8 @@ namespace DB {
         }
         QString order = "INSERT INTO %1 (id,x,y,z) Values(?,?,?,?)";
         query.prepare(order);
-        query.addBindValue(ss);
+
+        query.addBindValue(QVariant::fromValue(ss));
         query.addBindValue(xs);
         query.addBindValue(ys);
         query.addBindValue(zs);
