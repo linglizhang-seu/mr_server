@@ -1,10 +1,10 @@
 ﻿#include "messagesocket.h"
 #include <QDataStream>
 #include <QFile>
-#include <QRegExp>
+
 #include <QHostAddress>
 #include <QCoreApplication>
-#include "basicdatamanage.h"
+
 #include <QMap>
 extern QMap<QString,QStringList> m_MapImageIdWithRes;
 void MessageSocket::sendfiles(MessageSocket* socket,QStringList filepaths)

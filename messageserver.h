@@ -2,13 +2,8 @@
 #define MESSAGESERVER_H
 #include <QTcpServer>
 #include <neuron_editing/v_neuronswc.h>
-#include <QMutex>
 #include "neuron_editing/neuron_format_converter.h"
 #include "messagesocket.h"
-#include <QThread>
-#include <signal.h>
-#include "basicdatamanage.h"
-#include <QSqlDatabase>
 class MessageServer : public QTcpServer
 {
     struct UserInfo{
@@ -21,15 +16,6 @@ class MessageServer : public QTcpServer
 
     Q_OBJECT
 public:
-    /**
-     * @brief makeMessageServer
-     * @param neuron neuronid
-     * 在NeuronMapMessageServer中寻找对应neuron的Messageserver*，
-     * 找到则返回Messageserver*，
-     * 找不到则新建一个Messageserver，返回新建的Messageserver*
-     * @return
-     */
-    static MessageServer* makeMessageServer(QString neuron);
     /**
      * @brief MessageServer
      * @param neuron neuronid
@@ -156,8 +142,6 @@ signals:
     void disconnectName(MessageSocket* socket);
 public:
     QString port;
-    QThread *p_thread=nullptr;
-    QSqlDatabase db;
 
 private:
     QString neuron;
@@ -174,10 +158,6 @@ private:
     const float ths=1;
     static const QStringList clienttypes;
 
-};
-namespace Map {
-   extern QMap<QString,MessageServer*> NeuronMapMessageServer;
-   extern QMutex mutex;
 };
 
 #endif // MESSAGESERVER_H

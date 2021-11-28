@@ -1,6 +1,4 @@
 ﻿#include "messageserver.h"
-#include "basicdatamanage.h"
-#include "ThreadPool.h"
 #include "basic_c_fun/basic_surf_objs.h"
 #include <QCoreApplication>
 #include <cmath>
@@ -8,18 +6,7 @@
 #include <iostream>
 #include <QString>
 #include <QSqlDatabase>
-extern QString databaseName;
-extern QString dbHostName;
-extern QString dbUserName;
-extern QString dbPassword;
 
-static void signalhandle(int k)
-{
-    qDebug()<<"Child ThreadId:"<<QThread::currentThreadId()<<",Signal "<<k;
-    auto servers=Map::NeuronMapMessageServer.values();
-    for(auto s:servers)
-        s->autosave();
-}
 namespace Map {
     QMap<QString,MessageServer*> NeuronMapMessageServer;
     QMutex mutex;
@@ -48,88 +35,11 @@ const int neuron_type_color[colorsize][3] = {
     {255, 168, 128},  //	17
     {168, 128, 255}, //	18
         };
-
-void MessageServer:: proSignal()
-{
-    signal(SIGFPE,signalhandle);
-    signal(SIGSEGV,signalhandle);
-    signal(SIGPIPE,signalhandle);
-}
 const QStringList MessageServer::clienttypes={"TeraFly","TeraVR","TeraAI","HI5"};
 
-MessageServer* MessageServer::makeMessageServer(QString neuron)
-{
-    //neuron:/17301/17301_00019/*****.ano
-    Map::mutex.lock();
-    auto iter=Map::NeuronMapMessageServer.find(neuron);
-    if(iter!=Map::NeuronMapMessageServer.end())
-    {
-        Map::mutex.unlock();
-        return iter.value();
-    }
-    label:
-        qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-        QString messageport=QString::number(qrand()%1000+4000);
-        QStringList keys=Map::NeuronMapMessageServer.keys();
-        for(QString neuron:keys)
-        {
-            if(Map::NeuronMapMessageServer.value(neuron)->port==messageport)
-            {
-                goto label;
-            }
-        }
-        MessageServer* p=0;
-        QThread *p_thread=nullptr;
-        try {
-            p_thread = getNewThread();
-            p = new MessageServer(neuron,messageport,p_thread);
-            Map::NeuronMapMessageServer.insert(neuron,p);
-            connect(p_thread,&QThread::finished,p,&MessageServer::deleteLater);
-            connect(p_thread,&QThread::finished,p_thread,&QThread::deleteLater);
-            connect(p_thread,SIGNAL(started()),p,SLOT(onstarted()),Qt::DirectConnection);
-            connect(p_thread,&QThread::started,p,&MessageServer::proSignal);
-            connect(p,SIGNAL(messagecome()),p,SLOT(processmessage()));
-            p->moveToThread(p_thread);
-            p_thread->start();
-            qDebug()<<"create server for "<<neuron<<" success "<<p->port;
-        }  catch (...) {
-            if(p_thread)
-            {
-                p_thread->quit();
-                p_thread=0;
-            }
-            qDebug()<<"Message:failed to create server";
-        }
-        Map::mutex.unlock();
-
-        return p;
-}
 
 MessageServer::MessageServer(QString neuron,QString port,QThread *pthread,QObject *parent) : QTcpServer(parent)
 {
-    messagelist.clear();
-    wholePoint.clear();
-    segments.clear();
-    savedMessageIndex=0;
-    clients.clear();
-    timer=nullptr;
-    this->neuron=neuron;
-    this->port=port;
-    this->p_thread=pthread;
-    QStringList filepaths=FE::getLoadFile(neuron);//ano,apo,eswc
-//    qDebug()<<filepaths;
-    if(filepaths.isEmpty()) throw  "";
-    wholePoint=readAPO_file(filepaths.at(1));
-    auto NT=readSWC_file(filepaths.at(2));
-    segments=NeuronTree__2__V_NeuronSWC_list(NT);
-    if(!this->listen(QHostAddress::Any,this->port.toInt()))
-    {
-        qDebug()<<"cannot listen messageserver in port "<<this->port;
-        throw "";
-    }else
-    {
-        qDebug()<<"messageserver setup "<<this->neuron<<" "<<this->port;
-    }
 
 }
 
@@ -154,102 +64,13 @@ void MessageServer::incomingConnection(qintptr handle)
 
 void MessageServer::userLogin(QString name)
 {
-    qDebug()<<"user login:"<<name<<",port="<<port;
-    MessageSocket *kp=nullptr;
-    {
-        for(MessageSocket* key:clients.keys())
-        {
-            if(clients.value(key).username==name)
-            {
-                kp=key;
-                break;
-            }
-        }
-    }
 
-    auto t=autosave();
-    auto p=(MessageSocket*)(sender());
-    UserInfo info;
-    info.username=name;
-    info.userid=getid(name);
-    info.sendedsize=t.values().at(0);
-    info.score=DB::getScore(db,name);
-
-    clients.insert(p,info);
-    if(kp)
-    {
-        qDebug()<<"find same name ,first"<<kp<<" "<<kp->username<<",second "<<p<<",SERVER PORT:"<<port;
-        disconnectName(kp);
-    }
-    emit sendToAll("/users:"+getUserList().join(";"));
-    if(timer==nullptr)
-    {
-        timer=new QTimer();
-        connect(timer,&QTimer::timeout,this,&MessageServer::autosave);
-        timer->start(5*60*1000);
-    }else{
-        timer->stop();
-        timer->start(5*60*1000);
-    }
-    p->username=name;
 }
 
 void MessageServer::pushMessagelist(QString msg)
 {
-    messagelist.push_back(msg);
-    emit messagecome();
-    for(auto p:clients.keys())
-    {
-        auto &info=clients[p];
-        QStringList msgs;
-        for(int i=0;i<5&&info.sendedsize<messagelist.size();info.sendedsize++,i++)
-        {
-            msgs.push_back(messagelist.at(info.sendedsize));
-        }
-        sendmsgs(p,msgs);
-    }
-
-    (msglogstream)<<QDateTime::currentDateTimeUtc().toString("yyyy/MM/dd hh:mm:ss : ")<<msg<<endl;
-    msglogstream.flush();
 }
 void MessageServer::processmessage()
-{
-    if(savedMessageIndex!=messagelist.size())
-    {
-        QRegExp msgreg("/(.*)_(.*):(.*)");
-
-        for(int maxProcess=0;maxProcess<5&&savedMessageIndex<messagelist.size();maxProcess++)
-        {
-            QString msg=messagelist[savedMessageIndex++];
-            if(msgreg.indexIn(msg)!=-1)
-            {
-                QString operationtype=msgreg.cap(1).trimmed();
-//                bool isNorm=msgreg.cap(2).trimmed()=="norm";
-                QString operatorMsg=msgreg.cap(3).trimmed();
-                if(operationtype == "drawline" )
-                {
-                    drawline(operatorMsg);
-                }
-                else if(operationtype == "delline")
-                {
-                    delline(operatorMsg);
-                }
-                else if(operationtype == "addmarker")
-                {
-                    addmarker(operatorMsg);
-                }
-                else if(operationtype == "delmarker")
-                {
-                    delmarekr(operatorMsg);
-                }
-                else if(operationtype == "retypeline")
-                {
-                    retypeline(operatorMsg);
-                }
-
-            }
-        }
-    }
 }
 QMap<QStringList,qint64> MessageServer::autosave()
 {
