@@ -3,8 +3,6 @@
 #include <QFile>
 #include <QRegExp>
 #include <QHostAddress>
-#include <atomic>
-
 MessageSocket::MessageSocket(qintptr handle,QObject *parent) : QObject(parent)
 {
     socket=nullptr;
@@ -15,22 +13,16 @@ MessageSocket::MessageSocket(qintptr handle,QObject *parent) : QObject(parent)
 void MessageSocket::onstarted()
 {
     socket=new QTcpSocket;
-    timer=new QTimer(socket);
     socket->setSocketDescriptor(socketDescriptor);
     qDebug()<<socket->peerAddress().toString()<<socket->peerPort();
     connect(socket,&QTcpSocket::readyRead,this,&MessageSocket::onreadyRead);
-//    connect(timer,&QTimer::timeout,this,&MessageSocket::onreadyRead);
     connect(socket,&QTcpSocket::disconnected,this,&MessageSocket::disconnected);
-//    timer->start(5*1000);
 }
 
 void MessageSocket::onreadyRead()
 {
-
     try {
         QDataStream in(socket);
-//        qDebug()<<"bytesAvailable:"<<username<<" "<<socket->bytesAvailable();
-        //读取datasize
         if(dataInfo.dataSize==0)
         {
             if(socket->bytesAvailable()>=sizeof (qint32))
@@ -38,30 +30,24 @@ void MessageSocket::onreadyRead()
                 in>>dataInfo.dataSize;
                 dataInfo.dataReadedSize+=sizeof (qint32);
             }
-            else {
-//                qDebug()<<"In  datasize :"<<socket->bytesAvailable();
-                return;
-            }
+            else return;
         }
-        //读取stringOrFilenameSize filedataSize
+
         if(dataInfo.stringOrFilenameSize==0&&dataInfo.filedataSize==0)
         {
             if(socket->bytesAvailable()>=2*sizeof (qint32))
             {
                 in>>dataInfo.stringOrFilenameSize>>dataInfo.filedataSize;
                 dataInfo.dataReadedSize+=(2*sizeof (qint32));
-//                qDebug()<<"Message:"+socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
+                qDebug()<<"Message:"+socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
                 if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100)
                 {
                     socket->disconnectFromHost();
 //                    while(!socket->waitForDisconnected());
 //                    this->deleteLater();
                 }
-            }else{
-//                qDebug()<<"In  stringOrFilenameSize "<<username<<":"<<socket->bytesAvailable();
+            }else
                 return;
-            }
-
         }
         QStringList list;
         if(socket->bytesAvailable()>=dataInfo.stringOrFilenameSize+dataInfo.filedataSize)
@@ -82,11 +68,8 @@ void MessageSocket::onreadyRead()
             if(dataInfo.dataReadedSize==dataInfo.dataSize)
                 resetDataInfo();
             processReaded(list);
-        }else{
-//            qDebug()<<"In  messageOrFileName"<<username<<" :"<<socket->bytesAvailable()<< "\t"<<dataInfo.stringOrFilenameSize<<"\t"<<dataInfo.filedataSize;
+        }else
             return;
-        }
-
         onreadyRead();
     }  catch (std::bad_alloc&) {
         qDebug()<<"Message "<<socket->peerAddress().toString()<<" can not get available raw for read!";
@@ -100,7 +83,7 @@ void MessageSocket::processReaded(QStringList list)
         if(msg.startsWith("00"))
         {
             msg=msg.remove(0,2);
-//            qDebug()<<":"<<msg;
+            qDebug()<<":"<<msg;
             processMsg(msg);
         }
     }
@@ -205,8 +188,7 @@ void MessageSocket::processMsg(const QString msg)
         emit userLogin(loginRex.cap(1));
     }else if(msgRex.indexIn(msg)!=-1)
     {
-//        qDebug()<<"hello msg:"<<(++recCnt);
-//        qDebug()<<"receive msg:"<<username+":"<<msg;
+        qDebug()<<"receive msg:"<<username+":"<<msg;
         emit pushMsg(msg);
     }
 }

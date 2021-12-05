@@ -50,7 +50,7 @@ void ManageSocket::onreadyRead()
             {
                 in>>dataInfo.stringOrFilenameSize>>dataInfo.filedataSize;
                 dataInfo.dataReadedSize+=(2*sizeof (qint32));
-//                qDebug()<<"Manage:"+socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
+                qDebug()<<"Manage:"+socket->peerAddress().toString()<<" datasize = "<<dataInfo.stringOrFilenameSize<<" "<<dataInfo.filedataSize;
                 if(dataInfo.stringOrFilenameSize>=1024*1000||dataInfo.filedataSize>=1024*1024*100)
                 {
                     socket->disconnectFromHost();

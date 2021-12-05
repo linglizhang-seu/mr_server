@@ -2,7 +2,6 @@
 #define MESSAGESOCKET_H
 
 #include <QTcpSocket>
-#include <QTimer>
 class MessageSocket : public QObject
 {
     Q_OBJECT
@@ -40,7 +39,6 @@ private:
     qintptr socketDescriptor;
     DataInfo dataInfo;
     QString username;
-    QTimer *timer;
 private:
     void resetDataInfo();
     void processMsg(const QString msg);
