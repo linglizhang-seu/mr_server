@@ -26,11 +26,12 @@ public slots:
         socket->connectToHost(ip,port.toInt());
         while(!socket->waitForConnected());
 
-        sendMsg(QString("/login:" +id));
+        sendMsg({QString("/Login:" +id)});
+
         for(int i=0;i<msgs.size();i++)
-            sendMsg(msgs[i]);
+            sendMsg({msgs[i]});
         socket->flush();
-        sendMsg("");
+        sendMsg({""});
         QObject::disconnect(QThread::currentThread(),
                             SIGNAL(started()),this,SLOT(onstarted()));
 //        socket->disconnectFromHost();
@@ -47,24 +48,18 @@ public slots:
 
 private:
 
-    void sendMsg(QString msg)
+    void sendMsg(QStringList msgs)
     {
-        qint32 stringSize=msg.toUtf8().size();
-        qint32 rawsize=msg.toStdString().size();
-        qint32 tsize=QByteArray::fromStdString(msg.toStdString()).size();
-        qint32 totalsize=3*sizeof (qint32)+stringSize;
-        QByteArray block;
-        QDataStream dts(&block,QIODevice::WriteOnly);
-        dts<<qint32(totalsize);
-        dts<<qint32(stringSize);
-        dts<<qint32(0);
-        block+=msg.toUtf8();
-        qint64 sendedsize=socket->write(block);
-        if(sendedsize!=totalsize)
-            qDebug()<<QString("Error:send!=total,%1,%2").arg(sendedsize).arg(totalsize);
+
+        if(socket->state()!=QAbstractSocket::ConnectedState)
+            return;
+
+        const std::string data=msgs.join(';').toStdString();
+        const std::string header=QString("DataTypeWithSize:%1 %2\n").arg(0).arg(data.size()).toStdString();
+        socket->write(header.c_str(),header.size());
+        socket->write(data.c_str(),data.size());
         socket->flush();
-        socket->waitForBytesWritten(60*1000);
-//        qDebug()<<"sendToServer:"<<block;
+
     }
 
     QTcpSocket *socket;

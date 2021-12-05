@@ -13,10 +13,10 @@
 #include <QFile>
 #include <QTime>
 //传入的apo需要重新保存，使得n按顺序
-QString port="4353";
-int peopleCnt=180;
-int packageCnt=10;//MESSGE CNOUT
-const int threadCnt=peopleCnt/2;
+QString port="4001";
+int peopleCnt=1;//peopleCnt
+int packageCnt=1;//MESSGE CNOUT
+const int threadCnt=1;//peopleCnt/2
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -56,9 +56,9 @@ QStringList V_NeuronSWCToSendMSG(V_NeuronSWC seg)
 QString UpdateAddSegMsg(V_NeuronSWC seg,QString clienttype,int i)
 {
     QStringList result;
-    result.push_back(QString("%1 %2 %3 %4 %5").arg(i).arg(clienttype).arg(10000).arg(10000).arg(10000));
+    result.push_back(QString("%1 %2 %3 %4 %5").arg(clienttype).arg(i).arg(10000).arg(10000).arg(10000));
     result+=V_NeuronSWCToSendMSG(seg);
-    return "/drawline_norm:"+result.join(';');
+    return "/drawline_norm:"+result.join(',');
 }
 
 QString UpdateDelSegMsg(V_NeuronSWC seg,QString clienttype,int i)
@@ -66,37 +66,37 @@ QString UpdateDelSegMsg(V_NeuronSWC seg,QString clienttype,int i)
     QStringList result;
     result.push_back(QString("%1 %2 %3 %4 %5").arg(i).arg(clienttype).arg(10000).arg(10000).arg(10000));
     result+=V_NeuronSWCToSendMSG(seg);
-    return QString("/delline_norm:"+result.join(";"));
+    return QString("/delline_norm:"+result.join(","));
 
 }
 
 QString UpdateAddMarkerMsg(float X, float Y, float Z,int type,QString clienttype,int i)
 {
     QStringList result;
-    result.push_back(QString("%1 %2 %3 %4 %5").arg(i).arg(clienttype).arg(10000).arg(10000).arg(10000));
+    result.push_back(QString("%1 %2 %3 %4 %5").arg(clienttype).arg(i).arg(10000).arg(10000).arg(10000));
     result.push_back(QString("%1 %2 %3 %4").arg(type).arg(X).arg(Y).arg(Z));
-    return QString("/addmarker_norm:"+result.join(";"));
+    return QString("/addmarker_norm:"+result.join(","));
 }
 
 QString UpdateDelMarkerSeg(float x,float y,float z,QString clienttype,int i)
 {
     QStringList result;
-    result.push_back(QString("%1 %2 %3 %4 %5").arg(i).arg(clienttype).arg(10000).arg(10000).arg(10000));
+    result.push_back(QString("%1 %2 %3 %4 %5").arg(clienttype).arg(i).arg(10000).arg(10000).arg(10000));
     result.push_back(QString("%1 %2 %3 %4").arg(-1).arg(x).arg(y).arg(z));
-    return QString("/delmarker_norm:"+result.join(";"));
+    return QString("/delmarker_norm:"+result.join(","));
 }
 
 QString UpdateRetypeSegMsg(V_NeuronSWC seg,int type,QString clienttype,int i)
 {
     QStringList result;
-    result.push_back(QString("%1 %2 %3 %4 %5 %6").arg(i).arg(clienttype).arg(type).arg(10000).arg(10000).arg(10000));
+    result.push_back(QString("%1 %2 %3 %4 %5 %6").arg(clienttype).arg(i).arg(type).arg(10000).arg(10000).arg(10000));
     result+=V_NeuronSWCToSendMSG(seg);
-    return QString("/retypeline_norm:"+result.join(";"));
+    return QString("/retypeline_norm:"+result.join(","));
 }
 
 QList<QStringList> MsgForAddMarker(NeuronTree nt)
 {
-    int cnt=2;
+    int cnt=1;
     const int cntForPeople=cnt*packageCnt;
     std::shuffle(nt.listNeuron.begin(),nt.listNeuron.end(),std::default_random_engine());
     QList<NeuronSWC> markers(nt.listNeuron.begin(),nt.listNeuron.end()+peopleCnt*cntForPeople);
@@ -156,7 +156,7 @@ QList<QStringList> MsgForAddLine(V_NeuronSWC_list nt)
 
 QList<QStringList> MsgForDeleteLine(V_NeuronSWC_list nt)
 {
-    int cnt=3;//每个包里减线命令的条数
+    int cnt=1;//每个包里减线命令的条数
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments;
     for(int i=0;i<peopleCnt;i++){
@@ -176,7 +176,7 @@ QList<QStringList> MsgForDeleteLine(V_NeuronSWC_list nt)
 
 QList<QStringList> MsgForRetypeLine(V_NeuronSWC_list nt)
 {
-    int cnt=2;
+    int cnt=1;
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments;
     for(int i=0;i<peopleCnt;i++){
@@ -204,7 +204,8 @@ QList<QStringList> MsgWaitSend(QList<QStringList> addline,
 {
     QList<QStringList> res;//每个人的操作集合
     for(int i=0;i<peopleCnt;i++){
-        QStringList msgs=addline[i]/*+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];*/;
+//        QStringList msgs=addline[i]/*+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];*/;
+        QStringList msgs=addline[i]+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];;
         std::shuffle(msgs.begin(),msgs.end(),std::default_random_engine());
         res.push_back(msgs);
     }
@@ -216,12 +217,13 @@ QList<QStringList> prepareMsg(NeuronTree nt)
     auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
 
     auto addline=MsgForAddLine(segments);
-//    auto delline=MsgForDeleteLine(segments);
-//    auto retypeline=MsgForRetypeLine(segments);
-//    auto addmarker=MsgForAddMarker(nt);
-//    auto delmarker=MsgForDeleteMarker(nt);
+    auto delline=MsgForDeleteLine(segments);
+    auto retypeline=MsgForRetypeLine(segments);
+    auto addmarker=MsgForAddMarker(nt);
+    auto delmarker=MsgForDeleteMarker(nt);
 
-    return MsgWaitSend(addline,{},{},{},{});
+    return MsgWaitSend(addline,delline,retypeline,addmarker,delmarker);
+//    return MsgWaitSend(addline,{},{},{},{});
 }
 
 
@@ -288,23 +290,23 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
 //    processData("/Users/huanglei/Desktop/pressurelog");
-    processData("/Users/huanglei/Desktop/brustlog");
+//    processData("/Users/huanglei/Desktop/brustlog");
 //    processData("/Users/huanglei/Desktop/log");
-//    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
-//    auto msgLists=prepareMsg(nt);
+    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
+    auto msgLists=prepareMsg(nt);
 
-//    QString ip="139.155.28.154";
+    QString ip="192.168.3.158";
 
-//    QThread *threads=new QThread[threadCnt];
-//    QVector<SimClient*> clients;
-//    for(int i=0;i<peopleCnt;i++){
-//        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
-//        clients.push_back(p);
-//        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
-//        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
-//    }
-//    for(int i=0;i<threadCnt;i++)
-//        threads[i].start();
+    QThread *threads=new QThread[threadCnt];
+    QVector<SimClient*> clients;
+    for(int i=0;i<peopleCnt;i++){
+        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
+        clients.push_back(p);
+        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
+        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
+    }
+    for(int i=0;i<threadCnt;i++)
+        threads[i].start();
 
     return a.exec();
 }
