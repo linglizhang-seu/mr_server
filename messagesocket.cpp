@@ -188,7 +188,7 @@ void MessageSocket::processMsg(const QString msg)
         emit userLogin(loginRex.cap(1));
     }else if(msgRex.indexIn(msg)!=-1)
     {
-        qDebug()<<"receive msg:"<<username+":"<<msg;
+        qDebug()<<"receive msg:"<<msg;
         emit pushMsg(msg);
     }
 }
