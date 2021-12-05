@@ -150,7 +150,6 @@ private:
     const float ths=1;
 //    enum ClientType {}
     static const QStringList clienttypes;
-    int cnt=0;
 };
 namespace Map {
 
