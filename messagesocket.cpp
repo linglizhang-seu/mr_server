@@ -83,7 +83,7 @@ void MessageSocket::processReaded(QStringList list)
         if(msg.startsWith("00"))
         {
             msg=msg.remove(0,2);
-            qDebug()<<":"<<msg;
+            qDebug()<<this->socket->peerAddress().toString()<<":"<<msg;
             processMsg(msg);
         }
     }
@@ -184,11 +184,9 @@ void MessageSocket::processMsg(const QString msg)
 
     if(loginRex.indexIn(msg)!=-1)
     {
-        username=loginRex.cap(1);
         emit userLogin(loginRex.cap(1));
     }else if(msgRex.indexIn(msg)!=-1)
     {
-        qDebug()<<"receive msg:"<<msg;
         emit pushMsg(msg);
     }
 }
