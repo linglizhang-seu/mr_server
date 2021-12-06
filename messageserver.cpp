@@ -460,7 +460,7 @@ void MessageServer::retypeline(QString msg)
         return;
     }
 
-    QString username=listwithheader[0].split(' ',QString::SkipEmptyParts)[0].trimmed();
+
     int newtype=listwithheader[0].split(' ',QString::SkipEmptyParts)[2].trimmed().toUInt();
     if(!(newtype<colorsize)) newtype=defaulttype;
     NeuronTree newTempNT;
@@ -475,7 +475,6 @@ void MessageServer::retypeline(QString msg)
         for(auto & unit:it->row)
         {
             unit.type=newtype;
-            unit.r=(int)unit.r+1.0*getid(username)/100000;
         }
         qDebug()<<"find retype line sucess "<<msg;
         return;
