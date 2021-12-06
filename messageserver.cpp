@@ -574,7 +574,7 @@ NeuronTree MessageServer::convertMsg2NT(QStringList &listwithheader,QString user
     newTempNT.hashNeuron.clear();
     int cnt=listwithheader.size();
     int type=-1;
-
+    int timestamp=QDateTime::currentMSecsSinceEpoch();
     for(int i=1;i<cnt;i++)
     {
         NeuronSWC S;
@@ -590,6 +590,7 @@ NeuronTree MessageServer::convertMsg2NT(QStringList &listwithheader,QString user
         S.y=nodelist[2].toFloat();
         S.z=nodelist[3].toFloat();
         S.r=getid(username)*10+from;
+        S.timestamp=timestamp;
         if(i==1) S.pn=-1;
         else S.pn=i-1;
 
