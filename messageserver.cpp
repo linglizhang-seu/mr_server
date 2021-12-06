@@ -460,8 +460,22 @@ void MessageServer::retypeline(QString msg)
         return;
     }
 
+    QString username=listwithheader[0].split(' ',QString::SkipEmptyParts)[0].trimmed();
+    int userid=getid(username);
+
+    int from=0;
+    QString clienttype=listwithheader[0].split(' ',QString::SkipEmptyParts)[1].trimmed();
+    for(int i=0;i<clienttypes.size();i++)
+    {
+        if(clienttypes[i]==clienttype)
+        {
+            from = i;
+            break;
+        }
+    }
 
     int newtype=listwithheader[0].split(' ',QString::SkipEmptyParts)[2].trimmed().toUInt();
+
     if(!(newtype<colorsize)) newtype=defaulttype;
     NeuronTree newTempNT;
 
@@ -470,17 +484,18 @@ void MessageServer::retypeline(QString msg)
     qDebug()<<segments.seg.size();
     auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
 
+
     if(it!=segments.seg.end())
     {
         for(auto & unit:it->row)
         {
             unit.type=newtype;
+            unit.creatmode=userid*10+from;
         }
         qDebug()<<"find retype line sucess "<<msg;
         return;
     }
     qDebug()<<"not find retype line "<<msg;
-
 }
 void MessageServer::retypemarker(QString msg)
 {
