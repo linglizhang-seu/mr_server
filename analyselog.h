@@ -189,9 +189,10 @@ void getThirdValues(QStringList files,QString file)
     }
 }
 
-QMap<int,double> getusertimes(QString file)
+QMap<int,int> getusertimes(QString file)
 {
      QMap<int,QList<QDateTime>> usertimes;
+
      auto orders=readorders(file);
      V_NeuronSWC_list segments;
      QList<CellAPO> wholePoints;
@@ -240,8 +241,62 @@ QMap<int,double> getusertimes(QString file)
                  usertimes[username.toInt()].push_back(pair.first);
              }
          }
-
      }
+    const int plus=60*2;//时间补偿
+    const int thres=60*3;//gap thres
+     QMap<int,int> userinfos;
+     auto keys=usertimes.keys();
+     for(auto &key:keys){
+         QList<QDateTime> times;
+
+         int cnt=times.size();
+         if(cnt==0) {
+             userinfos[key]=0;
+         }else if(cnt==1){
+             userinfos[key]=plus;
+         }else{
+             userinfos[key]=times.back().toSecsSinceEpoch()-times.front().toSecsSinceEpoch()+plus;
+             for(int i=1;i<cnt;i++)
+             {
+                if(times[i].toSecsSinceEpoch()-times[i-1].toSecsSinceEpoch()>60*3)
+                    userinfos[key]-=(times[i].toSecsSinceEpoch()-times[i-1].toSecsSinceEpoch()-plus);
+             }
+         }
+     }
+     return userinfos;
+}
+
+void getspeed(QString inlogfile,QString inswc,QString outfile)
+{
+    auto times=getusertimes(inlogfile);
+    auto nt=readSWC_file(inswc);
+    for(auto &node:nt.listNeuron){
+        node.type=node.r/10+2;
+    }
+    auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
+
+    QMap<int,double> hashmap;
+    for(auto &seg:segments.seg){
+        hashmap[int(seg.row[0].type)]+=getsegmentlength(seg);
+    }
+
+    QMap<int,double> speeds;
+    if(times.keys()!=hashmap.keys()){
+        qDebug()<<"Error";
+        return;
+    }
+    auto keys=hashmap.keys();
+    for(auto key:keys){
+        speeds[key]=hashmap.value(key)/times.value(key);
+    }
+    QFile f(outfile);
+    if(f.open(QIODevice::WriteOnly)){
+        for(auto key:keys){
+            QString data=QString("%1:%2\n").arg(key).arg(speeds.value(key));
+            f.write(data.toStdString().c_str(),data.size());
+        }
+        f.close();
+    }
 }
 
 
