@@ -11,12 +11,7 @@ CONFIG -= app_bundle
 SOURCES += \
         basic_c_fun/basic_surf_objs.cpp \
         basic_c_fun/v3d_message.cpp \
-        basicdatamanage.cpp \
         main.cpp \
-        manageserver.cpp \
-        managesocket.cpp \
-        messageserver.cpp \
-        messagesocket.cpp \
         neuron_editing/apo_xforms.cpp \
         neuron_editing/global_feature_compute.cpp \
         neuron_editing/neuron_format_converter.cpp \
@@ -30,18 +25,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ThreadPool.h \
     analyselog.h \
     analyseswc.h \
     basic_c_fun/basic_surf_objs.h \
     basic_c_fun/v3d_basicdatatype.h \
     basic_c_fun/v3d_message.h \
     basic_c_fun/v_neuronswc.h \
-    basicdatamanage.h \
-    manageserver.h \
-    managesocket.h \
-    messageserver.h \
-    messagesocket.h \
     neuron_editing/apo_xforms.h \
     neuron_editing/global_feature_compute.h \
     neuron_editing/neuron_format_converter.h \

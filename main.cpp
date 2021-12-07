@@ -5,40 +5,29 @@
 #include <QFile>
 #include <cstdlib>
 #include <cstdio>
-#include "manageserver.h"
-//传入的apo需要重新保存，使得n按顺序
-
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
-    // 加锁
-    static QMutex mutex;
-    mutex.lock();
-
-    QByteArray localMsg = msg.toLocal8Bit();
-
-    // 设置输出信息格式
-    QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss : ");
-//    QString strMessage = QString("%1 File:%2  Line:%3  Function:%4  DateTime:%5\n")
-//            .arg(localMsg.constData()).arg(context.file).arg(context.line).arg(context.function).arg(strDateTime);
-    QString strMessage=strDateTime+localMsg.constData()+"\n";
-    // 输出信息至文件中（读写、追加形式）
-    QFile file("log.txt");
-    file.open(QIODevice::ReadWrite | QIODevice::Append);
-    QTextStream stream(&file);
-    stream << strMessage ;
-    file.flush();
-
-    file.close();
-    // 解锁
-    mutex.unlock();
-    fprintf(stderr,strMessage.toStdString().c_str());
-}
+#include "analyseswc.h"
 
 int main(int argc, char *argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
+    doaddusertypr("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+                  "/Users/huanglei/Desktop/20211207/20211203_testbig_addusertype.eswc");
 
+    docheckusertype("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+                  "/Users/huanglei/Desktop/20211207/20211203_testbig_checkusertype.eswc");
+
+    domodiltytype("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+                  "/Users/huanglei/Desktop/20211207/20211203_testbig_modiltytype.eswc");
+
+    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+                     "/Users/huanglei/Desktop/20211207/20211203_testbig_adduserlength.txt");
+
+    getretypeuserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+                     "/Users/huanglei/Desktop/20211207/20211203_testbig_retypeuserlength.txt");
+
+    doheatmap("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+                     "/Users/huanglei/Desktop/20211207/20211203_testbig_heatmap.swc");
     return a.exec();
 }
 

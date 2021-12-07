@@ -6,6 +6,8 @@
 #include "utils.h"
 #include <algorithm>
 #include <cmath>
+#include <QRegExp>
+
 QStringList readorders(QString infile)
 {
     const int thirdId=20;

@@ -468,14 +468,14 @@ void neuron_branch_tip_count(V3DLONG &n_branch, V3DLONG &n_tip, const vector<V_N
 		{
 			V_NeuronSWC_unit node = seg.row.at(j);
 			V_NeuronSWC_coord key = node;
-			map.insertMulti(key, node);
+            map.insert(key, node);
 		}
 	}
 
 	n_branch = 0;
 	n_tip = 2*segment_list.size();
 
-	QList <V_NeuronSWC_coord> keys = map.uniqueKeys();
+    QList <V_NeuronSWC_coord> keys = map.keys();
 	for (V3DLONG i=0; i<keys.size(); i++)
 	{
 		V_NeuronSWC_coord key = keys.at(i);
