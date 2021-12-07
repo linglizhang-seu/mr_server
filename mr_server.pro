@@ -1,5 +1,5 @@
 QT -= gui
-QT += sql network
+QT += sql network core5compat
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -31,6 +31,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     ThreadPool.h \
+    analyselog.h \
+    analyseswc.h \
     basic_c_fun/basic_surf_objs.h \
     basic_c_fun/v3d_basicdatatype.h \
     basic_c_fun/v3d_message.h \
@@ -45,4 +47,5 @@ HEADERS += \
     neuron_editing/neuron_format_converter.h \
     neuron_editing/neuron_sim_scores.h \
     neuron_editing/neuron_xforms.h \
-    neuron_editing/v_neuronswc.h
+    neuron_editing/v_neuronswc.h \
+    utils.h
