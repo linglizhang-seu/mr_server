@@ -206,7 +206,7 @@ void MessageServer::pushMessagelist(QString msg)
         sendmsgs(p,msgs);
     }
 
-    (*msglogstream)<<QDateTime::currentDateTimeUtc().toString("yyyy/MM/dd hh:mm:ss : ")<<msg<<endl;
+    (*msglogstream)<<QDateTime::currentDateTime().toString("yyyy/MM/dd hh:mm:ss:zzz : ")<<msg<<endl;
 }
 
 void MessageServer::processmessage()
