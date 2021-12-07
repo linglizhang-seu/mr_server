@@ -30,6 +30,46 @@ std::pair<QDateTime,QString> getMsgwithTime(const QString &msg)
     return {QDateTime::fromString(timestr,"yyyy-MM-dd hh:mm:ss"),data};
 }
 
+void doorders(QString inlog,QString outswc)
+{
+    auto orders=readorders(inlog);
+    V_NeuronSWC_list segments;
+    QList<CellAPO> wholePoints;
+    QStringList stack;
+    for(auto &msg:orders){
+        auto pair=getMsgwithTime(msg);
+        QRegExp msgreg("/(.*)_(.*):(.*)");
+        if(msgreg.indexIn(pair.second)!=-1)
+        {
+            QString operationtype=msgreg.cap(1).trimmed();
+//                bool isNorm=msgreg.cap(2).trimmed()=="norm";
+            QString operatorMsg=msgreg.cap(3).trimmed();
+            if(operationtype == "drawline" )
+            {
+                drawline(operatorMsg,segments);
+            }
+            else if(operationtype == "delline")
+            {
+                 if(delline(operatorMsg,segments))
+                     stack.push_back(operatorMsg);
+            }
+            else if(operationtype == "addmarker")
+            {
+                addmarker(operatorMsg,wholePoints);
+            }
+            else if(operationtype == "delmarker")
+            {
+                delmarekr(operatorMsg,wholePoints);
+            }
+            else if(operationtype == "retypeline")
+            {
+                retypeline(operatorMsg,segments);
+            }
+        }
+    }
+    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
+}
+
 void getUnUse(QString inlog,QString outswc)
 {
     auto orders=readorders(inlog);
@@ -67,7 +107,7 @@ void getUnUse(QString inlog,QString outswc)
             }
         }
     }
-
+//    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
     for(auto &msg:stack){
         drawlineWithThirdParty(msg,segments);
     }

@@ -155,10 +155,14 @@ void compare(QString file1,QString file2)
     for(auto seg:segs1.seg)
     {
         auto it=findseg(segs2.seg.begin(),segs2.seg.end(),seg);
-        if(it!=segs2.seg.end())
+        if(it!=segs2.seg.end()&&it->row.at(0).type==seg.row.at(0).type)
+        {
             segs2.seg.erase(it);
+        }
+
         else{
             qDebug()<<"Fatal:seg1.seg not find in seg2";
+            qDebug()<<(it!=segs2.seg.end())<<"\t"<<(it->row.at(0).type==seg.row.at(0).type);
         }
     }
 }

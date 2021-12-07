@@ -91,6 +91,7 @@ vector<V_NeuronSWC>::iterator findseg(vector<V_NeuronSWC>::iterator begin,vector
         }
         begin++;
     }
+
     return result;
 }
 
@@ -190,6 +191,8 @@ bool delline(QString msg,V_NeuronSWC_list &segments)
 
     if(it!=segments.seg.end())
     {
+        if(it->row.at(0).type==2||(it->row.at(0).r/10)!=getid(username)
+                ||(QDateTime::currentDateTime().toSecsSinceEpoch()-QDateTime::fromString(QString::number(int64_t(it->row.at(0).timestamp)),"").toSecsSinceEpoch())>60*5)
         segments.seg.erase(it);
         return true;
     }else
