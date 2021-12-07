@@ -191,12 +191,13 @@ bool delline(QString msg,V_NeuronSWC_list &segments)
 
     if(it!=segments.seg.end())
     {
-        if(it->row.at(0).type==2||(it->row.at(0).r/10)!=getid(username)
-                ||(QDateTime::currentDateTime().toSecsSinceEpoch()-QDateTime::fromString(QString::number(int64_t(it->row.at(0).timestamp)),"").toSecsSinceEpoch())>60*5)
+        bool res=it->row.at(0).type==2||(it->row.at(0).r/10)!=getid(username)
+                ||(QDateTime::currentDateTime().toSecsSinceEpoch()-QDateTime::fromString(QString::number(int64_t(it->row.at(0).timestamp)),"yyyyMMddhhmmsszzz").toSecsSinceEpoch())>60*5;
+
         segments.seg.erase(it);
-        return true;
-    }else
-        return false;
+        return res;
+    }
+    return false;
 }
 
 void addmarker(QString msg,QList<CellAPO> &wholePoint)
@@ -321,7 +322,7 @@ NeuronTree convertMsg2NTWithThirdParty(QStringList &listwithheader,QString usern
         NeuronSWC S;
         QStringList nodelist=listwithheader[i].split(' ',Qt::SkipEmptyParts);
         S.n=i;
-        S.type=10;//third party type
+        S.type=3;//third party type
 
         S.x=nodelist[1].toFloat();
         S.y=nodelist[2].toFloat();

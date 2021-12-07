@@ -30,9 +30,8 @@ std::pair<QDateTime,QString> getMsgwithTime(const QString &msg)
     return {QDateTime::fromString(timestr,"yyyy-MM-dd hh:mm:ss"),data};
 }
 
-void doorders(QString inlog,QString outswc)
+V_NeuronSWC_list doorders(QStringList orders)
 {
-    auto orders=readorders(inlog);
     V_NeuronSWC_list segments;
     QList<CellAPO> wholePoints;
     QStringList stack;
@@ -67,7 +66,7 @@ void doorders(QString inlog,QString outswc)
             }
         }
     }
-    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
+    return segments;
 }
 
 void getUnUse(QString inlog,QString outswc)

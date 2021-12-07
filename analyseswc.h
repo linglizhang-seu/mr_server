@@ -141,7 +141,7 @@ void doheatmap(QString inswc,QString outswc)
     writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segs));
 }
 
-void compare(QString file1,QString file2)
+V_NeuronSWC compare(QString file1,QString file2)
 {
     auto nt1=readSWC_file(file1);
     auto nt2=readSWC_file(file2);
@@ -154,7 +154,13 @@ void compare(QString file1,QString file2)
         qDebug()<<"Fatal:segs.seg size !=";
     for(auto seg:segs1.seg)
     {
+
         auto it=findseg(segs2.seg.begin(),segs2.seg.end(),seg);
+        if(seg.row.at(0).creatmode==0.0)
+        {
+            qDebug()<<it->row.at(0).x<<" "<<it->row.at(0).y<<" "<<it->row.at(0).z;
+            return *it;
+        }
         if(it!=segs2.seg.end()&&it->row.at(0).type==seg.row.at(0).type)
         {
             segs2.seg.erase(it);
