@@ -3,6 +3,7 @@
 #include <QString>
 #include <basic_c_fun/basic_surf_objs.h>
 #include <neuron_editing/neuron_format_converter.h>
+#include "utils.h"
 void doaddusertypr(QString inswc,QString outswc)
 {
     auto nt=readSWC_file(inswc);
@@ -28,19 +29,6 @@ void domodiltytype(QString inswc,QString outswc)
         node.type=int(node.r)%10*2+int(node.creatmode)%10+1;
     }
     writeESWC_file(outswc,nt);
-}
-
-double getsegmentlength(const V_NeuronSWC &seg)
-{
-    const int cnt=seg.row.size();
-    double length=0;
-
-    for(int i=1;i<cnt;i++){
-        auto prenode=seg.row.at(i-1);
-        auto curnode=seg.row.at(i);
-        length+=sqrt(pow(curnode.x-prenode.x,2)+pow(curnode.y-prenode.y,2)+pow(curnode.z-prenode.z,2));
-    }
-    return length;
 }
 
 void getadduserlength(QString inswc,QString lengthfile)
@@ -150,5 +138,26 @@ void doheatmap(QString inswc,QString outswc)
     writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segs));
 }
 
+void compare(QString file1,QString file2)
+{
+    auto nt1=readSWC_file(file1);
+    auto nt2=readSWC_file(file2);
+
+    if(nt1.listNeuron.size()!=nt2.listNeuron.size())
+        qDebug()<<"Fatal:nt.listneuron size !=";
+    auto segs1=NeuronTree__2__V_NeuronSWC_list(nt1);
+    auto segs2=NeuronTree__2__V_NeuronSWC_list(nt2);
+    if(segs1.seg.size()!=segs2.seg.size())
+        qDebug()<<"Fatal:segs.seg size !=";
+    for(auto seg:segs1.seg)
+    {
+        auto it=findseg(segs2.seg.begin(),segs2.seg.end(),seg);
+        if(it!=segs2.seg.end())
+            segs2.seg.erase(it);
+        else{
+            qDebug()<<"Fatal:seg1.seg not find in seg2";
+        }
+    }
+}
 
 #endif // ANALYSESWC_H
