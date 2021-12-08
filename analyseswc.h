@@ -49,6 +49,8 @@ void getadduserlength(QString inswc,QString lengthfile)
     QFile f(lengthfile);
     if(f.open(QIODevice::WriteOnly)){
         auto keys=hashmap.keys();
+        QString data=QString("%1:%2\n").arg("usertype").arg("length");
+        f.write(data.toStdString().c_str(),data.size());
         for(auto &key:keys){
             QString data=QString("%1:%2\n").arg(key).arg(hashmap.value(key));
             f.write(data.toStdString().c_str(),data.size());
@@ -72,6 +74,8 @@ void getretypeuserlength(QString inswc,QString lengthfile)
     QFile f(lengthfile);
     if(f.open(QIODevice::WriteOnly)){
         auto keys=hashmap.keys();
+        QString data=QString("%1:%2\n").arg("usertype").arg("length");
+        f.write(data.toStdString().c_str(),data.size());
         for(auto &key:keys){
             QString data=QString("%1:%2\n").arg(key).arg(hashmap.value(key));
             f.write(data.toStdString().c_str(),data.size());
@@ -115,9 +119,11 @@ bool isInBBox(const std::array<int,6> &bbox,const V_NeuronSWC &seg)
 
 void dosegheatmap(V_NeuronSWC &seg,const V_NeuronSWC_list &sges)
 {
-    QSet<int> users;
-    auto BBox=getBBox(seg);
+    QSet<int> users;   
+    users.insert(int(seg.row.at(0).r/10));
+    users.insert(int(seg.row.at(0).creatmode/10));
 
+    auto BBox=getBBox(seg);
     for(auto &seg:sges.seg){
         if(isInBBox(BBox,seg)){
             users.insert(int(seg.row.at(0).r/10));
@@ -171,6 +177,16 @@ V_NeuronSWC compare(QString file1,QString file2)
             qDebug()<<(it!=segs2.seg.end())<<"\t"<<(it->row.at(0).type==seg.row.at(0).type);
         }
     }
+}
+
+void douserproof(QString insec,QString outswc)
+{
+    auto nt=readSWC_file(insec);
+    for(auto &node:nt.listNeuron)
+    {
+        node.type=int(node.r)/10==20?3:2;
+    }
+    writeESWC_file(outswc,nt);
 }
 
 #endif // ANALYSESWC_H

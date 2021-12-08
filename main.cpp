@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
 //   auto seg=compare("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
 //                "/Users/huanglei/Desktop/20211207/20211203_order.eswc");
 //    auto msgs=readorders("/Users/huanglei/Desktop/20211207/20211203_testbig.txt");
-
 //    for(int i=0;i<msgs.size();i++)
 //    {
 //        auto locallist=msgs.first(i+1);
@@ -28,31 +27,43 @@ int main(int argc, char *argv[])
 //        if(it!=nt.seg.end()&&it->row.at(0).type==2)
 //            qDebug()<<i;
 //    }
-
-
-    //analyse log
-    getUnUse("/Users/huanglei/Desktop/20211207/20211203_testbig.txt",
-             "/Users/huanglei/Desktop/20211207/20211203_testbig_unuse.eswc");
-
+//verifylog("/Users/huanglei/Desktop/20211207/20211203_testbig.txt");
 
     //analyse swc
     doaddusertypr("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                  "/Users/huanglei/Desktop/20211207/20211203_testbig_addusertype.eswc");
+                  "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_addusertype.eswc");
 
     docheckusertype("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                  "/Users/huanglei/Desktop/20211207/20211203_testbig_checkusertype.eswc");
+                  "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_checkusertype.eswc");
 
     domodiltytype("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                  "/Users/huanglei/Desktop/20211207/20211203_testbig_modiltytype.eswc");
+                  "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_modiltytype.eswc");
 
     getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                     "/Users/huanglei/Desktop/20211207/20211203_testbig_adduserlength.txt");
+                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_adduserlength.txt");
 
     getretypeuserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                     "/Users/huanglei/Desktop/20211207/20211203_testbig_retypeuserlength.txt");
+                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_retypeuserlength.txt");
 
     doheatmap("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                     "/Users/huanglei/Desktop/20211207/20211203_testbig_heatmap.swc");
+                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_heatmap.eswc");
+    //analyse log
+    getUnUse("/Users/huanglei/Desktop/20211207/20211203_testbig.txt",
+             "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_unuse.eswc");
+
+    getThirdValues({"/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.txt"},
+                   "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterproof_analyse.txt");
+
+    douserproof("/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc",
+                "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterproof_retype.eswc");
+
+    getspeed("/Users/huanglei/Desktop/20211207/20211203_testbig.txt",
+             "/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+             "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_speed.txt");
+
+    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc",
+                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterprooflength.txt");
+
 //    return a.exec();
     return 0;
 }
