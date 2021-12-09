@@ -7,6 +7,14 @@
 #include <cstdio>
 #include "analyseswc.h"
 #include "analyselog.h"
+QString inDir="/Users/huanglei/Desktop/20211209/";
+QString inbasename="20211209_test";
+QString anlyseDir=inDir+"analyse/";
+QString rawswcname=inDir+inbasename+".eswc";
+QString rawintructionlist=inDir+inbasename+".txt";
+QString swcsuffix=".eswc";
+QString txtsuffix=".txt";
+
 int main(int argc, char *argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
@@ -30,36 +38,26 @@ int main(int argc, char *argv[])
 //verifylog("/Users/huanglei/OneDrive/StudyDB/neu/20211207/20211203_testbig.txt");//寻找log中直接加3号色的区域
 
     //analyse swc
-    doaddusertypr("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                  "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_addusertype.eswc");
+    doaddusertypr(rawswcname,anlyseDir+inbasename+"_addusertype.eswc");
 
-    docheckusertype("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                  "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_checkusertype.eswc");
+    docheckusertype(rawswcname,anlyseDir+inbasename+"_checkusertype.eswc");
 
-    domodiltytype("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                  "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_modiltytype.eswc");
 
-    //in speed txt
-//    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-//                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_adduserlength.txt");
+    domodiltytype(rawswcname,anlyseDir+inbasename+"_modiltytype.eswc");
 
-//    getretypeuserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-//                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_retypeuserlength.txt");
 
-    donodeheatmap("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_heatmap.eswc");
+    donodeheatmap(rawswcname,anlyseDir+inbasename+"_heatmap.eswc");
 
     //analyse log
-    getUnUse("/Users/huanglei/Desktop/20211207/20211203_testbig.txt",
-             "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_unuse.eswc");
+    getUnUse(rawintructionlist,anlyseDir+inbasename+"_unuse.eswc");
 
-    doproof({"/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc"},{"/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc"},
-            {"/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_proof.ano.eswc"},"/Users/huanglei/Desktop/20211207/analyse/proof.txt");
+    getspeed(rawintructionlist,rawswcname,anlyseDir+inbasename+"_speed.txt");
+
+//    doproof({"/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc"},{"/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc"},
+//            {"/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_proof.ano.eswc"},"/Users/huanglei/Desktop/20211207/analyse/proof.txt");
 
 
-    getspeed("/Users/huanglei/Desktop/20211207/20211203_testbig.txt",
-             "/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-             "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_speed.txt");
+
 
     //for verify not use
 //    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc",

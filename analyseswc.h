@@ -8,7 +8,7 @@ void doaddusertypr(QString inswc,QString outswc)
 {
     auto nt=readSWC_file(inswc);
     for(auto &node:nt.listNeuron){
-        node.type=node.r/10+2;
+        node.type=node.r/10;
     }
     writeESWC_file(outswc,nt);
 }
@@ -20,7 +20,7 @@ void docheckusertype(QString inswc,QString outswc)
         if(node.creatmode/10==0){
             qDebug()<<node.n;
         }
-        node.type=node.creatmode/10+2;
+        node.type=node.creatmode/10;
     }
     writeESWC_file(outswc,nt);
 }
@@ -29,7 +29,7 @@ void domodiltytype(QString inswc,QString outswc)
 {
     auto nt=readSWC_file(inswc);
     for(auto &node:nt.listNeuron){
-        node.type=int(node.r)%10*2+int(node.creatmode)%10+2;
+        node.type=int(node.r)%10*2+int(node.creatmode)%10+3;
     }
     writeESWC_file(outswc,nt);
 }
@@ -38,7 +38,7 @@ void getadduserlength(QString inswc,QString lengthfile)
 {
     auto nt=readSWC_file(inswc);
     for(auto &node:nt.listNeuron){
-        node.type=node.r/10+2;
+        node.type=node.r/10;
     }
     auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
 
@@ -63,7 +63,7 @@ void getretypeuserlength(QString inswc,QString lengthfile)
 {
     auto nt=readSWC_file(inswc);
     for(auto &node:nt.listNeuron){
-        node.type=node.creatmode/10+2;
+        node.type=node.creatmode/10;
     }
     auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
 
@@ -132,7 +132,7 @@ void dosegheatmap(V_NeuronSWC &seg,const V_NeuronSWC_list &sges)
     }
 
     for(auto &node:seg.row){
-        node.type=users.size()+2;
+        node.type=users.size();
     }
 }
 
@@ -171,7 +171,7 @@ void donodeheatmap(QString inswc,QString outswc)
                 myset.insert(int(n.creatmode/10));
             }
         }
-        node.type=myset.size()+2;
+        node.type=myset.size()+3;
     }
     writeESWC_file(outswc,nt);
 }
