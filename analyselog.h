@@ -108,7 +108,7 @@ void getUnUse(QString inlog,QString outswc)
     }
 //    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
     for(auto &msg:stack){
-        drawlineWithThirdParty(msg,segments);
+        drawlineUnuse(msg,segments);
     }
     writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
 }
@@ -198,112 +198,117 @@ void getThirdValues(QStringList files,QString file)
     }
 }
 
-QMap<int,int> getusertimes(QString file)
+//从instruction list中抽取出每个的sub instruction list
+//对于每个sub instruction list,遍历 计算前一条指令和后一条指令的时间差
+
+std::pair<QMap<int,double>,QMap<int,double> > getusertimes(QString file)
 {
-     QMap<int,QList<QDateTime>> usertimes;
+     QMap<int,double> addtimes,checktimes;
 
-     auto orders=readorders(file);
-     V_NeuronSWC_list segments;
-     QList<CellAPO> wholePoints;
+     QMap<int,QStringList> hashmap;
+     {
+         auto orders=readorders(file);
+         for(auto &msg:orders){
+             auto pair=getMsgwithTime(msg);
+             QRegExp msgreg("/(.*)_(.*):(.*)");
+             if(msgreg.indexIn(pair.second)!=-1)
+             {
+                 QString operationtype=msgreg.cap(1).trimmed();
+                 QString operatorMsg=msgreg.cap(3).trimmed();
 
-     for(auto &msg:orders){
-         auto pair=getMsgwithTime(msg);
-         QRegExp msgreg("/(.*)_(.*):(.*)");
-         if(msgreg.indexIn(pair.second)!=-1)
-         {
-             QString operationtype=msgreg.cap(1).trimmed();
-             QString operatorMsg=msgreg.cap(3).trimmed();
-             if(operationtype == "drawline" )
-             {
-                 drawline(operatorMsg,segments);
-             }
-             else if(operationtype == "delline")
-             {
-                  delline(operatorMsg,segments);
-             }
-             else if(operationtype == "addmarker")
-             {
-                 addmarker(operatorMsg,wholePoints);
-             }
-             else if(operationtype == "delmarker")
-             {
-                 delmarekr(operatorMsg,wholePoints);
-             }
-             else if(operationtype == "retypeline")
-             {
-                 retypeline(operatorMsg,segments);
-             }
-
-             {
                  QStringList listwithheader=operatorMsg.split(';',Qt::SkipEmptyParts);
-                 if(listwithheader.size()<=1)
-                 {
-                     qDebug()<<"msg only contains header:"<<pair.second;
-                     continue;
-                 }
+                 auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
+                 QString username=headerlist[0].trimmed();
 
-                 QString username;
-                 {
-                     auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
-                     username=headerlist[0].trimmed();
-                 }
-                 usertimes[username.toInt()].push_back(pair.first);
+                 hashmap[username.toInt()].push_back(msg);
              }
          }
      }
-    const int plus=60*2;//时间补偿
-    const int thres=60*3;//gap thres
-     QMap<int,int> userinfos;
-     auto keys=usertimes.keys();
-     for(auto &key:keys){
-         QList<QDateTime> times=usertimes.value(key);
 
-         int cnt=times.size();
-         if(cnt==0) {
-             userinfos[key+2]=0;
-         }else if(cnt==1){
-             userinfos[key+2]=plus;
-         }else{
-             userinfos[key+2]=times.back().toSecsSinceEpoch()-times.front().toSecsSinceEpoch()+plus;
-             for(int i=1;i<cnt;i++)
-             {
-                if(times[i].toSecsSinceEpoch()-times[i-1].toSecsSinceEpoch()>60*3)
-                    userinfos[key+2]-=(times[i].toSecsSinceEpoch()-times[i-1].toSecsSinceEpoch()-plus);
-             }
-         }
+
+     const int thres=60*3;
+     const int plus=30;
+     auto keys=hashmap.keys();
+
+
+     for(auto key:keys){
+        auto instructions=hashmap.value(key);
+        const int cnt=instructions.size();
+        if(cnt==0) continue;
+        for(int i=1;i<cnt;i++){
+            QDateTime currMsgTime,preMsgTime;
+            QString currOperationtype;
+
+            {
+                auto pair=getMsgwithTime(instructions[i]);
+                currMsgTime=pair.first;
+                QRegExp msgreg("/(.*)_(.*):(.*)");
+                if(msgreg.indexIn(pair.second)!=-1)
+                {
+                   currOperationtype=msgreg.cap(1).trimmed();
+                }
+            }
+            {
+                auto pair=getMsgwithTime(instructions[i-1]);
+                preMsgTime=pair.first;
+            }
+
+            int diff=currMsgTime.toSecsSinceEpoch()-preMsgTime.toSecsSinceEpoch();
+            if(diff>thres) diff=plus;
+            if(currOperationtype!="retypeline"){
+                addtimes[key]+=diff;
+            }else{
+                checktimes[key]+=diff;
+            }
+
+        }
      }
-     return userinfos;
+
+     return {addtimes,checktimes};
 }
 
 void getspeed(QString inlogfile,QString inswc,QString outfile)
 {
     auto times=getusertimes(inlogfile);
-    auto nt=readSWC_file(inswc);
-    for(auto &node:nt.listNeuron){
-        node.type=node.r/10+2;
-    }
-    auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
+    auto addtimes=times.first;
+    auto checktimes=times.second;
 
-    QMap<int,double> hashmap;
-    for(auto &seg:segments.seg){
-        hashmap[int(seg.row[0].type)]+=getsegmentlength(seg);
+    QMap<int,double> addlengths,checklengths;
+    {
+        auto nt=readSWC_file(inswc);
+        for(auto &node:nt.listNeuron){
+            node.type=node.r/10;
+        }
+        auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
+        for(auto &seg:segments.seg){
+            addlengths[int(seg.row[0].type)]+=getsegmentlength(seg);
+        }
+    }
+    {
+        auto nt=readSWC_file(inswc);
+        for(auto &node:nt.listNeuron){
+            node.type=node.creatmode/10;
+        }
+        auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
+        for(auto &seg:segments.seg){
+            checklengths[int(seg.row[0].type)]+=getsegmentlength(seg);
+        }
     }
 
-    QMap<int,double> speeds;
-    if(times.keys().size()!=hashmap.keys().size()){
-        qDebug()<<"Error";
-        return;
-    }
-    auto keys=hashmap.keys();
+
+    QMap<int,double> addspeeds,checkspeeds;
+    auto keys=addtimes.keys();
     for(auto key:keys){
-        speeds[key]=hashmap.value(key)/times.value(key);
+        addspeeds[key]=addlengths[key]/addtimes[key]*60;
+        checkspeeds[key]=checklengths[key]/checktimes[key]*60;
     }
+
     QFile f(outfile);
     if(f.open(QIODevice::WriteOnly)){
-        QString data=QString("%1:%2 %3 %4\n").arg("usertype").arg("time").arg("length").arg("speed");
+        QString data=QString("%1:%2 %3 %4 %5 %6 %7\n").arg("usertype").arg("addtime").arg("addlength").arg("checktime").arg("checklength").arg("addspedd").arg("checkspeed");
         f.write(data.toStdString().c_str(),data.size());
         for(auto key:keys){
-            QString data=QString("%1:%2 %3 %4\n").arg(key).arg(times.value(key)).arg(hashmap.value(key)).arg(speeds.value(key));
+            QString data=QString("%1:%2 %3 %4 %5 %6 %7\n").arg(key).arg(addtimes.value(key)).arg(addlengths.value(key)).arg(checktimes.value(key)).arg(checklengths.value(key)).arg(addspeeds[key]).arg(checkspeeds[key]);
             f.write(data.toStdString().c_str(),data.size());
         }
         f.close();

@@ -136,15 +136,44 @@ void dosegheatmap(V_NeuronSWC &seg,const V_NeuronSWC_list &sges)
     }
 }
 
-void doheatmap(QString inswc,QString outswc)
+//void doheatmap(QString inswc,QString outswc)
+//{
+//    auto nt=readSWC_file(inswc);
+//    auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
+
+//    for(auto &seg:segs.seg){
+//        dosegheatmap(seg,segs);
+//    }
+//    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segs));
+//}
+
+void donodeheatmap(QString inswc,QString outswc)
 {
     auto nt=readSWC_file(inswc);
-    auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
+    const auto cnt=readSWC_file(inswc);
+    int halflen=20;
+    for(auto &node:nt.listNeuron){
+        int x1=node.x-halflen;
+        int x2=node.x+halflen;
+        int y1=node.y-halflen;
+        int y2=node.y+halflen;
+        int z1=node.z-halflen;
+        int z2=node.z+halflen;
+        QSet<int> myset;
+        myset.insert(int(node.r/10));
+        myset.insert(int(node.creatmode/10));
 
-    for(auto &seg:segs.seg){
-        dosegheatmap(seg,segs);
+        for(auto &n:cnt.listNeuron){
+            if(n.x>x1&&n.x<x2
+                    &&n.y>y1&&n.y<y2
+                    &&n.z>z1&&n.z<z2){
+                myset.insert(int(n.r/10));
+                myset.insert(int(n.creatmode/10));
+            }
+        }
+        node.type=myset.size()+2;
     }
-    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segs));
+    writeESWC_file(outswc,nt);
 }
 
 V_NeuronSWC compare(QString file1,QString file2)
@@ -189,4 +218,55 @@ void douserproof(QString insec,QString outswc)
     writeESWC_file(outswc,nt);
 }
 
+std::pair<double,double> doproofdetaills(QString raw,QString proof,QString outswc)
+{
+    auto rawnt=readSWC_file(raw);
+    auto proofnt=readSWC_file(proof);
+
+    auto rawsegs=NeuronTree__2__V_NeuronSWC_list(rawnt);
+    auto proofsegs=NeuronTree__2__V_NeuronSWC_list(proofnt);
+
+    double diffraw2proof=0;//删除的结构
+    double diffproof2raw=0;//增加的结构
+
+    for(auto &seg:rawsegs.seg){
+        auto it=findseg(proofsegs.seg.begin(),proofsegs.seg.end(),seg);
+        if(it==proofsegs.seg.end()||((int)it->row.at(0).r/10)!=((int)seg.row.at(0).r/10))
+        {
+            //找不到或者找到了但增加的用户不同
+            diffraw2proof+=getsegmentlength(seg);
+            //改变原始的
+            for(auto &row:seg.row)
+                row.type=4;
+        }
+    }
+
+    for(auto &seg:proofsegs.seg){
+        auto it=findseg(rawsegs.seg.begin(),rawsegs.seg.end(),seg);
+        if(it==rawsegs.seg.end()||((int)it->row.at(0).r/10)!=((int)seg.row.at(0).r/10))
+        {
+            //找不到或者找到了但增加的用户不同
+            diffproof2raw+=getsegmentlength(seg);
+            for(auto &row:seg.row)
+                row.type=5;
+            rawsegs.seg.push_back(seg);
+            //附加到原始的nt
+        }
+    }
+    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(rawsegs));
+    return {diffraw2proof,diffproof2raw};
+}
+
+void doproof(QStringList inrawfiles,QStringList inproofedfiles,QStringList outlist,QString out)
+{
+    if(inrawfiles.size()!=inproofedfiles.size()) return;
+    QFile f(out);
+    if(!f.open(QIODevice::WriteOnly)) return;
+    for(int i=0;i<inrawfiles.size();i++){
+        auto p=doproofdetaills(inrawfiles[i],inproofedfiles[i],outlist[i]);
+        QString data=QString("%1--%2:%3 %4").arg(inrawfiles[i]).arg(inproofedfiles[i]).arg(p.first).arg(p.second);
+        f.write(data.toStdString().c_str(),data.size());
+    }
+    f.close();
+}
 #endif // ANALYSESWC_H

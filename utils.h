@@ -309,7 +309,7 @@ void retypeline(QString msg,V_NeuronSWC_list &segments)
 }
 
 
-NeuronTree convertMsg2NTWithThirdParty(QStringList &listwithheader,QString username,int from)
+NeuronTree convertMsg2NTUnuse(QStringList &listwithheader,QString username,int from)
 {
     NeuronTree newTempNT;
     newTempNT.listNeuron.clear();
@@ -338,7 +338,7 @@ NeuronTree convertMsg2NTWithThirdParty(QStringList &listwithheader,QString usern
     return newTempNT;
 }
 
-void drawlineWithThirdParty(QString msg,V_NeuronSWC_list &segments)
+void drawlineUnuse(QString msg,V_NeuronSWC_list &segments)
 {
     //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...
     QStringList listwithheader=msg.split(';',Qt::SkipEmptyParts);
@@ -364,7 +364,7 @@ void drawlineWithThirdParty(QString msg,V_NeuronSWC_list &segments)
         username=headerlist[0].trimmed();
     }
 
-    NeuronTree newTempNT=convertMsg2NTWithThirdParty(listwithheader,username,from);
+    NeuronTree newTempNT=convertMsg2NTUnuse(listwithheader,username,from);
     segments.append(NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0]);
     qDebug()<<"add in seg sucess "<<msg;
 }

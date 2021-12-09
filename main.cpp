@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 //        if(it!=nt.seg.end()&&it->row.at(0).type==2)
 //            qDebug()<<i;
 //    }
-//verifylog("/Users/huanglei/Desktop/20211207/20211203_testbig.txt");
+//verifylog("/Users/huanglei/OneDrive/StudyDB/neu/20211207/20211203_testbig.txt");//寻找log中直接加3号色的区域
 
     //analyse swc
     doaddusertypr("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
@@ -39,30 +39,31 @@ int main(int argc, char *argv[])
     domodiltytype("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
                   "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_modiltytype.eswc");
 
-    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_adduserlength.txt");
+    //in speed txt
+//    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+//                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_adduserlength.txt");
 
-    getretypeuserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
-                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_retypeuserlength.txt");
+//    getretypeuserlength("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+//                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_retypeuserlength.txt");
 
-    doheatmap("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
+    donodeheatmap("/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
                      "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_heatmap.eswc");
+
     //analyse log
     getUnUse("/Users/huanglei/Desktop/20211207/20211203_testbig.txt",
              "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_unuse.eswc");
 
-    getThirdValues({"/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.txt"},
-                   "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterproof_analyse.txt");
+    doproof({"/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc"},{"/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc"},
+            {"/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_proof.ano.eswc"},"/Users/huanglei/Desktop/20211207/analyse/proof.txt");
 
-    douserproof("/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc",
-                "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterproof_retype.eswc");
 
     getspeed("/Users/huanglei/Desktop/20211207/20211203_testbig.txt",
              "/Users/huanglei/Desktop/20211207/20211203_testbig.ano.eswc",
              "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_speed.txt");
 
-    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc",
-                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterprooflength.txt");
+    //for verify not use
+//    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc",
+//                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterprooflength.txt");
 
 //    return a.exec();
     return 0;
