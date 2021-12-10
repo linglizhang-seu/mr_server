@@ -14,9 +14,9 @@
 #include <QTime>
 //传入的apo需要重新保存，使得n按顺序
 QString port="4001";
-int peopleCnt=1;//peopleCnt
+int peopleCnt=10;//peopleCnt
 int packageCnt=1;//MESSGE CNOUT
-const int threadCnt=1;//peopleCnt/2
+const int threadCnt=10;//peopleCnt/2
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -40,7 +40,6 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     mutex.unlock();
     fprintf(stderr,strMessage.toStdString().c_str());
 }
-
 
 QStringList V_NeuronSWCToSendMSG(V_NeuronSWC seg)
 {
@@ -204,8 +203,8 @@ QList<QStringList> MsgWaitSend(QList<QStringList> addline,
 {
     QList<QStringList> res;//每个人的操作集合
     for(int i=0;i<peopleCnt;i++){
-//        QStringList msgs=addline[i]/*+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];*/;
-        QStringList msgs=addline[i]+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];;
+        QStringList msgs=addline[i]/*+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];*/;
+//        QStringList msgs=addline[i]+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];
         std::shuffle(msgs.begin(),msgs.end(),std::default_random_engine());
         res.push_back(msgs);
     }
@@ -217,13 +216,13 @@ QList<QStringList> prepareMsg(NeuronTree nt)
     auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
 
     auto addline=MsgForAddLine(segments);
-    auto delline=MsgForDeleteLine(segments);
-    auto retypeline=MsgForRetypeLine(segments);
-    auto addmarker=MsgForAddMarker(nt);
-    auto delmarker=MsgForDeleteMarker(nt);
+//    auto delline=MsgForDeleteLine(segments);
+//    auto retypeline=MsgForRetypeLine(segments);
+//    auto addmarker=MsgForAddMarker(nt);
+//    auto delmarker=MsgForDeleteMarker(nt);
 
-    return MsgWaitSend(addline,delline,retypeline,addmarker,delmarker);
-//    return MsgWaitSend(addline,{},{},{},{});
+//    return MsgWaitSend(addline,delline,retypeline,addmarker,delmarker);
+    return MsgWaitSend(addline,{},{},{},{});
 }
 
 
@@ -292,6 +291,8 @@ int main(int argc, char *argv[])
 //    processData("/Users/huanglei/Desktop/pressurelog");
 //    processData("/Users/huanglei/Desktop/brustlog");
 //    processData("/Users/huanglei/Desktop/log");
+    peopleCnt*=atoi(argv[1]);
+    port=QString::number(4000+atoi(argv[1]));
     auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
     auto msgLists=prepareMsg(nt);
 
