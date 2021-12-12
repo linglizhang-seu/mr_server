@@ -227,7 +227,7 @@ QList<QStringList> prepareMsg(NeuronTree nt)
 
 
 QString preProcess(QString infilepath,QString outfilepath){
-    QString order=QString("cat %1 | grep receive: > %2").arg(infilepath).arg(outfilepath);
+    QString order=QString("cat %1 > %2").arg(infilepath).arg(outfilepath);
     system(order.toStdString().c_str());
     return outfilepath;
 }
@@ -241,13 +241,13 @@ vector<double> cacPerMsgDelay(QString infilepath,QString basename){
 
     QStringList list=QString(file.readAll()).split('\n',Qt::SkipEmptyParts);
     file.close();
-    if(list.size()!=paras[0].toUInt()*paras[1].toUInt()){
+    if(list.size()!=paras[3].toUInt()*paras[4].toUInt()){
         qDebug()<<"Error:"+infilepath;
     }
 
-    QDateTime start=QDateTime::fromString(list[0].left(19),"yyyy-MM-dd hh:mm:ss");
-    QDateTime end=QDateTime::fromString(list.back().left(19),"yyyy-MM-dd hh:mm:ss");
-    return {paras[0].toDouble(),paras[1].toDouble(),start.msecsTo(end)*1.0/list.size()};
+    QDateTime start=QDateTime::fromString(list[0].left(19),"yyyy/MM/dd hh:mm:ss");
+    QDateTime end=QDateTime::fromString(list.back().left(19),"yyyy/MM/dd hh:mm:ss");
+    return {paras[3].toDouble(),paras[4].toDouble(),(end.toMSecsSinceEpoch()-start.toMSecsSinceEpoch())*1.0/list.size()};
 }
 
 void processData(QString dirName){
@@ -288,26 +288,27 @@ int main(int argc, char *argv[])
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
 
-//    processData("/Users/huanglei/Desktop/pressurelog");
-//    processData("/Users/huanglei/Desktop/brustlog");
+    processData("/Users/huanglei/Desktop/pressure");
+    processData("/Users/huanglei/Desktop/burst");
 //    processData("/Users/huanglei/Desktop/log");
-    peopleCnt*=atoi(argv[1]);
-    port=QString::number(4000+atoi(argv[1]));
-    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
-    auto msgLists=prepareMsg(nt);
+//    auto v=87;
+//    peopleCnt*=v;
+//    port=QString::number(4000+v);
+//    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
+//    auto msgLists=prepareMsg(nt);
 
-    QString ip="192.168.3.158";
+//    QString ip="127.0.0.1";
 
-    QThread *threads=new QThread[threadCnt];
-    QVector<SimClient*> clients;
-    for(int i=0;i<peopleCnt;i++){
-        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
-        clients.push_back(p);
-        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
-        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
-    }
-    for(int i=0;i<threadCnt;i++)
-        threads[i].start();
+//    QThread *threads=new QThread[threadCnt];
+//    QVector<SimClient*> clients;
+//    for(int i=0;i<peopleCnt;i++){
+//        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
+//        clients.push_back(p);
+//        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
+//        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
+//    }
+//    for(int i=0;i<threadCnt;i++)
+//        threads[i].start();
 
-    return a.exec();
+//    return a.exec();
 }
