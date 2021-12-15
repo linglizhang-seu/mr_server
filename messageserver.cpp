@@ -487,10 +487,13 @@ void MessageServer::retypeline(QString msg)
 
     if(it!=segments.seg.end())
     {
+        double timestamp=QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz").toDouble();
         for(auto & unit:it->row)
         {
             unit.type=newtype;
+            unit.level=timestamp;
             unit.creatmode=userid*10+from;
+
         }
         qDebug()<<"find retype line sucess "<<msg;
         return;
