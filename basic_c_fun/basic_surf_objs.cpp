@@ -436,27 +436,10 @@ bool writeSWC_file(const QString& filename, const NeuronTree& nt, const QStringL
 bool writeESWC_file(const QString& filename, const NeuronTree& nt)
 {
 	QString curFile = filename;
-//	if (curFile.trimmed().isEmpty()) //then open a file dialog to choose file
-//	{
-//		curFile = QFileDialog::getSaveFileName(0,
-//											   "Select a ESWC (enhanced SWC) file to save the neuronal or relational data... ",
-//											   ".eswc",
-//											   QObject::tr("Enhanced Neuron structure file (*.eswc);;(*.*)"
-//														   ));
-//#ifndef DISABLE_V3D_MSG
-//		v3d_msg(QString("save file: %1").arg(curFile), false);
-//#endif
-        
-//		if (curFile.isEmpty()) //note that I used isEmpty() instead of isNull
-//			return false;
-//	}
     
     FILE * fp = fopen(curFile.toLatin1(), "wt");
 	if (!fp)
 	{
-#ifndef DISABLE_V3D_MSG
-		v3d_msg("Could not open the file to save the neuron.");
-#endif
 		return false;
 	}
     

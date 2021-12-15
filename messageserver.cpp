@@ -487,11 +487,12 @@ void MessageServer::retypeline(QString msg)
 
     if(it!=segments.seg.end())
     {
-        double timestamp=QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz").toDouble();
+        V3DLONG timediff=QDateTime::currentMSecsSinceEpoch()-QDateTime::fromString(QString::number(it->row.front().timestamp),"yyyyMMddhhmmsszzz").toMSecsSinceEpoch();
+//        double timestamp=QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz").toLong();
         for(auto & unit:it->row)
         {
             unit.type=newtype;
-            unit.level=timestamp;
+            unit.level=timediff;
             unit.creatmode=userid*10+from;
 
         }
