@@ -269,4 +269,13 @@ void doproof(QStringList inrawfiles,QStringList inproofedfiles,QStringList outli
     }
     f.close();
 }
+
+void doselfconform(QString inswc,QString outswc)
+{
+    auto nt=readSWC_file(inswc);
+    for(auto &n:nt.listNeuron){
+        n.type=(int(n.r/10)==int(n.creatmode/10))?2:4;
+    }
+    writeESWC_file(outswc,nt);
+}
 #endif // ANALYSESWC_H
