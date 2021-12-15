@@ -245,8 +245,9 @@ vector<double> cacPerMsgDelay(QString infilepath,QString basename){
         qDebug()<<"Error:"+infilepath;
     }
 
-    QDateTime start=QDateTime::fromString(list[0].left(19),"yyyy/MM/dd hh:mm:ss");
-    QDateTime end=QDateTime::fromString(list.back().left(19),"yyyy/MM/dd hh:mm:ss");
+    QDateTime start=QDateTime::fromString(list[0].left(23),"yyyy/MM/dd hh:mm:ss.zzz");
+    QDateTime end=QDateTime::fromString(list.back().left(23),"yyyy/MM/dd hh:mm:ss.zzz");
+    qDebug()<<paras[3].toDouble()<<paras[4].toDouble()<<(end.toMSecsSinceEpoch()-start.toMSecsSinceEpoch())*1.0/list.size();
     return {paras[3].toDouble(),paras[4].toDouble(),(end.toMSecsSinceEpoch()-start.toMSecsSinceEpoch())*1.0/list.size()};
 }
 
@@ -288,8 +289,8 @@ int main(int argc, char *argv[])
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
 
-    processData("/Users/huanglei/Desktop/pressure");
-    processData("/Users/huanglei/Desktop/burst");
+    processData("/Users/huanglei/Desktop/orders");
+//    processData("/Users/huanglei/Desktop/burst");
 //    processData("/Users/huanglei/Desktop/log");
 //    auto v=87;
 //    peopleCnt*=v;
