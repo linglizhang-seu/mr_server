@@ -1,9 +1,11 @@
 #ifndef ANALYSESWC_H
 #define ANALYSESWC_H
 #include <QString>
+#include <QVector3D>
 #include <basic_c_fun/basic_surf_objs.h>
 #include <neuron_editing/neuron_format_converter.h>
 #include "utils.h"
+
 void doaddusertypr(QString inswc,QString outswc)
 {
     auto nt=readSWC_file(inswc);
@@ -278,4 +280,30 @@ void doselfconform(QString inswc,QString outswc)
     }
     writeESWC_file(outswc,nt);
 }
+
+void mergeNts(QStringList swcs,QString outswc)
+{
+    V_NeuronSWC_list segs;
+    const int offset=2;
+    const int size=swcs.size();
+
+    for(int i=0;i<size;i++)
+    {
+        auto nt=readSWC_file(swcs[i]);
+        qDebug()<<nt.listNeuron.size();
+        for(auto &n:nt.listNeuron){
+            n.type=i+offset;
+        }
+        auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
+        segs.seg.insert(segs.seg.end(),segments.seg.begin(),segments.seg.end());
+    }
+    auto nt=V_NeuronSWC_list__2__NeuronTree(segs);
+    qDebug()<<nt.listNeuron.size();
+    writeESWC_file(outswc,nt);
+}
+
+
+
+
+
 #endif // ANALYSESWC_H

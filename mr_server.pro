@@ -1,4 +1,4 @@
-QT -= gui
+QT += gui
 QT += sql network core5compat
 
 CONFIG += c++11 console
@@ -37,4 +37,5 @@ HEADERS += \
     neuron_editing/neuron_sim_scores.h \
     neuron_editing/neuron_xforms.h \
     neuron_editing/v_neuronswc.h \
+    swcutils.h \
     utils.h
