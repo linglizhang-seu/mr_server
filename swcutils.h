@@ -5,8 +5,8 @@
 #include "neuron_editing/v_neuronswc.h"
 #include <QVector3D>
 #include "utils.h"
-int distthres=3.0;
-int lengththres=1.0;
+int distthres=6;
+int lengththres=1;
 void retype(V_NeuronSWC_list &segs,int type)
 {
     for(auto &seg:segs.seg){
@@ -83,6 +83,7 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
     V_NeuronSWC_list total;//全在2中
     V_NeuronSWC_list part;//部分在2中
     auto segs1=NeuronTree__2__V_NeuronSWC_list(nt1);
+
     for(auto &seg:segs1.seg){
         if(istype(seg,2)){
             //完全未找到的结构
@@ -95,6 +96,9 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
             part.seg.push_back(seg);
         }
     }
+
+    retype(only,2);
+    retype(total,3);
 
     for(auto &seg:part.seg){
         int cnt=seg.row.size();
@@ -111,7 +115,6 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
         for(;i<cnt;i++){
             set.insert(seg.row[i].type);
         }
-
         if(set.size()==1)
         {
             V_NeuronSWC seg1,seg2;
@@ -135,42 +138,71 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
                 seg2.row.back().parent=-1;
             }
 
-            if(type==2){
-//                if(seg1.row.size()<=2||getsegmentlength(seg1)<lengththres){
-//                    //太短了，归共有
-//                    seg2.row.insert(seg2.row.begin(),seg1.row.begin(),seg1.row.end());
-//                    for(int i=0;i<seg2.row.size();i++)
-//                    {
-//                        seg2.row[i].n=i+1;
-//                        seg2.row[i].parent=i+2;
-//                    }
-//                    seg2.row.back().parent=-1;
-//                    total.seg.push_back(seg2);
-//                }else{
+            if(type==2){//头部是2号色，独有的结构
+                if(getsegmentlength(seg1)<lengththres){//独有太短
+                    //太短了，归共有
+                    seg2.row.insert(seg2.row.begin(),seg1.row.begin(),seg1.row.end());
+                    for(int i=0;i<seg2.row.size();i++)
+                    {
+                        seg2.row[i].n=i+1;
+                        seg2.row[i].parent=i+2;
+                    }
+                    seg2.row.back().parent=-1;
+                    total.seg.push_back(seg2);
+                }else if(getsegmentlength(seg2)<lengththres){//共有太短
+                    seg1.row.insert(seg1.row.end(),seg2.row.begin(),seg2.row.end());
+                    for(int i=0;i<seg1.row.size();i++)
+                    {
+                        seg1.row[i].n=i+1;
+                        seg1.row[i].parent=i+2;
+                    }
+                    seg1.row.back().parent=-1;
+                    only.seg.push_back(seg1);
+                }else{
                     only.seg.push_back(seg1);
                     total.seg.push_back(seg2);
-//                }
+                }
             }else{
-//                if(seg2.row.size()<=2||getsegmentlength(seg2)<lengththres){
-//                    //太短了，归共有
-//                    seg1.row.insert(seg1.row.end(),seg2.row.begin(),seg2.row.end());
-//                    for(int i=0;i<seg1.row.size();i++)
-//                    {
-//                        seg1.row[i].n=i+1;
-//                        seg1.row[i].parent=i+2;
-//                    }
-//                    seg1.row.back().parent=-1;
-//                    total.seg.push_back(seg1);
-//                }else{
+                //头部是3号色，共有的结构
+                if(getsegmentlength(seg1)<lengththres){//共有太短
+                    //太短了，归独有
+                    seg2.row.insert(seg2.row.begin(),seg1.row.begin(),seg1.row.end());
+                    for(int i=0;i<seg2.row.size();i++)
+                    {
+                        seg2.row[i].n=i+1;
+                        seg2.row[i].parent=i+2;
+                    }
+                    seg2.row.back().parent=-1;
+                    only.seg.push_back(seg2);
+                }else if(getsegmentlength(seg2)<lengththres){//独有太短
+                    //太短了，归共有
+                    seg1.row.insert(seg1.row.end(),seg2.row.begin(),seg2.row.end());
+                    for(int i=0;i<seg1.row.size();i++)
+                    {
+                        seg1.row[i].n=i+1;
+                        seg1.row[i].parent=i+2;
+                    }
+                    seg1.row.back().parent=-1;
+                    total.seg.push_back(seg1);
+                }else{
                     only.seg.push_back(seg2);
                     total.seg.push_back(seg1);
-//                }
+                }
             }
         }else{
-            total.seg.push_back(seg);
+            double len2=0,len3=0;
+            for(int i=1;i<seg.row.size();i++){
+                auto prenode=seg.row.at(i-1);
+                auto curnode=seg.row.at(i);
+                if(curnode.type==2) len2+=sqrt(pow(curnode.x-prenode.x,2)+pow(curnode.y-prenode.y,2)+pow(curnode.z-prenode.z,2));
+                else len3+=sqrt(pow(curnode.x-prenode.x,2)+pow(curnode.y-prenode.y,2)+pow(curnode.z-prenode.z,2));
+            }
+            if(len2>len3) only.seg.push_back(seg);
+            else total.seg.push_back(seg);
         }
     }
-
+    retype(only,2);
+    retype(total,3);
     auto segss=only;
     segss.seg.insert(segss.seg.end(),total.seg.begin(),total.seg.end());
     writeESWC_file(QString("%1_%2"+out).arg(distthres).arg(lengththres),V_NeuronSWC_list__2__NeuronTree(segss));
@@ -179,34 +211,34 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
 
 
 
-void compareA2Bv2(QString swc1,QString swc2)
+void compareA2Bv2(QString swc1,QString swc2,QString out)
 {
-    for(distthres=1;distthres<7;distthres++){
-        for(lengththres=1;lengththres<7;lengththres++){
-
             auto res12=comapreA2B(swc1,swc2,"_12.eswc");//我的重建独有的(需要删除的)，共有的
-            for(auto it=res12[0].seg.begin();it!=res12[0].seg.end();){
-                if(getsegmentlength(*it)<lengththres){
-                    res12[1].seg.push_back(*it);
-                    it=res12[0].seg.erase(it);
-                }else{
-                    it++;
-                }
-            }
+//            for(auto it=res12[0].seg.begin();it!=res12[0].seg.end();){
+//                if(getsegmentlength(*it)<lengththres){
+//                    res12[1].seg.push_back(*it);
+//                    it=res12[0].seg.erase(it);
+//                }else{
+//                    it++;
+//                }
+//            }
 
             auto res21=comapreA2B(swc2,swc1,"_21.eswc");//标准答案独有的(需要增加的)，共有的
-            for(auto it=res21[0].seg.begin();it!=res21[0].seg.end();){
-                if(getsegmentlength(*it)<lengththres){
-                    res21[1].seg.push_back(*it);
-                    it=res21[0].seg.erase(it);
-                }else{
-                    it++;
-                }
-            }
+//            for(auto it=res21[0].seg.begin();it!=res21[0].seg.end();){
+//                if(getsegmentlength(*it)<lengththres){
+//                    res21[1].seg.push_back(*it);
+//                    it=res21[0].seg.erase(it);
+//                }else{
+//                    it++;
+//                }
+//            }
 
             retype(res12[0],4);
             retype(res12[1],3);
             retype(res21[0],5);
+            retype(res21[1],6);
+
+            qDebug()<<getsegmentslength(res21[0]);
 
             V_NeuronSWC_list segs;
             segs.seg.insert(segs.seg.end(),res12[0].seg.begin(),res12[0].seg.end());
@@ -219,10 +251,8 @@ void compareA2Bv2(QString swc1,QString swc2)
                     ++it;
                 }
             }
-            writeESWC_file(QString("out_%1_%2.eswc").arg(distthres).arg(lengththres),V_NeuronSWC_list__2__NeuronTree(segs));
-        }
-    }
-
+          writeESWC_file(out,V_NeuronSWC_list__2__NeuronTree(segs));
+          writeESWC_file("shouldadd_"+out,V_NeuronSWC_list__2__NeuronTree(res21[0]));
 }
 
 

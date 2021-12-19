@@ -14,48 +14,37 @@ QString rawswcname=inDir+inbasename+".eswc";
 QString rawintructionlist=inDir+inbasename+".txt";
 QString swcsuffix=".eswc";
 QString txtsuffix=".txt";
-#include "swcutils.h"
+extern int distthres;
+extern int lengththres;
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-
-//    mergeNts({"/Users/huanglei/Desktop/test/18455_00152.eswc",
-//              "/Users/huanglei/Desktop/test/18455_00152_res.eswc"
-//             },"/Users/huanglei/Desktop/test/18455_00152_merged.eswc");
-
-    compareA2Bv2("/Users/huanglei/Desktop/test/18455_00152.eswc","/Users/huanglei/Desktop/test/18455_00152_res.eswc");
-
-
-
     //------------------------------------------------------------------
 
-//    //analyse swc
-//    doaddusertypr(rawswcname,anlyseDir+inbasename+"_addusertype.eswc");
+    //analyse swc
+    doaddusertypr(rawswcname,anlyseDir+inbasename+"_addusertype.eswc");
 
-//    docheckusertype(rawswcname,anlyseDir+inbasename+"_checkusertype.eswc");
+    docheckusertype(rawswcname,anlyseDir+inbasename+"_checkusertype.eswc");
 
-//    domodiltytype(rawswcname,anlyseDir+inbasename+"_modiltytype.eswc");
+    domodiltytype(rawswcname,anlyseDir+inbasename+"_modiltytype.eswc");
 
-//    donodeheatmap(rawswcname,anlyseDir+inbasename+"_heatmap.eswc");
+    donodeheatmap(rawswcname,anlyseDir+inbasename+"_heatmap.eswc");
 
-//    doselfconform(rawswcname,anlyseDir+inbasename+"_selfconform.eswc");
+    mergeNts({rawswcname,inDir+inbasename+"_res.eswc"},anlyseDir+inbasename+"_merged.eswc");
 
-////    doproof({rawswcname},{inDir+inbasename+"_proof.eswc"},
-////                {anlyseDir+inbasename+"_proof_analyse.eswc"},anlyseDir+"proof.txt");
+    doproof({rawswcname},{inDir+inbasename+"_res.eswc"},
+                {anlyseDir+inbasename+"_diff.eswc"},anlyseDir+"proof.txt");
+//    analyse log
+    getUnUse(rawintructionlist,anlyseDir+inbasename+"_unuse.eswc");
 
-//    //analyse log
-//    getUnUse(rawintructionlist,anlyseDir+inbasename+"_unuse.eswc");
+    getspeed(rawintructionlist,rawswcname,anlyseDir+inbasename+"_speed.txt");
 
-//    getspeed(rawintructionlist,rawswcname,anlyseDir+inbasename+"_speed.txt");
+//    for(distthres=1;distthres<7;distthres++){
+//        for(lengththres=0;lengththres<7;lengththres++){
+//            compareA2Bv2(rawswcname,inDir+inbasename+"_res.eswc",QString("%1_%2.eswc").arg(distthres).arg(lengththres));
+//        }
+//    }
 
-
-
-    //for verify not use
-//    getadduserlength("/Users/huanglei/Desktop/20211207/20211203_testbig_afterproof.ano.eswc",
-//                     "/Users/huanglei/Desktop/20211207/analyse/20211203_testbig_afterprooflength.txt");
-
-//    return a.exec();
-
-            return 0;
+    return 0;
 }
 

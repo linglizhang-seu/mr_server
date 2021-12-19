@@ -5,7 +5,7 @@
 #include <basic_c_fun/basic_surf_objs.h>
 #include <neuron_editing/neuron_format_converter.h>
 #include "utils.h"
-
+#include "swcutils.h"
 void doaddusertypr(QString inswc,QString outswc)
 {
     auto nt=readSWC_file(inswc);
@@ -220,7 +220,7 @@ void douserproof(QString insec,QString outswc)
     writeESWC_file(outswc,nt);
 }
 
-std::pair<double,double> doproofdetaills(QString raw,QString proof,QString outswc)
+std::pair<double,double> doproofdetaillsV1(QString raw,QString proof,QString outswc)
 {
     auto rawnt=readSWC_file(raw);
     auto proofnt=readSWC_file(proof);
@@ -259,13 +259,21 @@ std::pair<double,double> doproofdetaills(QString raw,QString proof,QString outsw
     return {diffraw2proof,diffproof2raw};
 }
 
+std::pair<double,double> doproofdetaillsV2(QString raw,QString proof,QString outswc)
+{
+    compareA2Bv2(raw,proof,outswc);
+    auto nt=readSWC_file(outswc);
+    auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
+    return {getsegmentslength(segs,4),getsegmentslength(segs,5)};
+}
+
 void doproof(QStringList inrawfiles,QStringList inproofedfiles,QStringList outlist,QString out)
 {
     if(inrawfiles.size()!=inproofedfiles.size()) return;
     QFile f(out);
     if(!f.open(QIODevice::WriteOnly)) return;
     for(int i=0;i<inrawfiles.size();i++){
-        auto p=doproofdetaills(inrawfiles[i],inproofedfiles[i],outlist[i]);
+        auto p=doproofdetaillsV2(inrawfiles[i],inproofedfiles[i],outlist[i]);
         QString data=QString("%1--%2:%3 %4").arg(inrawfiles[i]).arg(inproofedfiles[i]).arg(p.first).arg(p.second);
         f.write(data.toStdString().c_str(),data.size());
     }

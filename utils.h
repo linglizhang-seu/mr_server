@@ -381,4 +381,14 @@ double getsegmentlength(const V_NeuronSWC &seg)
     }
     return length;
 }
+
+double getsegmentslength(const V_NeuronSWC_list &segs,int type=-1)
+{
+    double len=0;
+    for(auto &seg:segs.seg){
+        if(type<0) len+=getsegmentlength(seg);
+        else if(type==seg.row.at(0).type) len+=getsegmentlength(seg);
+    }
+    return len;
+}
 #endif // UTILS_H
