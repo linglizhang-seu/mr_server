@@ -14,8 +14,10 @@ QString rawswcname=inDir+inbasename+".eswc";
 QString rawintructionlist=inDir+inbasename+".txt";
 QString swcsuffix=".eswc";
 QString txtsuffix=".txt";
-extern int distthres;
-extern int lengththres;
+
+int distthres=6;
+int lengththres=1;
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);

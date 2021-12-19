@@ -5,8 +5,8 @@
 #include "neuron_editing/v_neuronswc.h"
 #include <QVector3D>
 #include "utils.h"
-int distthres=6;
-int lengththres=1;
+extern int distthres;
+extern int lengththres;
 void retype(V_NeuronSWC_list &segs,int type)
 {
     for(auto &seg:segs.seg){
