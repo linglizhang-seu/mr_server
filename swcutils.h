@@ -7,6 +7,8 @@
 #include "utils.h"
 extern int distthres;
 extern int lengththres;
+extern QString anlyseDir;
+extern QString inbasename;
 void retype(V_NeuronSWC_list &segs,int type)
 {
     for(auto &seg:segs.seg){
@@ -205,7 +207,7 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
     retype(total,3);
     auto segss=only;
     segss.seg.insert(segss.seg.end(),total.seg.begin(),total.seg.end());
-    writeESWC_file(QString("%1_%2"+out).arg(distthres).arg(lengththres),V_NeuronSWC_list__2__NeuronTree(segss));
+    writeESWC_file(anlyseDir+inbasename+QString("_%1_%2"+out).arg(distthres).arg(lengththres),V_NeuronSWC_list__2__NeuronTree(segss));
     return {only,total};
 }
 
@@ -252,7 +254,7 @@ void compareA2Bv2(QString swc1,QString swc2,QString out)
                 }
             }
           writeESWC_file(out,V_NeuronSWC_list__2__NeuronTree(segs));
-          writeESWC_file("shouldadd_"+out,V_NeuronSWC_list__2__NeuronTree(res21[0]));
+          writeESWC_file(anlyseDir+inbasename+"_shouldadd.eswc",V_NeuronSWC_list__2__NeuronTree(res21[0]));
 }
 
 

@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     mergeNts({rawswcname,inDir+inbasename+"_res.eswc"},anlyseDir+inbasename+"_merged.eswc");
 
     doproof({rawswcname},{inDir+inbasename+"_res.eswc"},
-                {anlyseDir+inbasename+"_diff.eswc"},anlyseDir+"proof.txt");
+                {anlyseDir+inbasename+"_diff.eswc"},anlyseDir+inbasename+"_proof.txt");
 //    analyse log
     getUnUse(rawintructionlist,anlyseDir+inbasename+"_unuse.eswc");
 
