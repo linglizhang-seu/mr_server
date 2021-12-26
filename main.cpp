@@ -15,7 +15,7 @@ QString rawintructionlist=inDir+inbasename+".txt";
 QString swcsuffix=".eswc";
 QString txtsuffix=".txt";
 
-int distthres=6;
+int distthres=3;
 int lengththres=1;
 
 int main(int argc, char *argv[])

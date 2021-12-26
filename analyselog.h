@@ -311,6 +311,14 @@ void getspeed(QString inlogfile,QString inswc,QString outfile)
             QString data=QString("%1:%2 %3 %4 %5 %6 %7\n").arg(key).arg(addtimes.value(key)).arg(addlengths.value(key)).arg(checktimes.value(key)).arg(checklengths.value(key)).arg(addspeeds[key]).arg(checkspeeds[key]);
             f.write(data.toStdString().c_str(),data.size());
         }
+        data=QString("Total_Add_length:%1\n").arg(std::accumulate(addlengths.begin(),addlengths.end(),0.0));
+        f.write(data.toStdString().c_str(),data.size());
+        data=QString("Total_Check_length:%1\n").arg(std::accumulate(checklengths.begin(),checklengths.end(),0.0));
+        f.write(data.toStdString().c_str(),data.size());
+        data=QString("Total_Add_time:%1\n").arg(std::accumulate(addtimes.begin(),addtimes.end(),0.0)/60);
+        f.write(data.toStdString().c_str(),data.size());
+        data=QString("Total_Check_time:%1\n").arg(std::accumulate(checktimes.begin(),checktimes.end(),0.0)/60);
+        f.write(data.toStdString().c_str(),data.size());
         f.close();
     }
 }
