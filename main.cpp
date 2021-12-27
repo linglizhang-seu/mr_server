@@ -15,8 +15,9 @@
 //传入的apo需要重新保存，使得n按顺序
 QString port="4001";
 int peopleCnt=10;//peopleCnt
-int packageCnt=1;//MESSGE CNOUT
-const int threadCnt=10;//peopleCnt/2
+int packageCnt=10;//MESSGE CNOUT
+int threadCnt=10;//peopleCnt/2
+QString ip="192.168.3.155";
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -138,15 +139,16 @@ QList<QStringList> MsgForAddLine(V_NeuronSWC_list nt)
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments; //每个人的线集合
     for(int i=0;i<peopleCnt;i++){
-        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
-        segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
+//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
+//        segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
+        segments.push_back(QList<V_NeuronSWC>(cntForPeople,nt.seg.at(0)));
     }
 
     QList<QStringList> res;//每个人的线集合->每个人的消息集合
     for(int i=0;i<peopleCnt;i++){
         QStringList tmp;
         for(int j=0;j<cntForPeople;j++){
-            tmp.append(UpdateAddSegMsg(segments[i][j],"TeraVR",i));
+            tmp.append(UpdateAddSegMsg(segments[i][j],"0",i));
         }
         res.append(tmp);
     }
@@ -288,28 +290,32 @@ int main(int argc, char *argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-
     processData("/Users/huanglei/Desktop/orders");
 //    processData("/Users/huanglei/Desktop/burst");
 //    processData("/Users/huanglei/Desktop/log");
-//    auto v=87;
-//    peopleCnt*=v;
-//    port=QString::number(4000+v);
-//    auto nt=readSWC_file("/Users/huanglei/Desktop/2.eswc");
-//    auto msgLists=prepareMsg(nt);
 
-//    QString ip="127.0.0.1";
 
-//    QThread *threads=new QThread[threadCnt];
-//    QVector<SimClient*> clients;
-//    for(int i=0;i<peopleCnt;i++){
-//        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
-//        clients.push_back(p);
-//        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
-//        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
-//    }
-//    for(int i=0;i<threadCnt;i++)
-//        threads[i].start();
+    auto v=atoi(argv[1]);//user
+    auto t=atoi(argv[2]);//msg
+//    auto v=10,t=10;
+    peopleCnt*=v;
+    packageCnt*=t;
+    threadCnt=peopleCnt;
 
-//    return a.exec();
+    port=QString::number(4000+v*10+t);
+    auto nt=readSWC_file("/Users/huanglei/Desktop/3.eswc");
+    auto msgLists=prepareMsg(nt);
+    qDebug()<<"preare finish";
+    QThread *threads=new QThread[threadCnt];
+    QVector<SimClient*> clients;
+    for(int i=0;i<peopleCnt;i++){
+        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
+        clients.push_back(p);
+        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
+        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
+    }
+    for(int i=0;i<threadCnt;i++)
+        threads[i].start();
+
+    return a.exec();
 }
