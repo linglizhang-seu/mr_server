@@ -17,7 +17,7 @@ QString port="4001";
 int peopleCnt=10;//peopleCnt
 int packageCnt=10;//MESSGE CNOUT
 int threadCnt=10;//peopleCnt/2
-QString ip="192.168.3.155";
+QString ip="192.168.3.158";
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -290,32 +290,41 @@ int main(int argc, char *argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-    processData("/Users/huanglei/Desktop/orders");
+    processData("/Users/huanglei/Desktop/orders/1");
+    processData("/Users/huanglei/Desktop/orders/2");
+    processData("/Users/huanglei/Desktop/orders/3");
+    processData("/Users/huanglei/Desktop/orders/4");
+    processData("/Users/huanglei/Desktop/orders/5");
+    processData("/Users/huanglei/Desktop/orders/6");
+    processData("/Users/huanglei/Desktop/orders/7");
+    processData("/Users/huanglei/Desktop/orders/8");
+    processData("/Users/huanglei/Desktop/orders/9");
+    processData("/Users/huanglei/Desktop/orders/10");
+    return 0;
 //    processData("/Users/huanglei/Desktop/burst");
 //    processData("/Users/huanglei/Desktop/log");
 
 
-    auto v=atoi(argv[1]);//user
-    auto t=atoi(argv[2]);//msg
-//    auto v=10,t=10;
-    peopleCnt*=v;
-    packageCnt*=t;
-    threadCnt=peopleCnt;
+//    auto v=atoi(argv[1]);//user
+//    auto t=1;
+//    peopleCnt*=v;
+//    packageCnt*=t;
+//    threadCnt=peopleCnt>=300?300:peopleCnt;
 
-    port=QString::number(4000+v*10+t);
-    auto nt=readSWC_file("/Users/huanglei/Desktop/3.eswc");
-    auto msgLists=prepareMsg(nt);
-    qDebug()<<"preare finish";
-    QThread *threads=new QThread[threadCnt];
-    QVector<SimClient*> clients;
-    for(int i=0;i<peopleCnt;i++){
-        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
-        clients.push_back(p);
-        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
-        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
-    }
-    for(int i=0;i<threadCnt;i++)
-        threads[i].start();
+//    port=QString::number(4000+v*10+t);
+//    auto nt=readSWC_file("/Users/huanglei/Desktop/3.eswc");
+//    auto msgLists=prepareMsg(nt);
+//    qDebug()<<"preare finish";
+//    QThread *threads=new QThread[threadCnt];
+//    QVector<SimClient*> clients;
+//    for(int i=0;i<peopleCnt;i++){
+//        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
+//        clients.push_back(p);
+//        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
+//        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
+//    }
+//    for(int i=0;i<threadCnt;i++)
+//        threads[i].start();
 
-    return a.exec();
+//    return a.exec();
 }

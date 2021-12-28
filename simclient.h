@@ -34,11 +34,7 @@ public slots:
         sendMsg({""});
         QObject::disconnect(QThread::currentThread(),
                             SIGNAL(started()),this,SLOT(onstarted()));
-//        socket->disconnectFromHost();
-//        while(!(socket->state() == QAbstractSocket::UnconnectedState
-//               || socket->waitForDisconnected(1000))) ;
         qDebug()<<id <<" has complete!";
-//        QThread::currentThread()->yieldCurrentThread();
     }
 
     void onRead(){
