@@ -254,7 +254,7 @@ void compareA2Bv2(QString swc1,QString swc2,QString out)
                 }
             }
           writeESWC_file(out,V_NeuronSWC_list__2__NeuronTree(segs));
-          writeESWC_file(anlyseDir+inbasename+"_shouldadd.eswc",V_NeuronSWC_list__2__NeuronTree(res21[0]));
+//          writeESWC_file(anlyseDir+inbasename+"_shouldadd.eswc",V_NeuronSWC_list__2__NeuronTree(res21[0]));
 }
 
 

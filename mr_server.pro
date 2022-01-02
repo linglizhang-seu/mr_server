@@ -38,4 +38,5 @@ HEADERS += \
     neuron_editing/neuron_xforms.h \
     neuron_editing/v_neuronswc.h \
     swcutils.h \
-    utils.h
+    utils.h \
+    versioncontrol.h

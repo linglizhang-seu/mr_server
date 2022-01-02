@@ -23,23 +23,23 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     //------------------------------------------------------------------
 
-    //analyse swc
-    doaddusertypr(rawswcname,anlyseDir+inbasename+"_addusertype.eswc");
+//    //analyse swc
+//    doaddusertypr(rawswcname,anlyseDir+inbasename+"_addusertype.eswc");
 
-    docheckusertype(rawswcname,anlyseDir+inbasename+"_checkusertype.eswc");
+//    docheckusertype(rawswcname,anlyseDir+inbasename+"_checkusertype.eswc");
 
-    domodiltytype(rawswcname,anlyseDir+inbasename+"_modiltytype.eswc");
+//    domodiltytype(rawswcname,anlyseDir+inbasename+"_modiltytype.eswc");
 
-    donodeheatmap(rawswcname,anlyseDir+inbasename+"_heatmap.eswc");
+//    donodeheatmap(rawswcname,anlyseDir+inbasename+"_heatmap.eswc");
 
-    mergeNts({rawswcname,inDir+inbasename+"_res.eswc"},anlyseDir+inbasename+"_merged.eswc");
+//    mergeNts({rawswcname,inDir+inbasename+"_res.eswc"},anlyseDir+inbasename+"_merged.eswc");
 
-    doproof({rawswcname},{inDir+inbasename+"_res.eswc"},
-                {anlyseDir+inbasename+"_diff.eswc"},anlyseDir+inbasename+"_proof.txt");
-//    analyse log
-    getUnUse(rawintructionlist,anlyseDir+inbasename+"_unuse.eswc");
+//    doproof({rawswcname},{inDir+inbasename+"_res.eswc"},
+//                {anlyseDir+inbasename+"_diff.eswc"},anlyseDir+inbasename+"_proof.txt");
+////    analyse log
+//    getUnUse(rawintructionlist,anlyseDir+inbasename+"_unuse.eswc");
 
-    getspeed(rawintructionlist,rawswcname,anlyseDir+inbasename+"_speed.txt");
+//    getspeed(rawintructionlist,rawswcname,anlyseDir+inbasename+"_speed.txt");
 
 //    for(distthres=1;distthres<7;distthres++){
 //        for(lengththres=0;lengththres<7;lengththres++){
@@ -47,6 +47,8 @@ int main(int argc, char *argv[])
 //        }
 //    }
 
+    compareA2Bv2("/Users/huanglei/Desktop/18454_01130_L1A.eswc","/Users/huanglei/Desktop/18454_01130_L1D.eswc","/Users/huanglei/Desktop/18454_01130_A2D.eswc");
+    compareA2Bv2("/Users/huanglei/Desktop/18454_01130_L1D.eswc","/Users/huanglei/Desktop/18454_01130_L2D.eswc","/Users/huanglei/Desktop/18454_01130_1D22D.eswc");
     return 0;
 }
 
