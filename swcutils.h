@@ -26,11 +26,16 @@ void retype(V_NeuronSWC &seg,int type)
 
 }
 
-double distance2ine(const NeuronSWC &node,const V_NeuronSWC_unit &u1,const V_NeuronSWC_unit &u2)
+double distance2line(const NeuronSWC &node,const V_NeuronSWC_unit &u1,const V_NeuronSWC_unit &u2)
 {
       QVector3D v;v.setX(node.x);v.setY(node.y);v.setZ(node.z);
       QVector3D v1;v1.setX(u1.x);v1.setY(u1.y);v1.setZ(u1.z);
       QVector3D v2;v2.setX(u2.x);v2.setY(u2.y);v2.setZ(u2.z);
+
+      QVector3D a=v-v1,b=v2-v1,c=v2-v;
+      if(QVector3D::dotProduct(a,b)<0||QVector3D::dotProduct(b,c)<0){
+          return min(a.length(),c.length());
+      }
 
       QVector3D line=v1-v2;line=line.normalized();
       return v.distanceToLine(v1,line);
@@ -44,7 +49,7 @@ bool IsInSegments(const NeuronSWC& node,const V_NeuronSWC_list &segs)
     for(auto &seg:segs.seg){
         int size=seg.row.size();
         for(int i=1;i<size;i++){
-            dist=distance2ine(node,seg.row[i-1],seg.row[i]);
+            dist=distance2line(node,seg.row[i-1],seg.row[i]);
             mindist=min(mindist,dist);
         }
     }
@@ -240,7 +245,10 @@ void compareA2Bv2(QString swc1,QString swc2,QString out)
             retype(res21[0],5);
             retype(res21[1],6);
 
+            qDebug()<<getsegmentslength(res12[0]);
+            qDebug()<<getsegmentslength(res12[1]);
             qDebug()<<getsegmentslength(res21[0]);
+            qDebug()<<getsegmentslength(res21[1]);
 
             V_NeuronSWC_list segs;
             segs.seg.insert(segs.seg.end(),res12[0].seg.begin(),res12[0].seg.end());

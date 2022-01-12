@@ -106,9 +106,15 @@ void getUnUse(QString inlog,QString outswc)
             }
         }
     }
+    double lengthuse=getsegmentslength(segments);
 //    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
     for(auto &msg:stack){
         drawlineUnuse(msg,segments);
+    }
+    double lengthall=getsegmentslength(segments);
+    QFile f(QString::number(lengthuse/lengthall));
+    if (f.open(QIODevice::WriteOnly)){
+        f.close();
     }
     writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
 }
