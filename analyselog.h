@@ -331,24 +331,24 @@ void getspeed(QString inlogfile,QString inswc,QString outfile)
 
 void verifylog(QString infile)
 {
-         auto orders=readorders(infile);
-         for(int i=0;i<orders.size();i++){
-             auto msg=orders[i];
-             auto pair=getMsgwithTime(msg);
-             QRegExp msgreg("/(.*)_(.*):(.*)");
-             if(msgreg.indexIn(pair.second)!=-1)
-             {
-                 QString operationtype=msgreg.cap(1).trimmed();
-                 QString operatorMsg=msgreg.cap(3).trimmed();
-                 if(operationtype=="drawline"){
-                     QStringList listwithheader=operatorMsg.split(';',Qt::SkipEmptyParts);
-                     auto data1=listwithheader[1].split(' ',Qt::SkipEmptyParts);
-                     if(data1[0].toInt()!=3){
-                         qDebug()<<i<<":"<<msg;
-                     }
+     auto orders=readorders(infile);
+     for(int i=0;i<orders.size();i++){
+         auto msg=orders[i];
+         auto pair=getMsgwithTime(msg);
+         QRegExp msgreg("/(.*)_(.*):(.*)");
+         if(msgreg.indexIn(pair.second)!=-1)
+         {
+             QString operationtype=msgreg.cap(1).trimmed();
+             QString operatorMsg=msgreg.cap(3).trimmed();
+             if(operationtype=="drawline"){
+                 QStringList listwithheader=operatorMsg.split(';',Qt::SkipEmptyParts);
+                 auto data1=listwithheader[1].split(' ',Qt::SkipEmptyParts);
+                 if(data1[0].toInt()!=3){
+                     qDebug()<<i<<":"<<msg;
                  }
              }
          }
+     }
 }
 
 
