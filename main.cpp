@@ -157,12 +157,13 @@ QList<QStringList> MsgForAddLine(V_NeuronSWC_list nt)
 
 QList<QStringList> MsgForDeleteLine(V_NeuronSWC_list nt)
 {
-    int cnt=1;//每个包里减线命令的条数
+    double cnt=0.2;//每个包里减线命令的条数
     const int cntForPeople=cnt*packageCnt;
     QList<QList<V_NeuronSWC>> segments;
     for(int i=0;i<peopleCnt;i++){
-        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
-        segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
+//        std::shuffle(nt.seg.begin(),nt.seg.end(),std::default_random_engine());
+//        segments.push_back(QList<V_NeuronSWC>(nt.seg.begin(),nt.seg.begin()+cntForPeople));
+         segments.push_back(QList<V_NeuronSWC>(cntForPeople,nt.seg.at(0)));
     }
     QList<QStringList> res;
     for(int i=0;i<peopleCnt;i++){
@@ -205,7 +206,7 @@ QList<QStringList> MsgWaitSend(QList<QStringList> addline,
 {
     QList<QStringList> res;//每个人的操作集合
     for(int i=0;i<peopleCnt;i++){
-        QStringList msgs=addline[i]/*+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];*/;
+        QStringList msgs=addline[i]+delline[i]/*+retypeline[i]+addmarker[i]+deletemarker[i]*/;
 //        QStringList msgs=addline[i]+delline[i]+retypeline[i]+addmarker[i]+deletemarker[i];
         std::shuffle(msgs.begin(),msgs.end(),std::default_random_engine());
         res.push_back(msgs);
@@ -218,13 +219,13 @@ QList<QStringList> prepareMsg(NeuronTree nt)
     auto segments=NeuronTree__2__V_NeuronSWC_list(nt);
 
     auto addline=MsgForAddLine(segments);
-//    auto delline=MsgForDeleteLine(segments);
+    auto delline=MsgForDeleteLine(segments);
 //    auto retypeline=MsgForRetypeLine(segments);
 //    auto addmarker=MsgForAddMarker(nt);
 //    auto delmarker=MsgForDeleteMarker(nt);
 
 //    return MsgWaitSend(addline,delline,retypeline,addmarker,delmarker);
-    return MsgWaitSend(addline,{},{},{},{});
+    return MsgWaitSend(addline,delline,{},{},{});
 }
 
 
@@ -270,7 +271,7 @@ void processData(QString dirName){
         table.push_back(cacPerMsgDelay(file.absoluteFilePath(),file.baseName()));
     }
 
-    QFile file(dirName+"/report");
+    QFile file(dirName+"/report.txt");
     if(!file.open(QIODevice::WriteOnly)){
         qDebug()<<file.errorString();
     }
@@ -290,41 +291,31 @@ int main(int argc, char *argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-    processData("/Users/huanglei/Desktop/orders/1");
-    processData("/Users/huanglei/Desktop/orders/2");
-    processData("/Users/huanglei/Desktop/orders/3");
-    processData("/Users/huanglei/Desktop/orders/4");
-    processData("/Users/huanglei/Desktop/orders/5");
-    processData("/Users/huanglei/Desktop/orders/6");
-    processData("/Users/huanglei/Desktop/orders/7");
-    processData("/Users/huanglei/Desktop/orders/8");
-    processData("/Users/huanglei/Desktop/orders/9");
-    processData("/Users/huanglei/Desktop/orders/10");
+    processData("/Users/huanglei/Desktop/localwithoutdel/pressure/orders");
     return 0;
-//    processData("/Users/huanglei/Desktop/burst");
-//    processData("/Users/huanglei/Desktop/log");
+    int v=1,t=3;
+    v=atoi(argv[1]);
+    if(argc==3)
+        t=atoi(argv[2]);
 
+    peopleCnt*=v;
+    packageCnt*=t;
+    threadCnt=peopleCnt>=300?300:peopleCnt;
 
-//    auto v=atoi(argv[1]);//user
-//    auto t=1;
-//    peopleCnt*=v;
-//    packageCnt*=t;
-//    threadCnt=peopleCnt>=300?300:peopleCnt;
+    port=QString::number(4000+v*10+t);
+    auto nt=readSWC_file("/Users/huanglei/Desktop/3.eswc");
+    auto msgLists=prepareMsg(nt);
+    qDebug()<<"preare finish";
+    QThread *threads=new QThread[threadCnt];
+    QVector<SimClient*> clients;
+    for(int i=0;i<peopleCnt;i++){
+        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
+        clients.push_back(p);
+        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
+        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
+    }
+    for(int i=0;i<threadCnt;i++)
+        threads[i].start();
 
-//    port=QString::number(4000+v*10+t);
-//    auto nt=readSWC_file("/Users/huanglei/Desktop/3.eswc");
-//    auto msgLists=prepareMsg(nt);
-//    qDebug()<<"preare finish";
-//    QThread *threads=new QThread[threadCnt];
-//    QVector<SimClient*> clients;
-//    for(int i=0;i<peopleCnt;i++){
-//        auto p=new SimClient(ip,port,QString::number(i),msgLists[i]);
-//        clients.push_back(p);
-//        QObject::connect(threads+i%threadCnt,SIGNAL(started()),p,SLOT(onstarted()));
-//        clients[i]->moveToThread(threads+(peopleCnt%threadCnt));
-//    }
-//    for(int i=0;i<threadCnt;i++)
-//        threads[i].start();
-
-//    return a.exec();
+    return a.exec();
 }
