@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 5.0.3, 2021-12-27T17:06:33. -->
+<!-- Written by QtCreator 5.0.3, 2022-01-17T16:50:48. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -243,6 +243,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">mr_server2</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/Users/huanglei/Documents/GitHub/mr_server/mr_server.pro</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/huanglei/Documents/GitHub/mr_server/mr_server.pro</value>
+    <value type="QString" key="RunConfiguration.Arguments">&gt;time.txt 2&amp;&gt;1</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

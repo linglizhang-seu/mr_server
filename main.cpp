@@ -244,7 +244,7 @@ vector<double> cacPerMsgDelay(QString infilepath,QString basename){
 
     QStringList list=QString(file.readAll()).split('\n',Qt::SkipEmptyParts);
     file.close();
-    if(list.size()!=paras[3].toUInt()*paras[4].toUInt()){
+    if(list.size()!=uint(paras[3].toUInt()*paras[4].toUInt()*1.1)){
         qDebug()<<"Error:"+infilepath;
     }
 
@@ -286,12 +286,39 @@ void processData(QString dirName){
 
 }
 
+int cactimediff(QString infile)
+{
+    QFile file(infile);
+    if(!file.open(QIODevice::ReadOnly)){
+        qDebug()<<file.errorString();
+    }
+    qDebug()<<infile;
+
+    QStringList list=QString(file.readAll()).split('\n',Qt::SkipEmptyParts);
+    file.close();
+    for(int i=1;i<list.size();i++){
+        qDebug()<<i<<"\t"<<QDateTime::fromString(list[i].left(23),"yyyy/MM/dd hh:mm:ss.zzz").toMSecsSinceEpoch()-QDateTime::fromString(list[i-1].left(23),"yyyy/MM/dd hh:mm:ss.zzz").toMSecsSinceEpoch();
+    }
+}
 
 int main(int argc, char *argv[])
 {
 //    qInstallMessageHandler(myMessageOutput);
     QCoreApplication a(argc, argv);
-    processData("/Users/huanglei/Desktop/localwithoutdel/pressure/orders");
+
+
+//    {
+//        QString dirName="/Users/huanglei/Desktop/brust/orders";
+//        QDir dir(dirName);
+//        auto filelist=dir.entryInfoList(QDir::Files,QDir::Name);
+
+//        for(auto file:filelist){
+//            cactimediff(file.absoluteFilePath());
+//        }
+//    }
+//    return 0;
+
+    processData("/Users/huanglei/Desktop/brust/orders");//处理log数据
     return 0;
     int v=1,t=3;
     v=atoi(argv[1]);
