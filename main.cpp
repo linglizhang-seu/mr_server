@@ -7,6 +7,8 @@
 #include <cstdio>
 #include "analyseswc.h"
 #include "analyselog.h"
+#include <QApplication>
+#include <QTableWidget>
 QString inDir="/Users/huanglei/Desktop/18455_00152/";
 QString inbasename="18455_00152";
 QString anlyseDir=inDir+"analyse/";
@@ -29,7 +31,47 @@ void length(QString swc)
 }
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv);
+
+    {
+        QString logfile= "/Users/huanglei/Desktop/18455_00152.txt";
+        QTableWidget *widget=new QTableWidget(10000,4);
+        QStringList header;
+        header<<"TimeStamp"<<"User"<<"Client"<<"Operation";
+        widget->setHorizontalHeaderLabels(header);
+
+        QFile *file=new QFile(logfile);
+        if(!file->open(QIODevice::ReadOnly)) {
+            delete widget;
+            delete file;
+            return 0;
+        }
+
+        int i=0;
+        QString timestamp,user,client,operation;
+        QString data;
+        while(!file->atEnd()){
+            data=file->readLine(100000000);
+            timestamp=data.left(19);
+            data=data.right(data.size()-27);
+            operation=data.left(data.indexOf(':'));
+            data=data.right(data.size()-data.indexOf(':')-1);
+            auto header=data.split(';',Qt::SkipEmptyParts).at(0).split(' ',Qt::SkipEmptyParts);
+            if(header.size()<=2){
+                ;
+            }
+            user=header[0].trimmed();
+            client=header[1].trimmed();
+            widget->setItem(i,0,new QTableWidgetItem(timestamp));
+            widget->setItem(i,1,new QTableWidgetItem(user));
+            widget->setItem(i,2,new QTableWidgetItem(client));
+            widget->setItem(i,3,new QTableWidgetItem(operation));
+            ++i;
+        }
+        widget->show();
+    }
+
+    return a.exec();
 //    //协作重建数据分析
 //    //analyse swc
 //    doaddusertypr(rawswcname,anlyseDir+inbasename+"_addusertype.eswc");

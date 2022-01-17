@@ -40,5 +40,4 @@ HEADERS += \
     neuron_editing/v_neuronswc.h \
     swcutils.h \
     utils.h \
-    versioncontrol.h \
-    vislog.h
+    versioncontrol.h
