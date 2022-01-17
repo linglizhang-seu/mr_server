@@ -1,4 +1,5 @@
 QT += gui
+QT += widgets
 QT += sql network core5compat
 
 CONFIG += c++11 console
@@ -39,4 +40,5 @@ HEADERS += \
     neuron_editing/v_neuronswc.h \
     swcutils.h \
     utils.h \
-    versioncontrol.h
+    versioncontrol.h \
+    vislog.h
