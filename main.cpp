@@ -9,6 +9,9 @@
 #include "analyselog.h"
 #include <QApplication>
 #include <QTableWidget>
+#include <QHeaderView>
+#include <QTime>
+#include <QtGlobal>
 QString inDir="/Users/huanglei/Desktop/18455_00152/";
 QString inbasename="18455_00152";
 QString anlyseDir=inDir+"analyse/";
@@ -33,45 +36,67 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    {
-        QString logfile= "/Users/huanglei/Desktop/18455_00152.txt";
-        QTableWidget *widget=new QTableWidget(10000,4);
-        QStringList header;
-        header<<"TimeStamp"<<"User"<<"Client"<<"Operation";
-        widget->setHorizontalHeaderLabels(header);
+//    {
+//        QString logfile= "/Users/huanglei/Desktop/18455_00152.txt";
+//        QTableWidget *widget=new QTableWidget(10000,4);
+//        QFont font =  widget->horizontalHeader()->font();
+//        font.setBold(true);
+//        widget->horizontalHeader()->setFont(QFont("Song", 12));
+//        widget->horizontalHeader()->setFont(font);
+//        widget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+//        widget->setShowGrid(true);
+//        widget->setWindowTitle("History");
+//        QStringList header;
+//        header<<"TimeStamp"<<"UserId"<<"Terminal"<<"Operation";
+//        widget->setHorizontalHeaderLabels(header);
 
-        QFile *file=new QFile(logfile);
-        if(!file->open(QIODevice::ReadOnly)) {
-            delete widget;
-            delete file;
-            return 0;
-        }
 
-        int i=0;
-        QString timestamp,user,client,operation;
-        QString data;
-        while(!file->atEnd()){
-            data=file->readLine(100000000);
-            timestamp=data.left(19);
-            data=data.right(data.size()-27);
-            operation=data.left(data.indexOf(':'));
-            data=data.right(data.size()-data.indexOf(':')-1);
-            auto header=data.split(';',Qt::SkipEmptyParts).at(0).split(' ',Qt::SkipEmptyParts);
-            if(header.size()<=2){
-                ;
-            }
-            user=header[0].trimmed();
-            client=header[1].trimmed();
-            widget->setItem(i,0,new QTableWidgetItem(timestamp));
-            widget->setItem(i,1,new QTableWidgetItem(user));
-            widget->setItem(i,2,new QTableWidgetItem(client));
-            widget->setItem(i,3,new QTableWidgetItem(operation));
-            ++i;
-        }
-        widget->show();
-    }
+//        QFile *file=new QFile(logfile);
+//        if(!file->open(QIODevice::ReadOnly)) {
+//            delete widget;
+//            delete file;
+//            return 0;
+//        }
 
-    return a.exec();
+//        int i=0;
+//        QString timestamp,user,client,operation;
+//        QString data;
+//        while(!file->atEnd()){
+//            data=file->readLine(100000000);
+//            timestamp=data.left(19);
+//            data=data.right(data.size()-27);
+//            operation=data.left(data.indexOf(':'));
+//            data=data.right(data.size()-data.indexOf(':')-1);
+//            auto header=data.split(';',Qt::SkipEmptyParts).at(0).split(' ',Qt::SkipEmptyParts);
+//            if(header.size()<=2){
+//                ;
+//            }
+//            user=header[0].trimmed();
+//            client=header[1].trimmed();
+//            QRandomGenerator64 rd;
+////            srand(QDateTime::fromString(timestamp,"yyyy/MM/dd hh:mm:ss").toMSecsSinceEpoch()+time(0));
+//            client=QRandomGenerator::global()->generateDouble()>0.8?"Virtual Reality":"Desktop";
+//            if(operation.startsWith("drawline")){
+//                operation="draw_seg";
+//            }else if(operation.startsWith("delline")){
+//                operation="del_seg";
+//            }else if(operation.startsWith("addmarker")){
+//                operation="draw_marker";
+//            }else if(operation.startsWith("delmarker")){
+//                operation="del_marker";
+//            }else if(operation.startsWith("retypeline")){
+//                operation="confirm_seg";
+//            }
+//            widget->setItem(i,0,new QTableWidgetItem(timestamp));
+//            widget->setItem(i,1,new QTableWidgetItem(user));
+//            widget->setItem(i,2,new QTableWidgetItem(client));
+//            widget->setItem(i,3,new QTableWidgetItem(operation));
+//            ++i;
+//        }
+//        widget->show();
+//    return a.exec();
+//    }
+
 //    //协作重建数据分析
 //    //analyse swc
 //    doaddusertypr(rawswcname,anlyseDir+inbasename+"_addusertype.eswc");
@@ -141,39 +166,56 @@ int main(int argc, char *argv[])
 //    length("/Users/huanglei/OneDrive/StudyDB/neu/data/18455_00152/analyse/18455_00152_diff.eswc");
 //    length("/Users/huanglei/OneDrive/StudyDB/neu/data/18455_00152/analyse/18455_00152_modiltytype.eswc");
 
-    //auto grid
-    QString s18454_00049_1="C:/Users/SEU/Desktop/auto/v3d_qt6.exe Z:/TeraconvertedBrain/mouse18454_teraconvert/RES(26298x35000x11041) C:/Users/SEU/Desktop/3.603c C:/Users/SEU/Desktop/huanglei/18454_00049_";
+//    {
+//        //auto grid
+//        QString s18454_00049_1="C:/Users/SEU/Desktop/auto/v3d_qt6.exe Z:/TeraconvertedBrain/mouse18454_teraconvert/RES(26298x35000x11041) C:/Users/SEU/Desktop/3.603c C:/Users/SEU/Desktop/huanglei/18454_00049_";
 
-    QDir dir("./");
-    QFile res("/Users/huanglei/Desktop/18454_00049_res.swc");
-    QStringList msgs;
-    res.open(QIODevice::ReadOnly);
+//        QDir dir("./");
+//        QFile res("/Users/huanglei/Desktop/18454_00049_res.swc");
+//        QStringList msgs;
+//        res.open(QIODevice::ReadOnly);
 
-    for(int blocksize=128;blocksize<=400;blocksize+=128){
-        for(int c=1;c<=10;c++){
-            for(int id_thres=100;id_thres<=500;id_thres+=100){
-                for(int seg_id=100;seg_id<=500;seg_id+=100){
-                    for(int bord=20;bord<=80;bord+=20){
-                        QString d=QString("%1_%2_%3_%4_%5").arg(blocksize).arg(c).arg(id_thres).arg(seg_id).arg(bord);
-                        QString s18454_00049_2=QString("C:/Users/SEU/Desktop/huanglei/18454_00049_%1/18454_00049_res.swc 14530 10693 3124").arg(d);
-                        msgs.append(QString("%1%2 %3 %4 %5 %6 %7 %8 %9").arg(s18454_00049_1).arg(d).arg(s18454_00049_2).arg(blocksize).arg(c).arg(id_thres).arg(seg_id).arg(bord)
-                                .arg(QString("whole_%1.eswc").arg(d)).toStdString().c_str());
-                        dir.mkdir("18454_00049_"+d);
-                        res.copy("./18454_00049_"+d+"/18454_00049_res.swc");
-                    }
-                }
-            }
-        }
-    }
+//        for(int blocksize=128;blocksize<=400;blocksize+=128){
+//            for(int c=1;c<=10;c++){
+//                for(int id_thres=100;id_thres<=500;id_thres+=100){
+//                    for(int seg_id=100;seg_id<=500;seg_id+=100){
+//                        for(int bord=20;bord<=80;bord+=20){
+//                            QString d=QString("%1_%2_%3_%4_%5").arg(blocksize).arg(c).arg(id_thres).arg(seg_id).arg(bord);
+//                            QString s18454_00049_2=QString("C:/Users/SEU/Desktop/huanglei/18454_00049_%1/18454_00049_res.swc 14530 10693 3124").arg(d);
+//                            msgs.append(QString("%1%2 %3 %4 %5 %6 %7 %8 %9").arg(s18454_00049_1).arg(d).arg(s18454_00049_2).arg(blocksize).arg(c).arg(id_thres).arg(seg_id).arg(bord)
+//                                        .arg(QString("whole_%1.eswc").arg(d)).toStdString().c_str());
+//                            dir.mkdir("18454_00049_"+d);
+//                            res.copy("./18454_00049_"+d+"/18454_00049_res.swc");
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
-    int k=msgs.size()/20;
-    for(int i=0;i<20;i++)
-    {
-        QFile f(QString("task_%1").arg(i));
-        f.open(QIODevice::WriteOnly);
-        f.write(msgs.sliced(i*k,k).join('\n').toStdString().c_str());
-        f.close();
-    }
+//        int k=msgs.size()/20;
+//        for(int i=0;i<20;i++)
+//        {
+//            QFile f(QString("task_%1").arg(i));
+//            f.open(QIODevice::WriteOnly);
+//            f.write(msgs.sliced(i*k,k).join('\n').toStdString().c_str());
+//            f.close();
+//        }
+//    }
+//    dologfile("/Users/huanglei/Desktop/18455_00152_1000.txt","/Users/huanglei/Desktop/18455_00152_1000.eswc");
+//    dologfile("/Users/huanglei/Desktop/18455_00152_2000.txt","/Users/huanglei/Desktop/18455_00152_2000.eswc");
+//    dologfile("/Users/huanglei/Desktop/18455_00152_3000.txt","/Users/huanglei/Desktop/18455_00152_3000.eswc");
+//    dologfile("/Users/huanglei/Desktop/18455_00152_4000.txt","/Users/huanglei/Desktop/18455_00152_4000.eswc");
+//    dologfile("/Users/huanglei/Desktop/18455_00152_5000.txt","/Users/huanglei/Desktop/18455_00152_5000.eswc");
+//    dologfile("/Users/huanglei/Desktop/18455_00152_6000.txt","/Users/huanglei/Desktop/18455_00152_6000.eswc");
+//    dologfile("/Users/huanglei/Desktop/18455_00152.txt","/Users/huanglei/Desktop/18455_00152_7000.eswc");
+
+    compareA2Bv2("/Users/huanglei/Desktop/18454_01130_DAH_stamp_2019_11_19_17_49.ano.eswc"
+                 ,"/Users/huanglei/Desktop/18454_01130_DAH_YLL_SYY_stamp_2019_12_10_09_09.ano.eswc"
+                 ,"/Users/huanglei/Desktop/10002000.eswc");
+    compareA2Bv2("/Users/huanglei/Desktop/18454_01130_DAH_YLL_stamp_2019_11_26_14_22.ano.eswc"
+                 ,"/Users/huanglei/Desktop/18454_01130_DAH_YLL_stamp_2019_12_09_13_47.ano.eswc"
+                 ,"/Users/huanglei/Desktop/20007000.eswc");
+
 
     return 0;
 }
