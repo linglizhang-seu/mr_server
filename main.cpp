@@ -128,32 +128,32 @@ int main(int argc, char *argv[])
 //    compareA2Bv2("/Users/huanglei/Desktop/18454_01130_L1D.eswc","/Users/huanglei/Desktop/18454_01130_L2D.eswc","/Users/huanglei/Desktop/18454_01130_1D22D.eswc");
 
     //自动化校验
-//    {
-//        auto nt=readSWC_file("/Users/huanglei/Desktop/whole_image.eswc");
-//        auto sges=NeuronTree__2__V_NeuronSWC_list(nt);
-//        qDebug()<<"whole_image.eswc "<<getsegmentslength(sges,-1);
-//    }
+    {
+        auto nt=readSWC_file("/Users/huanglei/Desktop/whole_image.eswc");
+        auto sges=NeuronTree__2__V_NeuronSWC_list(nt);
+        qDebug()<<"whole_image.eswc "<<getsegmentslength(sges,-1);
+    }
 
-//    {
-//        auto nt=readSWC_file("/Users/huanglei/Desktop/18454_00049.swc");
-//        auto sges=NeuronTree__2__V_NeuronSWC_list(nt);
-//        qDebug()<<"18454_00049.eswc "<<getsegmentslength(sges,-1);
-//    }
+    {
+        auto nt=readSWC_file("/Users/huanglei/Desktop/18867_6003_x18592_y6204.swc");
+        auto sges=NeuronTree__2__V_NeuronSWC_list(nt);
+        qDebug()<<"18454_00049.eswc "<<getsegmentslength(sges,-1);
+    }
 
-//    {
-//        compareA2Bv2("/Users/huanglei/Desktop/whole_image.eswc","/Users/huanglei/Desktop/18454_00049.swc","/Users/huanglei/Desktop/out.swc");
-////        auto nt=readSWC_file("/Users/huanglei/Desktop/out.swc");
-////        auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
-////        auto ltrue=getsegmentslength(segs,3);
-////        nt=readSWC_file("/Users/huanglei/Desktop/18454_00049.swc");
-////        segs=NeuronTree__2__V_NeuronSWC_list(nt);
-////        auto leffect=getsegmentslength(segs,-1);
-////        qDebug()<<ltrue;
-////        qDebug()<<leffect;
-////        QFile f2("/Users/huanglei/Desktop/"+QString::number(ltrue)+"_"+QString::number(leffect));
-////        f2.open(QIODevice::WriteOnly);
-////        f2.close();
-//    }
+    {
+        compareA2Bv2("/Users/huanglei/Desktop/whole_image.eswc","/Users/huanglei/Desktop/18867_6003_x18592_y6204.swc","/Users/huanglei/Desktop/out.swc");
+//        auto nt=readSWC_file("/Users/huanglei/Desktop/out.swc");
+//        auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
+//        auto ltrue=getsegmentslength(segs,3);
+//        nt=readSWC_file("/Users/huanglei/Desktop/18454_00049.swc");
+//        segs=NeuronTree__2__V_NeuronSWC_list(nt);
+//        auto leffect=getsegmentslength(segs,-1);
+//        qDebug()<<ltrue;
+//        qDebug()<<leffect;
+//        QFile f2("/Users/huanglei/Desktop/"+QString::number(ltrue)+"_"+QString::number(leffect));
+//        f2.open(QIODevice::WriteOnly);
+//        f2.close();
+    }
 
 //    mergeNts({"/Users/huanglei/Desktop/whole_image.eswc","/Users/huanglei/Desktop/18454_00049.swc"},"/Users/huanglei/Desktop/whole_image_merge.eswc");
 
