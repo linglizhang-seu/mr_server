@@ -244,11 +244,13 @@ void compareA2Bv2(QString swc1,QString swc2,QString out)
             retype(res12[1],3);
             retype(res21[0],5);
             retype(res21[1],6);
+//自动化和答案一致的长度，自动化比答案多的，答案和自动化一致的，答案比自动化多的
+            auto nt1=readSWC_file(swc1);
+            auto nt2=readSWC_file(swc2);
 
-            qDebug()<<getsegmentslength(res12[0]);
-            qDebug()<<getsegmentslength(res12[1]);
-            qDebug()<<getsegmentslength(res21[0]);
-            qDebug()<<getsegmentslength(res21[1]);
+            qDebug()<<swc1<<" "<<swc2<<" "<<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1))
+                   <<" "<<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2))<<" "
+                  <<getsegmentslength(res12[0])<<" "<<getsegmentslength(res12[1])<<" "<<getsegmentslength(res21[0])<<" "<<getsegmentslength(res21[1]);
 
             V_NeuronSWC_list segs;
             segs.seg.insert(segs.seg.end(),res12[0].seg.begin(),res12[0].seg.end());

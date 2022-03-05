@@ -60,7 +60,7 @@ QList <CellAPO> readAPO_file(const QString& filename)
     int count = 0;
     mylist.clear();
 
-    qDebug("-------------------------------------------------------");
+//    qDebug("-------------------------------------------------------");
     char _buf[10000]; //expand the size from 2000 to 10000. by PHC, 20121212.
     while (! qf.atEnd())
     {
@@ -310,7 +310,7 @@ NeuronTree readSWC_file(const QString& filename)
 	QString name = "";
 	QString comment = "";
         nt.flag=true;
-    qDebug("-------------------------------------------------------");
+//    qDebug("-------------------------------------------------------");
     while (! qf.atEnd())
     {
         char _buf[1000], *buf;

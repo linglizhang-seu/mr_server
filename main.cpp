@@ -166,78 +166,78 @@ int main(int argc, char *argv[])
 //    length("/Users/huanglei/OneDrive/StudyDB/neu/data/18455_00152/analyse/18455_00152_diff.eswc");
 //    length("/Users/huanglei/OneDrive/StudyDB/neu/data/18455_00152/analyse/18455_00152_modiltytype.eswc");
 
-    {
-        //auto grid
-        QMap<QString,QString> imageMap;
-        imageMap["18462"] ="Z:/TeraconvertedBrain/mouse18462_teraconvert/RES(27748x32200x10578)";
-        imageMap["17781"] ="Z:/TeraconvertedBrain/mouse17781_teraconvert/RES(27300x17361x5510)";
-        imageMap["191812"]="Z:/TeraconvertedBrain/mouse191812_teraconvert/RES(30801x18911x11657)";
-        imageMap["17543"] ="Z:/TeraconvertedBrain/mouse17543_teraconvert/RES(27748x32200x10578)";
-        imageMap["18458"] ="Z:/TeraconvertedBrain/mouse18458_teraconvert/RES(25376x40600x10333)";
-        imageMap["18869"] ="Z:/TeraconvertedBrain/mouse18869_teraconvert/RES(16915x29400x10923)";
-        imageMap["18465"] ="Z:/TeraconvertedBrain/mouse18465_teraconvert/RES(26000x36000x10301)";
-        imageMap["236174"]="Z:/TeraconvertedBrain/mouse236174_teraconvert/RES(36400x23814x12061)";
-        imageMap["18452"] ="Z:/TeraconvertedBrain/mouse18452_teraconvert/RES(23423x36400x11028)";
-        imageMap["191803"]="Z:/TeraconvertedBrain/mouse191803_teraconvert/RES(29401x17848x11712)";
-        imageMap["18864"] ="Z:/TeraconvertedBrain/mouse18864_teraconvert/RES(35001x27299x10392)";
-        imageMap["18453"] ="Z:/TeraconvertedBrain/mouse18453_teraconvert/RES(24400x39200x10538)";
-        imageMap["191801"]="Z:/TeraconvertedBrain/mouse191801_teraconvert_12bit/RES(28001x17865x11151)";
-        imageMap["18463"] ="Z:/TeraconvertedBrain/mouse18463_teraconvert/RES(17478x32200x10842)";
-        imageMap["18867"] ="Z:/TeraconvertedBrain/mouse18867_teraconvert/RES(25376x40600x11203)";
-        imageMap["182725"]="Z:/TeraconvertedBrain/mouse182725_teraconvert/RES(30801x20821x11464)";
-        imageMap["17302"] ="Z:/TeraconvertedBrain/mouse17302_teraconvert/RES(54600x34412x9847)";
-        imageMap["18454"] ="Z:/TeraconvertedBrain/mouse18454_teraconvert/RES(26298x35000x11041)";
-        imageMap["18457"] ="Z:/TeraconvertedBrain/mouse18457_teraconvert/RES(24275x37800x10955)";
-        imageMap["17545"] ="Z:/TeraconvertedBrain/mouse17545_teraconvert/RES(27300x17994x5375)";
-        imageMap["18455"] ="Z:/TeraconvertedBrain/mouse18455_teraconvert/RES(23376x40600x10892)";
-        imageMap["17300"] ="Z:/TeraconvertedBrain/mouse17300_teraconvert/RES(54600x37230x9954)";
-        imageMap["18868"] ="Z:/TeraconvertedBrain/mouse18868_teraconvert/RES(24001x36401x10995)";
-        imageMap["17109"] ="Z:/TeraconvertedBrain/mouse17109_teraconvert/RES(35000x22793x10553)";
-        imageMap["17787"] ="Z:/TeraconvertedBrain/mouse17787_teraconvert/RES(24275x36400x11478)";
-        imageMap["17788"] ="Z:/TeraconvertedBrain/mouse17788_teraconvert/RES(27188x35000x11120)";
-        imageMap["18464"] ="Z:/TeraconvertedBrain/mouse18464_teraconvert/RES(26352x35000x10431)";
-        imageMap["18470"] ="Z:/TeraconvertedBrain/mouse18470_teraconvert/RES(27300x15977x5113)";
-        imageMap["17782"] ="Z:/TeraconvertedBrain/mouse17782_teraconvert/RES(28000x45000x11786)";
+//    {
+//        //auto grid
+//        QMap<QString,QString> imageMap;
+//        imageMap["18462"] ="Z:/TeraconvertedBrain/mouse18462_teraconvert/RES(27748x32200x10578)";
+//        imageMap["17781"] ="Z:/TeraconvertedBrain/mouse17781_teraconvert/RES(27300x17361x5510)";
+//        imageMap["191812"]="Z:/TeraconvertedBrain/mouse191812_teraconvert/RES(30801x18911x11657)";
+//        imageMap["17543"] ="Z:/TeraconvertedBrain/mouse17543_teraconvert/RES(27748x32200x10578)";
+//        imageMap["18458"] ="Z:/TeraconvertedBrain/mouse18458_teraconvert/RES(25376x40600x10333)";
+//        imageMap["18869"] ="Z:/TeraconvertedBrain/mouse18869_teraconvert/RES(16915x29400x10923)";
+//        imageMap["18465"] ="Z:/TeraconvertedBrain/mouse18465_teraconvert/RES(26000x36000x10301)";
+//        imageMap["236174"]="Z:/TeraconvertedBrain/mouse236174_teraconvert/RES(36400x23814x12061)";
+//        imageMap["18452"] ="Z:/TeraconvertedBrain/mouse18452_teraconvert/RES(23423x36400x11028)";
+//        imageMap["191803"]="Z:/TeraconvertedBrain/mouse191803_teraconvert/RES(29401x17848x11712)";
+//        imageMap["18864"] ="Z:/TeraconvertedBrain/mouse18864_teraconvert/RES(35001x27299x10392)";
+//        imageMap["18453"] ="Z:/TeraconvertedBrain/mouse18453_teraconvert/RES(24400x39200x10538)";
+//        imageMap["191801"]="Z:/TeraconvertedBrain/mouse191801_teraconvert_12bit/RES(28001x17865x11151)";
+//        imageMap["18463"] ="Z:/TeraconvertedBrain/mouse18463_teraconvert/RES(17478x32200x10842)";
+//        imageMap["18867"] ="Z:/TeraconvertedBrain/mouse18867_teraconvert/RES(25376x40600x11203)";
+//        imageMap["182725"]="Z:/TeraconvertedBrain/mouse182725_teraconvert/RES(30801x20821x11464)";
+//        imageMap["17302"] ="Z:/TeraconvertedBrain/mouse17302_teraconvert/RES(54600x34412x9847)";
+//        imageMap["18454"] ="Z:/TeraconvertedBrain/mouse18454_teraconvert/RES(26298x35000x11041)";
+//        imageMap["18457"] ="Z:/TeraconvertedBrain/mouse18457_teraconvert/RES(24275x37800x10955)";
+//        imageMap["17545"] ="Z:/TeraconvertedBrain/mouse17545_teraconvert/RES(27300x17994x5375)";
+//        imageMap["18455"] ="Z:/TeraconvertedBrain/mouse18455_teraconvert/RES(23376x40600x10892)";
+//        imageMap["17300"] ="Z:/TeraconvertedBrain/mouse17300_teraconvert/RES(54600x37230x9954)";
+//        imageMap["18868"] ="Z:/TeraconvertedBrain/mouse18868_teraconvert/RES(24001x36401x10995)";
+//        imageMap["17109"] ="Z:/TeraconvertedBrain/mouse17109_teraconvert/RES(35000x22793x10553)";
+//        imageMap["17787"] ="Z:/TeraconvertedBrain/mouse17787_teraconvert/RES(24275x36400x11478)";
+//        imageMap["17788"] ="Z:/TeraconvertedBrain/mouse17788_teraconvert/RES(27188x35000x11120)";
+//        imageMap["18464"] ="Z:/TeraconvertedBrain/mouse18464_teraconvert/RES(26352x35000x10431)";
+//        imageMap["18470"] ="Z:/TeraconvertedBrain/mouse18470_teraconvert/RES(27300x15977x5113)";
+//        imageMap["17782"] ="Z:/TeraconvertedBrain/mouse17782_teraconvert/RES(28000x45000x11786)";
 
-        QDir autodir("./");
-        autodir.mkdir("autoHL20220214");
-        if(!autodir.cd("autoHL20220214")){
-            qDebug()<<"cd autoHL20220214 error";
-        }else{
-            qDebug()<<autodir;
-        }
+//        QDir autodir("./");
+//        autodir.mkdir("autoHL20220214");
+//        if(!autodir.cd("autoHL20220214")){
+//            qDebug()<<"cd autoHL20220214 error";
+//        }else{
+//            qDebug()<<autodir;
+//        }
 
-        QDir dir("/Users/huanglei/Downloads/1708_unregistered");
-        auto files=dir.entryInfoList(QDir::Files,QDir::Name);
-        QMap<QString,QStringList> swcMap;
-        for(auto &file:files){
-            swcMap[file.baseName().split('_')[0]].push_back(file.fileName());
-        }
+//        QDir dir("/Users/huanglei/Downloads/1708_unregistered");
+//        auto files=dir.entryInfoList(QDir::Files,QDir::Name);
+//        QMap<QString,QStringList> swcMap;
+//        for(auto &file:files){
+//            swcMap[file.baseName().split('_')[0]].push_back(file.fileName());
+//        }
 
-        for(auto &key:swcMap.keys()){
-            QFile file(key+".txt");
-            if(file.open(QIODevice::WriteOnly)){
-                for(auto &value:swcMap[key]){
-                    QDir tmpdir=autodir;
-                    if(!tmpdir.mkdir(value.split('.').at(0)+"skip")){
-                        qDebug()<<tmpdir;
-                    }
+//        for(auto &key:swcMap.keys()){
+//            QFile file(key+".txt");
+//            if(file.open(QIODevice::WriteOnly)){
+//                for(auto &value:swcMap[key]){
+//                    QDir tmpdir=autodir;
+//                    if(!tmpdir.mkdir(value.split('.').at(0)+"skip")){
+//                        qDebug()<<tmpdir;
+//                    }
 
-                    if(!QFile::copy("/Users/huanglei/Downloads/1708_unregistered/"+value,"./autoHL20220214/"+value.split('.').at(0)+"skip/"+value)){
-                        qDebug()<<"error "<<value;
-                    }
-                    QString data=QString("C:/Users/SEU/Desktop/auto/v3d_qt6.exe %1 C:/Users/SEU/Desktop/3.603c D:/%2 D:/%2/%3\n")
-                            .arg(imageMap[key])
-                            .arg(QString("autoHL20220214/%1skip").arg(value.split('.').at(0)))
-                            .arg(value);
-                    file.write(data.toStdString().c_str());
-                }
-            }else{
-                qDebug()<<"file open failed";
-            }
-            file.close();
-        }
-    }
+//                    if(!QFile::copy("/Users/huanglei/Downloads/1708_unregistered/"+value,"./autoHL20220214/"+value.split('.').at(0)+"skip/"+value)){
+//                        qDebug()<<"error "<<value;
+//                    }
+//                    QString data=QString("C:/Users/SEU/Desktop/auto/v3d_qt6.exe %1 C:/Users/SEU/Desktop/3.603c D:/%2 D:/%2/%3\n")
+//                            .arg(imageMap[key])
+//                            .arg(QString("autoHL20220214/%1skip").arg(value.split('.').at(0)))
+//                            .arg(value);
+//                    file.write(data.toStdString().c_str());
+//                }
+//            }else{
+//                qDebug()<<"file open failed";
+//            }
+//            file.close();
+//        }
+//    }
 
 
 //    dologfile("/Users/huanglei/Desktop/18455_00152_1000.txt","/Users/huanglei/Desktop/18455_00152_1000.eswc");
@@ -248,12 +248,26 @@ int main(int argc, char *argv[])
 //    dologfile("/Users/huanglei/Desktop/18455_00152_6000.txt","/Users/huanglei/Desktop/18455_00152_6000.eswc");
 //    dologfile("/Users/huanglei/Desktop/18455_00152.txt","/Users/huanglei/Desktop/18455_00152_7000.eswc");
 
-//    compareA2Bv2("/Users/huanglei/Desktop/18454_01130_DAH_stamp_2019_11_19_17_49.ano.eswc"
-//                 ,"/Users/huanglei/Desktop/18454_01130_DAH_YLL_SYY_stamp_2019_12_10_09_09.ano.eswc"
-//                 ,"/Users/huanglei/Desktop/10002000.eswc");
-//    compareA2Bv2("/Users/huanglei/Desktop/18454_01130_DAH_YLL_stamp_2019_11_26_14_22.ano.eswc"
-//                 ,"/Users/huanglei/Desktop/18454_01130_DAH_YLL_stamp_2019_12_09_13_47.ano.eswc"
-//                 ,"/Users/huanglei/Desktop/20007000.eswc");
+    QDir target("/Users/huanglei/Desktop/target");
+    auto entrylist=target.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot,QDir::Name);
+
+    for(auto &entry:entrylist){
+        auto tmpDir=QDir(entry.absoluteFilePath());
+        auto tmpentrylist=tmpDir.entryInfoList(QDir::Files,QDir::Name);
+        QString respath="";
+        QString autopath="whole_image.eswc";
+        QString resname="";
+        for(auto &tmpentry:tmpentrylist){
+            if(!tmpentry.baseName().contains("whole_image")){
+                respath=tmpentry.absoluteFilePath();
+                resname=tmpentry.baseName();
+            }else{
+                autopath=tmpentry.absoluteFilePath();
+            }
+        }
+        compareA2Bv2(autopath,respath,"/Users/huanglei/Desktop/target/"+resname+"_compare.eswc");
+
+    }
 
 
     return 0;
