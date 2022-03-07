@@ -248,9 +248,15 @@ void compareA2Bv2(QString swc1,QString swc2,QString out)
             auto nt1=readSWC_file(swc1);
             auto nt2=readSWC_file(swc2);
 
-            qDebug()<<swc1<<" "<<swc2<<" "<<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1))
-                   <<" "<<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2))<<" "
-                  <<getsegmentslength(res12[0])<<" "<<getsegmentslength(res12[1])<<" "<<getsegmentslength(res21[0])<<" "<<getsegmentslength(res21[1]);
+            qDebug()<<swc1<<" "<<swc2<<" "
+                   <<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1))<<" "
+                   <<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2))<<" "
+                   <<getsegmentslength(res12[0])<<" "
+                   <<getsegmentslength(res12[1])<<" "
+                   <<getsegmentslength(res21[0])<<" "
+                   <<getsegmentslength(res21[1])
+                   <<" "<<1.0*getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1))/getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2))
+                   <<" "<<1.0*getsegmentslength(res12[0])/getsegmentslength(res21[0]);
 
             V_NeuronSWC_list segs;
             segs.seg.insert(segs.seg.end(),res12[0].seg.begin(),res12[0].seg.end());

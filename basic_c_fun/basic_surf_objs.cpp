@@ -179,9 +179,9 @@ bool writeAPO_file(const QString& filename, const QList <CellAPO> & listCell)
 	}
 
 	fclose(fp);
-#ifndef DISABLE_V3D_MSG
-	v3d_msg(QString("done with saving file: %1").arg(curFile), false);
-#endif
+//#ifndef DISABLE_V3D_MSG
+//	v3d_msg(QString("done with saving file: %1").arg(curFile), false);
+//#endif
 
 	return true;
 }
@@ -283,9 +283,9 @@ bool writeMarker_file(const QString & filename, const QList <ImageMarker> & list
 	}
 
 	fclose(fp);
-//#ifndef DISABLE_V3D_MSG
-	v3d_msg(QString("done with saving file: %1").arg(curFile), false);
-//#endif
+////#ifndef DISABLE_V3D_MSG
+//	v3d_msg(QString("done with saving file: %1").arg(curFile), false);
+////#endif
 	return true;
 }
 
@@ -403,7 +403,7 @@ bool writeSWC_file(const QString& filename, const NeuronTree& nt, const QStringL
 	if (!fp)
 	{
 #ifndef DISABLE_V3D_MSG
-		v3d_msg("Could not open the file to save the neuron.");
+//		v3d_msg("Could not open the file to save the neuron.");
 #endif
 		return false;
 	}
@@ -427,9 +427,9 @@ bool writeSWC_file(const QString& filename, const NeuronTree& nt, const QStringL
 	}
     
 	fclose(fp);
-#ifndef DISABLE_V3D_MSG
-	v3d_msg(QString("done with saving file: ")+filename, false);
-#endif
+//#ifndef DISABLE_V3D_MSG
+//	v3d_msg(QString("done with saving file: ")+filename, false);
+//#endif
 	return true;
 }
 
@@ -455,7 +455,7 @@ bool writeESWC_file(const QString& filename, const NeuronTree& nt)
 	if (!fp)
 	{
 #ifndef DISABLE_V3D_MSG
-		v3d_msg("Could not open the file to save the neuron.");
+//		v3d_msg("Could not open the file to save the neuron.");
 #endif
 		return false;
 	}
@@ -475,9 +475,9 @@ bool writeESWC_file(const QString& filename, const NeuronTree& nt)
 		fprintf(fp, "\n");
 	}
 	fclose(fp);
-#ifndef DISABLE_V3D_MSG
-	v3d_msg(QString("done with saving file: ")+filename, false);
-#endif
+//#ifndef DISABLE_V3D_MSG
+//	v3d_msg(QString("done with saving file: ")+filename, false);
+//#endif
 	return true;
 }
 
