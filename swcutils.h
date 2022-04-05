@@ -218,7 +218,7 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
 
 
 
-void compareA2Bv2(QString swc1,QString swc2,QString out)
+QString compareA2Bv2(QString swc1,QString swc2,QString out)
 {
             auto res12=comapreA2B(swc1,swc2,"_12.eswc");//我的重建独有的(需要删除的)，共有的
 //            for(auto it=res12[0].seg.begin();it!=res12[0].seg.end();){
@@ -244,23 +244,25 @@ void compareA2Bv2(QString swc1,QString swc2,QString out)
             retype(res12[1],3);
             retype(res21[0],5);
             retype(res21[1],6);
-//自动化和答案一致的长度，自动化比答案多的，答案和自动化一致的，答案比自动化多的
             auto nt1=readSWC_file(swc1);
             auto nt2=readSWC_file(swc2);
 
-            qDebug()<<swc1<<" "<<swc2<<" "
-                   <<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1))<<" "
-                   <<getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2))<<" "
-                   <<getsegmentslength(res12[0])<<" "
-                   <<getsegmentslength(res12[1])<<" "
-                   <<getsegmentslength(res21[0])<<" "
-                   <<getsegmentslength(res21[1])
-                   <<" "<<1.0*getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1))/getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2))
-                   <<" "<<1.0*getsegmentslength(res12[0])/getsegmentslength(res21[0]);
+            QString ana=QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11")
+                    .arg(swc2.split('/').back()).arg(getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1)))
+                    .arg(getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2)))
+                    .arg(getsegmentslength(res12[0])).arg(getsegmentslength(res12[1]))
+                    .arg(getsegmentslength(res21[0])).arg(getsegmentslength(res21[1]))
+                    .arg(1.0*getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1))/getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2)))
+                    .arg(1.0*getsegmentslength(res12[1])/getsegmentslength(res21[1]))
+                    .arg(1.0*getsegmentslength(res12[1])/getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1)))
+                    .arg(1.0*getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1),2)/getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1)));
+            qDebug()<<ana;
 
             V_NeuronSWC_list segs;
             segs.seg.insert(segs.seg.end(),res12[0].seg.begin(),res12[0].seg.end());
             segs.seg.insert(segs.seg.end(),res12[1].seg.begin(),res12[1].seg.end());//蓝色
+
+
             segs.seg.insert(segs.seg.end(),res21[0].seg.begin(),res21[0].seg.end());
             for(auto it=segs.seg.begin();it!=segs.seg.end();){
                 if(it->row.size()<=1){
@@ -269,7 +271,9 @@ void compareA2Bv2(QString swc1,QString swc2,QString out)
                     ++it;
                 }
             }
-          writeESWC_file(out,V_NeuronSWC_list__2__NeuronTree(segs));
+          writeESWC_file(out+"/compare.eswc",V_NeuronSWC_list__2__NeuronTree(segs));
+
+          return ana;
 //          writeESWC_file(anlyseDir+inbasename+"_shouldadd.eswc",V_NeuronSWC_list__2__NeuronTree(res21[0]));
 }
 
