@@ -25,8 +25,13 @@ QStringList readorders(QString infile)
 
 std::pair<QDateTime,QString> getMsgwithTime(const QString &msg)
 {
+
+//    QString timestr=msg.left(19);
     QString timestr=msg.left(19);
+    timestr=timestr.trimmed();
+    qDebug()<<"timestr: "<<timestr;
     QString data=msg.right(msg.size()-22);
+    qDebug()<<"data time"<<QDateTime::fromString(timestr,"yyyy/MM/dd hh:mm:ss");
     return {QDateTime::fromString(timestr,"yyyy/MM/dd hh:mm:ss"),data};
 }
 
@@ -35,8 +40,10 @@ V_NeuronSWC_list doorders(QStringList orders)
     V_NeuronSWC_list segments;
     QList<CellAPO> wholePoints;
     QStringList stack;
+//    int type;
     for(auto &msg:orders){
         auto pair=getMsgwithTime(msg);
+        qDebug()<<"pair: "<<pair;
         QRegExp msgreg("/(.*)_(.*):(.*)");
         if(msgreg.indexIn(pair.second)!=-1)
         {
@@ -49,8 +56,10 @@ V_NeuronSWC_list doorders(QStringList orders)
             }
             else if(operationtype == "delline")
             {
-                 if(delline(operatorMsg,segments))
-                     stack.push_back(operatorMsg);
+                if(delline(operatorMsg,segments))
+                    stack.push_back(operatorMsg);
+//                 if(delline(operatorMsg,segments,type))
+//                     stack.push_back(operatorMsg);
             }
             else if(operationtype == "addmarker")
             {
@@ -75,6 +84,8 @@ void getUnUse(QString inlog,QString outswc)
     V_NeuronSWC_list segments;
     QList<CellAPO> wholePoints;
     QStringList stack;
+    int type;
+    QList<int> intstack;
     for(auto &msg:orders){
         auto pair=getMsgwithTime(msg);
         QRegExp msgreg("/(.*)_(.*):(.*)");
@@ -89,8 +100,16 @@ void getUnUse(QString inlog,QString outswc)
             }
             else if(operationtype == "delline")
             {
-                 if(delline(operatorMsg,segments))
-                     stack.push_back(operatorMsg);
+                if(delline(operatorMsg,segments))
+                    stack.push_back(operatorMsg);
+
+//                 if(delline(operatorMsg,segments,type))
+//                 {
+//                     stack.push_back(operatorMsg);
+//                     intstack.push_back(type);
+//                     qDebug()<<"type_list"<<intstack;
+//                 }
+
             }
             else if(operationtype == "addmarker")
             {
@@ -108,6 +127,15 @@ void getUnUse(QString inlog,QString outswc)
     }
     double lengthuse=getsegmentslength(segments);
 //    writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
+    //lingli add
+//    for(int i=0;i<stack.size();i++)
+//    {
+//        qDebug()<<"stack"<<stack[i];
+//        qDebug()<<"intstack"<<intstack[i];
+//        drawlineUnuse(stack[i],segments,intstack[i]);
+
+//    }
+    //for type
     for(auto &msg:stack){
         drawlineUnuse(msg,segments);
     }
@@ -116,6 +144,9 @@ void getUnUse(QString inlog,QString outswc)
     if (f.open(QIODevice::WriteOnly)){
         f.close();
     }
+
+
+
     writeESWC_file(outswc,V_NeuronSWC_list__2__NeuronTree(segments));
 }
 
@@ -133,7 +164,7 @@ std::pair<double,double> doThirdPartys(QString inlog)
             QString operatorMsg=msgreg.cap(3).trimmed();
             if(operationtype=="drawline"||operationtype=="delline")
             {
-                QStringList listwithheader=operatorMsg.split(';',Qt::SkipEmptyParts);
+                QStringList listwithheader=operatorMsg.split(',',Qt::SkipEmptyParts);
                 if(listwithheader.size()<=1)
                 {
                     qDebug()<<"msg only contains header:"<<pair.second;
@@ -145,7 +176,7 @@ std::pair<double,double> doThirdPartys(QString inlog)
 
                 {
                     auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
-                    QString clienttype=headerlist[1].trimmed();
+                    QString clienttype=headerlist[0].trimmed();
                     for(int i=0;i<clienttypes.size();i++)
                     {
                         if(clienttypes[i]==clienttype)
@@ -154,7 +185,7 @@ std::pair<double,double> doThirdPartys(QString inlog)
                             break;
                         }
                     }
-                    username=headerlist[0].trimmed();
+                    username=headerlist[1].trimmed();
                 }
                 if(getid(username)==20)
                 {
@@ -216,15 +247,17 @@ std::pair<QMap<int,double>,QMap<int,double> > getusertimes(QString file)
          auto orders=readorders(file);
          for(auto &msg:orders){
              auto pair=getMsgwithTime(msg);
+             qDebug()<<"getusertime_pair_first"<<pair.first;
+             qDebug()<<"getusertime_pair_second"<<pair.second;
              QRegExp msgreg("/(.*)_(.*):(.*)");
              if(msgreg.indexIn(pair.second)!=-1)
              {
                  QString operationtype=msgreg.cap(1).trimmed();
                  QString operatorMsg=msgreg.cap(3).trimmed();
 
-                 QStringList listwithheader=operatorMsg.split(';',Qt::SkipEmptyParts);
+                 QStringList listwithheader=operatorMsg.split(',',Qt::SkipEmptyParts);
                  auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
-                 QString username=headerlist[0].trimmed();
+                 QString username=headerlist[1].trimmed();
 
                  hashmap[username.toInt()].push_back(msg);
              }
@@ -248,6 +281,7 @@ std::pair<QMap<int,double>,QMap<int,double> > getusertimes(QString file)
             {
                 auto pair=getMsgwithTime(instructions[i]);
                 currMsgTime=pair.first;
+                qDebug()<<"curMsgTime"<<currMsgTime;
                 QRegExp msgreg("/(.*)_(.*):(.*)");
                 if(msgreg.indexIn(pair.second)!=-1)
                 {
@@ -260,6 +294,7 @@ std::pair<QMap<int,double>,QMap<int,double> > getusertimes(QString file)
             }
 
             int diff=currMsgTime.toSecsSinceEpoch()-preMsgTime.toSecsSinceEpoch();
+            qDebug()<<"diff"<<diff;
             if(diff>thres) diff=plus;
             if(currOperationtype!="retypeline"){
                 addtimes[key]+=diff;
@@ -276,6 +311,8 @@ std::pair<QMap<int,double>,QMap<int,double> > getusertimes(QString file)
 void getspeed(QString inlogfile,QString inswc,QString outfile)
 {
     auto times=getusertimes(inlogfile);
+//    qDebug()<<"times_first"<<times.first;
+//    qDebug()<<"times_second"<<times.second;
     auto addtimes=times.first;
     auto checktimes=times.second;
 

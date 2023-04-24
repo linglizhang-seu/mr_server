@@ -14,14 +14,21 @@
 #include <QtGlobal>
 #include "basic_c_fun/basic_surf_objs.h"
 
-QString inDir="/Users/huanglei/Desktop/18455_00152/";
+QString inDir3="H:/Neu/Final_all_20_stype_second/8_acc_log";
 QString inbasename="18455_00152";
-QString anlyseDir=inDir+"analyse/";
-QString rawswcname=inDir+inbasename+".eswc";
-QString rawintructionlist=inDir+inbasename+".txt";
+//QString anlyseDir=inDir+"analyse/";
+//QString rawswcname=inDir+inbasename+".eswc";
+//QString rawintructionlist=inDir+inbasename+".txt";
 QString swcsuffix=".eswc";
 QString txtsuffix=".txt";
 
+QString inDir1="H:/Neu/Final_all_20_stype_second/3_connect_swc/result";
+QString inDir2="H:/Neu/Final_all_20_stype_second/release/";
+//QString inDir4="H:/Neu/Final_all_20_stype_second/test";
+//QString inDir3="H:/Neu/Final_all_20_stype_second/4.2_before_sort_proof_swc_manual/";
+//QString outDir="H:/Neu/Final_all_20_stype_second/4_before_sort_proof_swc/";
+QString outDir="H:/Neu/Final_all_20_stype_second/8_acc_analyse/1_analyse_swc";
+//QString inDir1="H:/Neu/yizhixing/towang";
 int distthres=4;
 int lengththres=2;
 void length(QString swc)
@@ -37,6 +44,259 @@ void length(QString swc)
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+//    QDir dir(inDir);
+//    QFileInfoList swclist=dir.entryInfoList();
+//    int i=0;
+//    while(i<swclist.size()){
+//        QFileInfo swcfile = swclist.at(i);
+//        QString swc=swcfile.filePath();
+//        QFile accfile=swcfile.filePath()+"_acc.txt";
+//        QString acc=accfile.fileName();
+//        auto nt=readSWC_file(swc);
+//        auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
+//        QFile f(acc);
+//        if(!f.open(QIODevice::WriteOnly)) return 0;
+//        QString data=QString("%1 %2\n").arg("right").arg("error");
+//        f.write(data.toStdString().c_str(),data.size());
+//        QString data2=QString("%1 %2\n").arg(getsegmentslength(segs,1)).arg(getsegmentslength(segs,2));
+//        f.write(data2.toStdString().c_str(),data2.size());
+//        i++;
+//    }
+
+//        QDir dir(inDir);
+//        QFileInfoList swclist=dir.entryInfoList();
+//        int i=0;
+//        while(i<swclist.size()){
+//            QFileInfo swcfile = swclist.at(i);
+//            QString swc=swcfile.filePath();
+//            QFile accfile=swcfile.filePath()+"_acc.txt";
+//            QString acc=accfile.fileName();
+//            auto nt=readSWC_file(swc);
+//            auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
+//            QFile f(acc);
+//            if(!f.open(QIODevice::WriteOnly)) return 0;
+//            QString data=QString("%1 %2\n").arg("total").arg("retype");
+//            f.write(data.toStdString().c_str(),data.size());
+//            QString data2=QString("%1 %2\n").arg(getsegmentslength(segs)).arg(getsegmentslength(segs,2));
+//            f.write(data2.toStdString().c_str(),data2.size());
+
+//            i++;
+
+//        }
+
+
+//    QDir dir(inDir1);
+//    dir.setFilter(QDir::Files | QDir::NoSymLinks);
+//    QFileInfoList list=dir.entryInfoList();
+//    int i=0;
+//    while(i<list.size()){
+//        QFileInfo rawfile=list.at(i);
+//        QString raw=rawfile.filePath();
+//        QFile unusefile=outDir+rawfile.baseName()+"_unuse.eswc";
+//        QString unuse = unusefile.fileName();
+//        getUnUse(raw,unuse);
+//        i++;
+
+//    }
+
+
+//    QFile f("H:/Neu/20stype/release/juzheng.txt");
+//    if(!f.open(QIODevice::WriteOnly)) return 0;
+//    QString data=QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16 %17 %18 %19 %20 %21 %22 %23 %24 %25 %26 %27\n").arg("38").arg("44").arg("75").arg("83").arg("89").arg("93").arg("94").arg("98").arg("104").arg("119").arg("125").arg("135").arg("148").arg("188").arg("238").arg("248").arg("393").arg("398").arg("453").arg("458").arg("459").arg("464").arg("489").arg("496").arg("548").arg("1583").arg("1588");
+//    f.write(data.toStdString().c_str(),data.size());
+//    QString data2=QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16 %17 %18 %19 %20 %21 %22 %23 %24 %25 %26 %27\n").arg(getsegmentslength(segs,38)).arg(getsegmentslength(segs,44)).arg(getsegmentslength(segs,75)).arg(getsegmentslength(segs,83)).arg(getsegmentslength(segs,89)).arg(getsegmentslength(segs,93)).arg(getsegmentslength(segs,94)).arg(getsegmentslength(segs,98)).arg(getsegmentslength(segs,104)).arg(getsegmentslength(segs,119)).arg(getsegmentslength(segs,125)).arg(getsegmentslength(segs,135)).arg(getsegmentslength(segs,148)).arg(getsegmentslength(segs,188)).arg(getsegmentslength(segs,238)).arg(getsegmentslength(segs,248)).arg(getsegmentslength(segs,393)).arg(getsegmentslength(segs,398)).arg(getsegmentslength(segs,453)).arg(getsegmentslength(segs,458)).arg(getsegmentslength(segs,459)).arg(getsegmentslength(segs,464)).arg(getsegmentslength(segs,489)).arg(getsegmentslength(segs,496)).arg(getsegmentslength(segs,548)).arg(getsegmentslength(segs,1583)).arg(getsegmentslength(segs,1588));
+//    f.write(data2.toStdString().c_str(),data2.size());
+
+//    qDebug()<<"len416"<<getsegmentslength(segs,148);
+
+//    QDir dir(inDir1);
+//    dir.setFilter(QDir::Files | QDir::NoSymLinks);
+////    QDir dir2(inDir2);
+//    QFileInfoList list=dir.entryInfoList();
+////    qDebug()<<"list"<<list;
+////    QFileInfoList list2=dir2.entryInfoList();
+////    qDebug()<<"list2"<<list2;
+//    int i=0;
+//    while(i<list.size()){
+//        QFileInfo rawfile=list.at(i);
+//        QFile difffile=outDir+rawfile.baseName()+"_diff.eswc";
+//        QFile prooffile=outDir+rawfile.baseName()+"_proof.txt";
+//        QString raw=rawfile.filePath();
+//        QString release="H:/Neu/addedMTG/release_705/00705_P007_T01-S001_MTG_R0678_LJ-20220530_LJ.res.eswc";
+////        QString release= inDir2+rawfile.baseName()+"_output.eswc";
+//        QString diff=difffile.fileName();
+//        QString proof=prooffile.fileName();
+//        qDebug()<<"raw:"<<raw<<"release:"<<release<<"diff"<<diff<<"proof"<<proof;
+//        i++;
+//        doproof({raw},{release},{diff},{proof});
+////        i++;
+//    }
+
+//    QDir dir(inDir1);
+//    dir.setFilter(QDir::Files | QDir::NoSymLinks);
+//    QFileInfoList list=dir.entryInfoList();
+//    int i=0;
+//    while(i<list.size())
+//    {
+//        QFileInfo fileinfo = list.at(i);
+//        qDebug()<<"fileinfo"<<fileinfo;
+//        QString infile = fileinfo.filePath();
+//        qDebug()<<"infile:"<<infile;
+//        QString filename = fileinfo.baseName();
+//        qDebug()<<"filename"<<filename;
+//        QString diff=inDir3+filename+"_diff.swc";
+//        QFile proooffile(outDir+filename+"_proof.txt");
+//        QString release=inDir2+filename.split("_")[1]+".res.swc";
+//        QString prooof=proooffile.fileName();
+//        qDebug()<<"raw:"<<infile<<"diff"<<diff<<"proof"<<prooof<<"release"<<release;
+//        doproofV2({infile},{release},{diff},{prooof});
+//        i++;
+//    }
+
+
+//    QDir dir(inDir1);
+//    QFileInfoList list=dir.entryInfoList();
+//    int i=0;
+//    while(i<list.size()){
+//        QFileInfo rawfile=list.at(i);
+////        QFileInfo releasefile=list2.at(i);
+
+//        QFile difffile=outDir+rawfile.filePath()+"_diff.eswc";
+////        qDebug()<<"difffile"<<difffile.fileName();
+//        QFile prooffile=outDir+rawfile.filePath()+"_proof.txt";
+////        if(!difffile.open(QIODevice::Append))
+////        {
+////            return 0;
+////        }
+////        if(!prooffile.open(QIODevice::Append))
+////        {
+////            return 0;
+////        }
+
+
+//        QString raw=rawfile.filePath();
+////        QString release=releasefile.filePath();
+//        QString diff=difffile.fileName();
+//        QString proof=prooffile.fileName();
+//        QString release= inDir2+rawfile.baseName().split("_")[1]+".res.eswc";
+
+//        qDebug()<<"raw:"<<raw<<"diff"<<diff<<"proof"<<proof;
+
+////        qDebug()<<"difffile"<<difffile.fileName();
+////        qDebug()<<"raw"<<raw;
+
+////        do
+//        proof({raw},{release},{diff},{proof});
+//        i++;
+//    }
+
+
+//    QDir dir(inDir1);
+//     dir.setFilter(QDir::Files | QDir::NoSymLinks);
+//     QFileInfoList list = dir.entryInfoList();
+//     qDebug()<<"list"<<list;
+//     int i =0;
+//     while(i<list.length())
+//     {
+//         QFileInfo fileinfo = list.at(i);
+//         qDebug()<<"fileinfo"<<fileinfo;
+//         QString infile = fileinfo.filePath();
+//         qDebug()<<"infile:"<<infile;
+//         QString filename = fileinfo.baseName();
+//         qDebug()<<"filename"<<filename;
+//         QFile difffile(outDir+filename+"_diff.swc");
+//         QFile proooffile(outDir+filename+"_proof.txt");
+//         QString release=inDir2+filename.split("_")[1]+".res.swc";
+//         QString diff=difffile.fileName();
+//         QString prooof=proooffile.fileName();
+//         qDebug()<<"raw:"<<infile<<"diff"<<diff<<"proof"<<prooof<<"release"<<release;
+
+//         doproof({infile},{release},{diff},{prooof});
+//         i++;
+
+//     }
+
+
+
+
+    QDir dir(inDir3);
+//    QDir dirout(outDir);
+    QFileInfoList list=dir.entryInfoList();
+    qDebug()<<"list"<<list;
+    int i=0;
+
+    while(i<list.size()){
+
+        QFileInfo fileinfo = list.at(i);
+        qDebug()<<"fileinfo"<<fileinfo;
+        QString infile = fileinfo.filePath();
+        qDebug()<<"infile:"<<infile;
+        QString filename = fileinfo.baseName();
+        qDebug()<<"filename"<<filename;
+        QFile outfile(outDir+"/"+filename+".eswc");
+        if(!outfile.open(QIODevice::ReadWrite))
+           return 0;
+
+//        QFile unusefile(outDir+"/"+filename+"_unuse.eswc");
+//        QFile speedtxt(outDir+"/"+filename+"_speed.txt");
+//        QFile addUserTypeFile(outDir+"/"+filename+"_addusertype.eswc");
+//        QFile checkUserTypeFile(outDir+"/"+filename+"_checkusertype.eswc");
+//        QFile heatmapFile(outDir+"/"+filename+"_heatmap.eswc");
+
+        QString out = outfile.fileName();
+//        QString unuse = unusefile.fileName();
+//        QString speed = speedtxt.fileName();
+//        QString addUserType= addUserTypeFile.fileName();
+//        QString checkUserType=checkUserTypeFile.fileName();
+//        QString heatmap = heatmapFile.fileName();
+
+        qDebug()<<"out2"<<out;
+
+        dologfile(infile,out);
+//        getUnUse(infile,unuse);
+//        getspeed(infile,out,speed);
+//        doaddusertypr(out,addUserType);
+//        docheckusertype(out,checkUserType);
+//        donodeheatmap(out,heatmap);
+        i++;
+
+////        QFileInfo rawtext=list.at(i);
+////        QFile swcfile=outDir+rawtext.baseName()+".eswc";
+//////        QFile speedfile=outDir+rawtext.baseName()+"_speed.txt";
+////        QString raw=rawtext.filePath();
+////        QString swc=swcfile.fileName();
+//////        QString speed=speedfile.fileName();
+////        qDebug()<<"raw"<<raw;
+////        qDebug()<<"swc"<<swc;
+//////        qDebug()<<"speed"<<speed;
+
+
+////        dologfile(raw,
+////                  swc);
+//////        getspeed(raw,swc,speed);
+
+
+
+////        doaddusertypr("C:/Users/Braintell/Desktop/analyseMTG/00490_P005_T01-S006_MFG_R0490_LJ-20220525_LJ_05.eswc",
+////                      "C:/Users/Braintell/Desktop/analyseMTG/00490_P005_T01-S006_MFG_R0490_LJ-20220525_LJ_05_addusertype.eswc");
+//////        docheckusertype(rawswcname,anlyseDir+inbasename+"_checkusertype.eswc");
+////        donodeheatmap("C:/Users/Braintell/Desktop/analyseMTG/00490_P005_T01-S006_MFG_R0490_LJ-20220525_LJ_05.eswc",
+////                      "C:/Users/Braintell/Desktop/analyseMTG/00490_P005_T01-S006_MFG_R0490_LJ-20220525_LJ_05_heatmap.eswc");
+////        getUnUse("H:/Neu/final20stype/juzheng/test/test2/17302_00024_output.txt",
+////                 "H:/Neu/final20stype/juzheng/test/test2/17302_00024_output_unuse.eswc");
+
+////            getspeed("C:/Users/Braintell/Desktop/Neuroverse_final/testunse/log/18458_00574.txt",
+////                     "C:/Users/Braintell/Desktop/Neuroverse_final/testunse/oriswc/18458_00574.eswc",
+////                     "C:/Users/Braintell/Desktop/Neuroverse_final/testunse/oriswc/18458_00574_speed.txt");
+
+    }
+//    doproof({"H:/Neu/Final_all_20_stype_second/18453_7010_x8769_y4509.ano.eswc"},{"H:/Neu/Final_all_20_stype_second/release/7010.res.swc"},{"H:/Neu/Final_all_20_stype_second/7010_diff.eswc"},{"H:/Neu/Final_all_20_stype_second/7010_proof.txt"});
+
+
+
+
+//    doproof({rawswcname},{inDir+inbasename+"_res.eswc"},
+//                {anlyseDir+inbasename+"_diff.eswc"},anlyseDir+inbasename+"_proof.txt");
 //
 //    auto nt=readSWC_file("/Users/huanglei/Desktop/18455_00152_modiltytype.eswc");
 //    for(auto &node:nt.listNeuron){
@@ -119,8 +379,7 @@ int main(int argc, char *argv[])
 
 //    mergeNts({rawswcname,inDir+inbasename+"_res.eswc"},anlyseDir+inbasename+"_merged.eswc");
 
-//    doproof({rawswcname},{inDir+inbasename+"_res.eswc"},
-//                {anlyseDir+inbasename+"_diff.eswc"},anlyseDir+inbasename+"_proof.txt");
+
 ////    analyse log
 //    getUnUse(rawintructionlist,anlyseDir+inbasename+"_unuse.eswc");
 
@@ -260,59 +519,59 @@ int main(int argc, char *argv[])
 //    for(distthres=1;distthres<=12;++distthres)
 
     {
-    distthres=atoi(argv[1]);
-        //分析自动化的结果
-        auto path=QString("/Users/huanglei/Desktop/20220328/%1").arg(distthres);
-        QDir target(path);
-        auto entrylist=target.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot,QDir::Name);
-        QString out=QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14\n")
-                .arg("distthres")
-                .arg("auto").arg("auto_length").arg("res_length")
-                .arg("d_auto_res").arg("b_auto_res")
-                .arg("d_res_auto").arg("b_res_auto")
-                .arg("auto_length/res_length").arg("b_auto_res/b_res_auto").arg("effect").arg("app2_ratio")
-                .arg("sessioncnt").arg("maxlength");
-        QFile f("/Users/huanglei/Desktop/20220328/report"+QString::number(distthres));
-        if(!f.open(QIODevice::WriteOnly))
-            qDebug()<<f.errorString();
-        f.write(out.toStdString().c_str());
-        for(auto &entry:entrylist){
-            QFile sessionfile(entry.absoluteFilePath()+"/App2_Success");
-            if(!sessionfile.open(QIODevice::ReadOnly)) continue;
+//    distthres=atoi(argv[1]);
+//        //分析自动化的结果
+//        auto path=QString("/Users/huanglei/Desktop/20220328/%1").arg(distthres);
+//        QDir target(path);
+//        auto entrylist=target.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot,QDir::Name);
+//        QString out=QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14\n")
+//                .arg("distthres")
+//                .arg("auto").arg("auto_length").arg("res_length")
+//                .arg("d_auto_res").arg("b_auto_res")
+//                .arg("d_res_auto").arg("b_res_auto")
+//                .arg("auto_length/res_length").arg("b_auto_res/b_res_auto").arg("effect").arg("app2_ratio")
+//                .arg("sessioncnt").arg("maxlength");
+//        QFile f("/Users/huanglei/Desktop/20220328/report"+QString::number(distthres));
+//        if(!f.open(QIODevice::WriteOnly))
+//            qDebug()<<f.errorString();
+//        f.write(out.toStdString().c_str());
+//        for(auto &entry:entrylist){
+//            QFile sessionfile(entry.absoluteFilePath()+"/App2_Success");
+//            if(!sessionfile.open(QIODevice::ReadOnly)) continue;
 
-            int sessioncnt=sessionfile.readAll().trimmed().toUInt();
-            sessionfile.close();
+//            int sessioncnt=sessionfile.readAll().trimmed().toUInt();
+//            sessionfile.close();
 
-            QFile maxlengthfile(entry.absoluteFilePath()+"/Max_App2_Length");
-            if(!maxlengthfile.open(QIODevice::ReadOnly)) continue;
+//            QFile maxlengthfile(entry.absoluteFilePath()+"/Max_App2_Length");
+//            if(!maxlengthfile.open(QIODevice::ReadOnly)) continue;
 
-            double maxlength=maxlengthfile.readAll().trimmed().toDouble();
-            sessionfile.close();
+//            double maxlength=maxlengthfile.readAll().trimmed().toDouble();
+//            sessionfile.close();
 
-            auto tmpentrylist=QDir(entry.absoluteFilePath()).entryInfoList(QDir::Files,QDir::Name);
-            QString respath="";
-            QString autopath="whole_image.eswc";
-            QString resname="";
-            for(auto &tmpentry:tmpentrylist){
-                if(!(tmpentry.absoluteFilePath().contains(".swc")
-                ||tmpentry.absoluteFilePath().contains(".eswc")))
-                    continue;
-                if(!tmpentry.baseName().contains("whole_image")){
-                    //获取答案的路径和文件名
-                    respath=tmpentry.absoluteFilePath();
-                    resname=tmpentry.baseName();
-                }else{
-                    //自动化结果的路径
-                    autopath=tmpentry.absoluteFilePath();
-                }
-            }
+//            auto tmpentrylist=QDir(entry.absoluteFilePath()).entryInfoList(QDir::Files,QDir::Name);
+//            QString respath="";
+//            QString autopath="whole_image.eswc";
+//            QString resname="";
+//            for(auto &tmpentry:tmpentrylist){
+//                if(!(tmpentry.absoluteFilePath().contains(".swc")
+//                ||tmpentry.absoluteFilePath().contains(".eswc")))
+//                    continue;
+//                if(!tmpentry.baseName().contains("whole_image")){
+//                    //获取答案的路径和文件名
+//                    respath=tmpentry.absoluteFilePath();
+//                    resname=tmpentry.baseName();
+//                }else{
+//                    //自动化结果的路径
+//                    autopath=tmpentry.absoluteFilePath();
+//                }
+//            }
 
-            if(respath.size()==0||resname.size()==0) continue;
-            auto ana=compareA2Bv2(autopath,respath,path+"/"+resname+"skip/");
+//            if(respath.size()==0||resname.size()==0) continue;
+//            auto ana=compareA2Bv2(autopath,respath,path+"/"+resname+"skip/");
 
-            out=QString("%1 %2 %3 %4\n").arg(distthres).arg(ana).arg(sessioncnt).arg(maxlength);
-            f.write(out.toStdString().c_str());
-        }
+//            out=QString("%1 %2 %3 %4\n").arg(distthres).arg(ana).arg(sessioncnt).arg(maxlength);
+//            f.write(out.toStdString().c_str());
+//        }
     }
 
 //    {

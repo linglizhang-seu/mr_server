@@ -20,7 +20,7 @@ void docheckusertype(QString inswc,QString outswc)
     auto nt=readSWC_file(inswc);
     for(auto &node:nt.listNeuron){
         if(node.creatmode/10==0){
-            qDebug()<<node.n;
+            qDebug()<<"node.n:"<<node.n;
         }
         node.type=node.creatmode/10;
     }
@@ -275,6 +275,21 @@ std::vector<double> doproofdetaillsV2(QString raw,QString proof,QString outswc)
     return {rmlen,addlen,rawlen,prooflen};
 }
 
+std::vector<double> doproofdetaillsV3(QString raw,QString proof,QString outswc)
+{
+    auto nt=readSWC_file(outswc);
+    auto segs=NeuronTree__2__V_NeuronSWC_list(nt);
+    auto rmlen=getsegmentslength(segs,4);
+    auto addlen=getsegmentslength(segs,5);
+
+    auto rawnt=readSWC_file(raw);
+    auto rawlen=getsegmentslength(NeuronTree__2__V_NeuronSWC_list(rawnt));
+    auto proofnt=readSWC_file(proof);
+    auto prooflen=getsegmentslength(NeuronTree__2__V_NeuronSWC_list(proofnt));
+    return {rmlen,addlen,rawlen,prooflen};
+}
+
+
 void doproof(QStringList inrawfiles,QStringList inproofedfiles,QStringList outlist,QString out)
 {
     if(inrawfiles.size()!=inproofedfiles.size()) return;
@@ -284,6 +299,21 @@ void doproof(QStringList inrawfiles,QStringList inproofedfiles,QStringList outli
     f.write(data.toStdString().c_str(),data.size());
     for(int i=0;i<inrawfiles.size();i++){
         auto p=doproofdetaillsV2(inrawfiles[i],inproofedfiles[i],outlist[i]);
+        QString data=QString("%1 %2:%3 %4 %5 %6\n").arg(inrawfiles[i]).arg(inproofedfiles[i]).arg(p[0]).arg(p[1]).arg(p[2]).arg(p[3]);
+        f.write(data.toStdString().c_str(),data.size());
+    }
+    f.close();
+}
+
+void doproofV2(QStringList inrawfiles,QStringList inproofedfiles,QStringList outlist,QString out)
+{
+    if(inrawfiles.size()!=inproofedfiles.size()) return;
+    QFile f(out);
+    if(!f.open(QIODevice::WriteOnly)) return;
+    QString data=QString("%1 %2:%3 %4 %5 %6\n").arg("File").arg("File_Res").arg("Should_Remove").arg("Should_Add").arg("File_Length").arg("Res_length");
+    f.write(data.toStdString().c_str(),data.size());
+    for(int i=0;i<inrawfiles.size();i++){
+        auto p=doproofdetaillsV3(inrawfiles[i],inproofedfiles[i],outlist[i]);
         QString data=QString("%1 %2:%3 %4 %5 %6\n").arg(inrawfiles[i]).arg(inproofedfiles[i]).arg(p[0]).arg(p[1]).arg(p[2]).arg(p[3]);
         f.write(data.toStdString().c_str(),data.size());
     }

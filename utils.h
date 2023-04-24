@@ -30,7 +30,7 @@ const int neuron_type_color[colorsize][3] = {
     {168, 128, 255}, //	18
         };
 
-const QStringList clienttypes={"TeraFly","TeraVR","TeraAI"};
+const QStringList clienttypes={"0","1","2"};
 
 int getid(QString username)
 {
@@ -127,7 +127,7 @@ NeuronTree convertMsg2NT(QStringList &listwithheader,QString username,int from)
 void drawline(QString msg,V_NeuronSWC_list &segments)
 {
     //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...
-    QStringList listwithheader=msg.split(';',Qt::SkipEmptyParts);
+    QStringList listwithheader=msg.split(',',Qt::SkipEmptyParts);
     if(listwithheader.size()<=1)
     {
         qDebug()<<"msg only contains header:"<<msg;
@@ -138,7 +138,7 @@ void drawline(QString msg,V_NeuronSWC_list &segments)
 
     {
         auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
-        QString clienttype=headerlist[1].trimmed();
+        QString clienttype=headerlist[0].trimmed();
         for(int i=0;i<clienttypes.size();i++)
         {
             if(clienttypes[i]==clienttype)
@@ -147,7 +147,7 @@ void drawline(QString msg,V_NeuronSWC_list &segments)
                 break;
             }
         }
-        username=headerlist[0].trimmed();
+        username=headerlist[1].trimmed();
     }
 
     NeuronTree newTempNT=convertMsg2NT(listwithheader,username,from);
@@ -155,10 +155,60 @@ void drawline(QString msg,V_NeuronSWC_list &segments)
     qDebug()<<"add in seg sucess "<<msg;
 }
 
+//bool delline(QString msg,V_NeuronSWC_list &segments,int &addtype)
+//{
+//   //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...
+//    QStringList listwithheader=msg.split(',',Qt::SkipEmptyParts);
+//    if(listwithheader.size()<=1)
+//    {
+//        qDebug()<<"msg only contains header:"<<msg;
+//        return false;
+//    }
+
+//    int from=0;
+//    QString username;
+
+//    {
+//        auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
+//        QString clienttype=headerlist[0].trimmed();
+//        for(int i=0;i<clienttypes.size();i++)
+//        {
+//            if(clienttypes[i]==clienttype)
+//            {
+//                from = i;
+//                break;
+//            }
+//        }
+//        username=headerlist[1].trimmed();
+//    }
+
+//    NeuronTree newTempNT;
+
+//    newTempNT=convertMsg2NT(listwithheader,username,from);
+
+//    auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
+//    qDebug()<<"seg before"<<seg.row.at(0).r;
+//    auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
+////    qDebug()<<"what it ifd "<<it->row.at(0).r;
+
+//    if(it!=segments.seg.end())
+//    {
+//        bool res=it->row.at(0).type==2||(it->row.at(0).r/10)!=getid(username)
+//                ||(QDateTime::currentDateTime().toSecsSinceEpoch()-QDateTime::fromString(QString::number(int64_t(it->row.at(0).timestamp)),"yyyyMMddhhmmsszzz").toSecsSinceEpoch())>60*5;
+//        if(res){
+//            addtype=it->row.at(0).r/10;
+//        }
+
+//        segments.seg.erase(it);
+//        return res;
+//    }
+//    return false;
+//}
+
 bool delline(QString msg,V_NeuronSWC_list &segments)
 {
    //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...
-    QStringList listwithheader=msg.split(';',Qt::SkipEmptyParts);
+    QStringList listwithheader=msg.split(',',Qt::SkipEmptyParts);
     if(listwithheader.size()<=1)
     {
         qDebug()<<"msg only contains header:"<<msg;
@@ -170,7 +220,7 @@ bool delline(QString msg,V_NeuronSWC_list &segments)
 
     {
         auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
-        QString clienttype=headerlist[1].trimmed();
+        QString clienttype=headerlist[0].trimmed();
         for(int i=0;i<clienttypes.size();i++)
         {
             if(clienttypes[i]==clienttype)
@@ -179,7 +229,7 @@ bool delline(QString msg,V_NeuronSWC_list &segments)
                 break;
             }
         }
-        username=headerlist[0].trimmed();
+        username=headerlist[1].trimmed();
     }
 
     NeuronTree newTempNT;
@@ -187,12 +237,17 @@ bool delline(QString msg,V_NeuronSWC_list &segments)
     newTempNT=convertMsg2NT(listwithheader,username,from);
 
     auto seg=NeuronTree__2__V_NeuronSWC_list(newTempNT).seg[0];
+    qDebug()<<"seg before"<<seg.row.at(0).r;
     auto it=findseg(segments.seg.begin(),segments.seg.end(),seg);
+//    qDebug()<<"what it ifd "<<it->row.at(0).r;
 
     if(it!=segments.seg.end())
     {
         bool res=it->row.at(0).type==2||(it->row.at(0).r/10)!=getid(username)
                 ||(QDateTime::currentDateTime().toSecsSinceEpoch()-QDateTime::fromString(QString::number(int64_t(it->row.at(0).timestamp)),"yyyyMMddhhmmsszzz").toSecsSinceEpoch())>60*5;
+//        if(res){
+//            addtype=it->row.at(0).r/10;
+//        }
 
         segments.seg.erase(it);
         return res;
@@ -200,10 +255,11 @@ bool delline(QString msg,V_NeuronSWC_list &segments)
     return false;
 }
 
+
 void addmarker(QString msg,QList<CellAPO> &wholePoint)
 {
     //marker msg format:username clienttype RESx RESy RESz;type x y z
-    QStringList listwithheader=msg.split(';',Qt::SkipEmptyParts);
+    QStringList listwithheader=msg.split(',',Qt::SkipEmptyParts);
     if(listwithheader.size()<=1)
     {
         qDebug()<<"msg only contains header:"<<msg;
@@ -228,7 +284,7 @@ void addmarker(QString msg,QList<CellAPO> &wholePoint)
 void delmarekr(QString msg,QList<CellAPO> &wholePoint)
 {
     //marker msg format:username clienttype RESx RESy RESz;type x y z
-    QStringList listwithheader=msg.split(';',Qt::SkipEmptyParts);
+    QStringList listwithheader=msg.split(',',Qt::SkipEmptyParts);
     if(listwithheader.size()<=1)
     {
         qDebug()<<"msg only contains header:"<<msg;
@@ -267,18 +323,19 @@ void delmarekr(QString msg,QList<CellAPO> &wholePoint)
 void retypeline(QString msg,V_NeuronSWC_list &segments)
 {
     //line msg format:username clienttype  newtype RESx RESy RESz;type x y z;type x y z;...
-    QStringList listwithheader=msg.split(';',Qt::SkipEmptyParts);
+    QStringList listwithheader=msg.split(',',Qt::SkipEmptyParts);
     if(listwithheader.size()<=1)
     {
         qDebug()<<"msg only contains header:"<<msg;
         return;
     }
 
-    QString username=listwithheader[0].split(' ',Qt::SkipEmptyParts)[0].trimmed();
+    QString username=listwithheader[0].split(' ',Qt::SkipEmptyParts)[1].trimmed();
     int userid=getid(username);
+    qDebug()<<"userid:"<<userid;
 
     int from=0;
-    QString clienttype=listwithheader[0].split(' ',Qt::SkipEmptyParts)[1].trimmed();
+    QString clienttype=listwithheader[0].split(' ',Qt::SkipEmptyParts)[0].trimmed();
     for(int i=0;i<clienttypes.size();i++)
     {
         if(clienttypes[i]==clienttype)
@@ -301,6 +358,8 @@ void retypeline(QString msg,V_NeuronSWC_list &segments)
         {
             unit.type=newtype;
             unit.creatmode=userid*10+from;
+//            qDebug()<<"unit.n"<<unit.n;
+            qDebug()<<"unit.creatmode"<<unit.creatmode;
         }
         qDebug()<<"find retype line sucess "<<msg;
         return;
@@ -322,7 +381,10 @@ NeuronTree convertMsg2NTUnuse(QStringList &listwithheader,QString username,int f
         NeuronSWC S;
         QStringList nodelist=listwithheader[i].split(' ',Qt::SkipEmptyParts);
         S.n=i;
-        S.type=3;//third party type
+        S.type=3;
+//        S.type=type;
+//        S.type=addtype;
+//        qDebug()<<"addtype"<<addtype;
 
         S.x=nodelist[1].toFloat();
         S.y=nodelist[2].toFloat();
@@ -341,7 +403,7 @@ NeuronTree convertMsg2NTUnuse(QStringList &listwithheader,QString username,int f
 void drawlineUnuse(QString msg,V_NeuronSWC_list &segments)
 {
     //line msg format:username clienttype RESx RESy RESz;type x y z;type x y z;...
-    QStringList listwithheader=msg.split(';',Qt::SkipEmptyParts);
+    QStringList listwithheader=msg.split(',',Qt::SkipEmptyParts);
     if(listwithheader.size()<=1)
     {
         qDebug()<<"msg only contains header:"<<msg;
@@ -352,7 +414,7 @@ void drawlineUnuse(QString msg,V_NeuronSWC_list &segments)
 
     {
         auto headerlist=listwithheader[0].split(' ',Qt::SkipEmptyParts);
-        QString clienttype=headerlist[1].trimmed();
+        QString clienttype=headerlist[0].trimmed();
         for(int i=0;i<clienttypes.size();i++)
         {
             if(clienttypes[i]==clienttype)
@@ -361,7 +423,7 @@ void drawlineUnuse(QString msg,V_NeuronSWC_list &segments)
                 break;
             }
         }
-        username=headerlist[0].trimmed();
+        username=headerlist[1].trimmed();
     }
 
     NeuronTree newTempNT=convertMsg2NTUnuse(listwithheader,username,from);

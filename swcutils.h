@@ -212,7 +212,7 @@ std::vector<V_NeuronSWC_list> comapreA2B(QString swc1,QString swc2,QString out)
     retype(total,3);
     auto segss=only;
     segss.seg.insert(segss.seg.end(),total.seg.begin(),total.seg.end());
-    writeESWC_file(anlyseDir+inbasename+QString("_%1_%2"+out).arg(distthres).arg(lengththres),V_NeuronSWC_list__2__NeuronTree(segss));
+    writeESWC_file(QString("_%1_%2"+out).arg(distthres).arg(lengththres),V_NeuronSWC_list__2__NeuronTree(segss));
     return {only,total};
 }
 
@@ -247,6 +247,7 @@ QString compareA2Bv2(QString swc1,QString swc2,QString out)
             auto nt1=readSWC_file(swc1);
             auto nt2=readSWC_file(swc2);
 
+
             QString ana=QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11")
                     .arg(swc2.split('/').back()).arg(getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt1)))
                     .arg(getsegmentslength(NeuronTree__2__V_NeuronSWC_list(nt2)))
@@ -271,7 +272,7 @@ QString compareA2Bv2(QString swc1,QString swc2,QString out)
                     ++it;
                 }
             }
-          writeESWC_file(out+"/compare.eswc",V_NeuronSWC_list__2__NeuronTree(segs));
+          writeESWC_file(out,V_NeuronSWC_list__2__NeuronTree(segs));
 
           return ana;
 //          writeESWC_file(anlyseDir+inbasename+"_shouldadd.eswc",V_NeuronSWC_list__2__NeuronTree(res21[0]));
